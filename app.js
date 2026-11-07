@@ -16,7 +16,7 @@ const FIELDS = [['wineName','酒名'],['wineryRegion','酒莊／產區'],['vinta
 
 const S = {
   data: null, sha: null, etag: null, keys: null, keysSha: null, session: null,
-  filter: null, search: '', view: 'list', open: new Set(), qrMode: false, selected: new Set(), hashWine: '',
+  filter: null, search: '', view: 'list', 
   editing: null, stock: null, photo: null, photoBlob: null, newPhotoBlob: null, localPhotos: new Map(),
   sort: 'loc', drawer: null,
   busy: 0, lastPoll: 0, syncedAt: null, rawFallback: false, auditPage: 1, auditWine: '', audit: []
@@ -185,7 +185,6 @@ function logout(silent) {
   S.session = null;
   try { localStorage.removeItem('cellarSession'); sessionStorage.removeItem('cellarSession'); } catch {}
   document.querySelectorAll('dialog[open]').forEach(d => d.close());
-  S.qrMode = false; S.selected.clear();
   if (!silent) toast('已登出，目前為瀏覽模式。');
   render();
 }
@@ -245,8 +244,6 @@ function render() {
   $('adminBtn').hidden = !S.session;
   $('addBtn').hidden = !canEdit();
   $('fab').hidden = !canEdit();
-  $('qrGoBtn').hidden = !S.qrMode;
-  $('qrBtn').textContent = S.qrMode ? '取消選取' : 'QR 標籤';
   $('viewList').classList.toggle('on', S.view !== 'grid'); $('viewList').setAttribute('aria-pressed', S.view !== 'grid');
   $('viewGrid').classList.toggle('on', S.view === 'grid'); $('viewGrid').setAttribute('aria-pressed', S.view === 'grid');
   $('sortSel').value = S.sort;
@@ -322,10 +319,9 @@ function renderList(list) {
 }
 function vinHtml(w) { const v = String(w.vintage || '').trim(); return /^\d{4}$/.test(v) ? `<span class="vin">${v}</span>` : `<span class="vin nv">${esc(v || 'NV')}</span>`; }
 function rowHtml(w) {
-  const t = total(w), sel = S.selected.has(w.wineId);
+  const t = total(w);
   const locs = (w.locations || []).filter(l => l.quantity > 0).map(l => `<span>${esc(l.cabinet)} · ${esc(l.shelf)}${(w.locations || []).filter(x => x.quantity > 0).length > 1 ? ` ×${l.quantity}` : ''}</span>`).join('');
-  return `<button class="row ${S.qrMode ? 'q' : ''} ${sel ? 'sel' : ''}" data-open="${esc(w.wineId)}">
-   ${S.qrMode ? `<span class="chk"><input type="checkbox" data-sel="${esc(w.wineId)}" ${sel ? 'checked' : ''} aria-label="選取 ${esc(w.wineName)}"></span>` : ''}
+  return `<button class="row" data-open="${esc(w.wineId)}">
    ${vinHtml(w)}
    <span class="nm"><b>${esc(w.wineName)}</b><span>${esc(w.wineryRegion || '')}${w.wineryRegion && w.origin ? ' · ' : ''}${esc(w.origin || '')}</span></span>
    <span class="lc">${locs || '<span>無庫存</span>'}</span>
@@ -356,7 +352,8 @@ function renderDrawer() {
     <div class="dw-head"><span class="vin">${esc(w.vintage || 'NV')}</span><h2 id="dwName">${esc(w.wineName)}</h2>${w.wineryRegion ? `<p>${esc(w.wineryRegion)}</p>` : ''}</div>
     ${p ? `<img class="dw-photo" src="${esc(p)}" alt="${esc(w.wineName)} 酒標照片">` : ''}
     <div class="dw-stock"><div class="sum"><span>目前庫存</span><b>${t} <small style="font-size:15px">瓶</small></b></div>${locs || '<div class="dw-loc"><span class="where hint">沒有存放位置</span></div>'}</div>
-    <div class="dw-act">${ed && !archived ? `<button class="primary" data-stockany="${esc(w.wineId)}" ${t ? '' : 'disabled'}>出庫</button><button data-edit="${esc(w.wineId)}">編輯</button><button data-photo="${esc(w.wineId)}">${p ? '更換照片' : '加照片'}</button>` : ''}<button data-qr1="${esc(w.wineId)}">QR 標籤</button><button data-copy="${esc(w.wineId)}">複製連結</button>${ed ? `<button data-log="${esc(w.wineId)}">異動紀錄</button>` : ''}</div>
+    <div class="dw-act">${ed ? `${archived ? '' : `<button class="primary" data-stockany="${esc(w.wineId)}" ${t ? '' : 'disabled'}>出庫</button>`}<button class="primary" data-edit="${esc(w.wineId)}">編輯</button><button data-photo="${esc(w.wineId)}">${p ? '更換照片' : '加照片'}</button>` : ''}<button data-copy="${esc(w.wineId)}">複製連結</button>${ed ? `<button data-log="${esc(w.wineId)}">異動紀錄</button>` : ''}</div>
+    ${ed ? (archived ? '<p class="hint" style="margin:0">這款酒已全部出庫。要補回庫存，請按「編輯」填入瓶數，它會回到目前酒款。</p>' : '') : '<p class="hint" style="margin:0">登入管理後可以出庫與編輯這款酒。</p>'}
     <dl class="dw-facts">${facts}${w.grapeNotes ? `<div class="wide"><dt>葡萄品種／備註</dt><dd class="note">${esc(w.grapeNotes)}</dd></div>` : ''}</dl>
     <div class="dw-meta">${w.createdAt ? `建立 ${fmtTime(w.createdAt)}（${esc(nameOf(w.createdBy))}）<br>` : ''}最後修改 ${fmtTime(w.updatedAt)}（${esc(nameOf(w.updatedBy))}）${archived ? `<br>出清 ${fmtTime(w.archivedAt)}（${esc(nameOf(w.archivedBy))}）` : ''}</div>
    </div>`;
@@ -379,9 +376,6 @@ function wire() {
   $('fab').addEventListener('click', () => openWineForm(null));
   $('adminBtn').addEventListener('click', () => { showDialog('adminModal'); switchTab('audit'); loadAudit('', 1); });
   $('exportBtn').addEventListener('click', exportCsv);
-  $('qrBtn').addEventListener('click', () => { S.qrMode = !S.qrMode; S.selected.clear(); if (S.qrMode) setView('list'); render(); if (S.qrMode) toast('勾選要列印標籤的酒款，再按「產生標籤」。'); });
-  $('qrGoBtn').addEventListener('click', () => { if (!S.selected.size) return toast('請先勾選酒款。'); openQr([...S.selected].map(byId).filter(Boolean)); });
-  $('printBtn').addEventListener('click', printLabels);
   $('map').addEventListener('click', e => {
     const b = e.target.closest('[data-cab]'); if (!b) return;
     const next = {cabinet: b.dataset.cab, shelf: b.dataset.shelf || ''};
@@ -390,10 +384,7 @@ function wire() {
     if (S.filter && matchMedia('(max-width:760px)').matches) document.querySelector('.ledger').scrollIntoView({behavior: 'smooth'});
   });
   $('list').addEventListener('click', e => {
-    const sel = e.target.closest('[data-sel]');
-    if (sel) { e.stopPropagation(); sel.checked ? S.selected.add(sel.dataset.sel) : S.selected.delete(sel.dataset.sel); render(); return; }
     const o = e.target.closest('[data-open]'); if (!o) return;
-    if (S.qrMode) { const id = o.dataset.open; S.selected.has(id) ? S.selected.delete(id) : S.selected.add(id); render(); return; }
     openDrawer(o.dataset.open);
   });
   const dw = $('drawer');
@@ -405,7 +396,6 @@ function wire() {
     const sa = e.target.closest('[data-stockany]'); if (sa) return openStock(sa.dataset.stockany);
     const ed = e.target.closest('[data-edit]'); if (ed) return openWineForm(byId(ed.dataset.edit));
     const ph = e.target.closest('[data-photo]'); if (ph) return openPhoto(byId(ph.dataset.photo));
-    const q1 = e.target.closest('[data-qr1]'); if (q1) return openQr([byId(q1.dataset.qr1)]);
     const cp = e.target.closest('[data-copy]'); if (cp) return copyLink(cp.dataset.copy);
     const lg = e.target.closest('[data-log]'); if (lg) { showDialog('adminModal'); switchTab('audit'); loadAudit(lg.dataset.log, 1); }
   });
@@ -427,6 +417,8 @@ function wire() {
   document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
   $('cabChips').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) removeCatalog('cabinets', b.dataset.rm); });
   $('shelfChips').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) removeCatalog('shelves', b.dataset.rm); });
+  const openHist = e => { const h = e.target.closest('[data-hist]'); if (!h || (e.type === 'keydown' && e.key !== 'Enter')) return; $('adminModal').close(); openDrawer(h.dataset.hist); };
+  $('histList').addEventListener('click', openHist); $('histList').addEventListener('keydown', openHist);
   $('slotList').addEventListener('click', e => { const b = e.target.closest('[data-delslot]'); if (b) deleteSlot(b); });
 }
 function setView(v) { S.view = v; try { localStorage.setItem('cellarView', v); } catch {} render(); }
@@ -676,24 +668,6 @@ async function savePhoto() {
   $('photoModal').close(); toast('照片已儲存。');
 }
 
-/* ---------- QR 標籤 ---------- */
-function labelEl(w) {
-  const el = document.createElement('div'); el.className = 'qr-label';
-  const q = document.createElement('div'); q.className = 'q'; el.append(q);
-  const b = document.createElement('b'); b.textContent = w.wineName; el.append(b);
-  const s = document.createElement('span'); s.textContent = [w.vintage, w.volume].filter(Boolean).join(' · '); el.append(s);
-  try { new QRCode(q, {text: wineUrl(w.wineId), width: 120, height: 120, correctLevel: QRCode.CorrectLevel.M}); } catch { q.textContent = 'QR 產生失敗'; }
-  return el;
-}
-let qrItems = [];
-function openQr(list) {
-  qrItems = []; for (const w of list) { const n = Math.max(1, total(w)); for (let i = 0; i < n; i++) qrItems.push(w); }
-  $('qrSummary').textContent = `${list.length} 款酒，共 ${qrItems.length} 張標籤（依目前瓶數）。同一款酒的標籤相同，掃描後開啟該酒款。`;
-  $('qrGrid').replaceChildren(...qrItems.map(labelEl));
-  showDialog('qrModal');
-}
-function printLabels() { $('printArea').replaceChildren(...qrItems.map(labelEl)); setTimeout(() => window.print(), 100); }
-
 /* ---------- CSV ---------- */
 function exportCsv() {
   const cell = v => { const s = String(v ?? ''); return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
@@ -716,7 +690,7 @@ function renderAdmin() {
   $('cabChips').innerHTML = cat.cabinets.map(chip).join('') || '<span class="hint">尚未建立。</span>';
   $('shelfChips').innerHTML = cat.shelves.map(chip).join('') || '<span class="hint">尚未建立。</span>';
   const hist = wines().filter(w => w.status === 'archived').sort((a, b) => (b.archivedAt || '') > (a.archivedAt || '') ? 1 : -1);
-  $('histList').innerHTML = hist.map(w => `<div><span><b>${esc(w.wineName)}</b> ${esc(w.vintage || '')} <span class="hint">${esc(w.wineryRegion || '')}</span></span><span class="hint">出清於 ${fmtTime(w.archivedAt)}（${esc(nameOf(w.archivedBy))}）</span></div>`).join('') || '<p class="hint">還沒有出清的酒款。</p>';
+  $('histList').innerHTML = hist.map(w => `<div class="hrow" data-hist="${esc(w.wineId)}" role="button" tabindex="0"><span><b>${esc(w.wineName)}</b> ${esc(w.vintage || '')} <span class="hint">${esc(w.wineryRegion || '')}</span></span><span class="hint">出清於 ${fmtTime(w.archivedAt)}（${esc(nameOf(w.archivedBy))}）</span></div>`).join('') || '<p class="hint">還沒有出清的酒款。</p>';
 }
 async function loadAudit(wineId, page) {
   S.auditWine = wineId; S.auditPage = page;

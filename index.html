@@ -55,8 +55,6 @@
    <select id="sortSel" aria-label="排序"><option value="loc">依位置</option><option value="id">依登錄先後</option><option value="vintage">年份：舊到新</option><option value="qty">瓶數：多到少</option><option value="name">依酒名</option></select>
    <div class="seg" role="group" aria-label="顯示方式"><button id="viewList" class="on" aria-pressed="true">清單</button><button id="viewGrid" aria-pressed="false">照片</button></div>
    <button class="ghost" id="exportBtn">匯出 CSV</button>
-   <button class="ghost" id="qrBtn">QR 標籤</button>
-   <button class="primary" id="qrGoBtn" hidden>產生標籤</button>
    <button class="primary" id="addBtn" hidden>＋ 新增酒款</button>
   </div>
   <div class="filterbar" id="filterBar" hidden><span id="filterText"></span><button class="small" id="clearFilter">顯示全部</button></div>
@@ -130,9 +128,6 @@
  <div class="dact"><button type="button" data-close>取消</button><button type="submit" class="primary" id="photoSave" disabled>儲存照片</button></div>
 </form></dialog>
 
-<dialog id="qrModal" aria-labelledby="qrTitle"><div class="dh"><h2 id="qrTitle">QR 瓶身標籤</h2><button data-close aria-label="關閉">×</button></div>
-<div class="db"><p class="hint" id="qrSummary" style="margin-top:0"></p><div class="qr-grid" id="qrGrid"></div>
-<div class="dact"><button type="button" data-close>關閉</button><button class="primary" id="printBtn">列印標籤</button></div></div></dialog>
 
 <dialog id="adminModal" aria-labelledby="adminTitle"><div class="dh"><h2 id="adminTitle">管理</h2><button data-close aria-label="關閉">×</button></div>
 <div class="db">
@@ -162,11 +157,9 @@
  </section>
 </div></dialog>
 
-<div id="printArea" aria-hidden="true"></div>
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script src="config.js"></script>
-<script src="vendor/qrcode.min.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
