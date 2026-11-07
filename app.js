@@ -363,7 +363,7 @@ function renderDrawer() {
   const p = photoUrl(w), ed = canEdit(), t = total(w), archived = w.status === 'archived';
   const facts = [['wineryRegion', '酒莊／產區'], ['origin', '產地'], ['volume', '容量'], ['source', '來源'], ['referencePrice', '參考價格'], ['entryDate', '入庫日期'], ['drinkWindow', '適飲期']]
     .map(([k, l]) => `<div><dt>${l}</dt><dd>${k === 'referencePrice' ? fmtPrice(w[k]) : esc(w[k] || '—')}</dd></div>`).join('');
-  const locs = (w.locations || []).map(l => `<div class="dw-loc"><span class="where">${esc(l.cabinet)} <small>· ${esc(l.shelf)}</small></span><span class="n">${l.quantity}</span>${ed && l.quantity > 0 ? `<span class="loc-btns"><button class="small" data-move="${esc(w.wineId)}" data-cab="${esc(l.cabinet)}" data-shelf="${esc(l.shelf)}">移動</button><button class="small" data-stock="${esc(w.wineId)}" data-cab="${esc(l.cabinet)}" data-shelf="${esc(l.shelf)}">出庫</button></span>` : '<span></span>'}</div>`).join('');
+  const locs = (w.locations || []).map(l => `<div class="dw-loc"><span class="where">${esc(l.cabinet)} <small>· ${esc(l.shelf)}</small></span><span class="n">${l.quantity}</span></div>`).join('');
   $('drawerBody').innerHTML = `
    <div class="dw-top"><span class="id">${archived ? '已出清' : esc(w.volume || '')}</span><button class="x" data-dwclose aria-label="關閉">×</button></div>
    <div class="dw">
