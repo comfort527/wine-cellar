@@ -258,8 +258,6 @@ function render() {
   // 總覽
   $('sumBottles').textContent = S.data ? list.reduce((a, w) => a + total(w), 0) : '—';
   $('sumWines').textContent = S.data ? list.length + ' 款' : '—';
-  const years = list.map(w => Number(w.vintage)).filter(y => y > 1800);
-  $('sumOldest').textContent = years.length ? Math.min(...years) : '—';
   const origins = new Set(list.map(countryOf).filter(o => o !== '未填產地'));
   $('sumOrigins').textContent = origins.size ? origins.size + ' 國' : '—';
   const last = S.data?.updatedAt || wines().reduce((m, w) => w.updatedAt > m ? w.updatedAt : m, '');
@@ -295,6 +293,7 @@ function sortWines(rows) {
   const k = S.sort;
   const firstLoc = w => { const l = (w.locations || []).find(x => x.quantity > 0) || {}; return [l.cabinet || '', shelfNo(l.shelf)]; };
   return rows.sort((a, b) => {
+    if (k === 'vintage-desc') { const va = Number(a.vintage) || 0, vb = Number(b.vintage) || 0; return vb - va || a.wineId.localeCompare(b.wineId); }
     if (k === 'vintage') return (Number(a.vintage) || 9999) - (Number(b.vintage) || 9999) || a.wineId.localeCompare(b.wineId);
     if (k === 'qty') return total(b) - total(a) || a.wineId.localeCompare(b.wineId);
     if (k === 'name') return a.wineName.localeCompare(b.wineName, 'en');
@@ -385,14 +384,6 @@ function wire() {
   $('clearSearch').addEventListener('click', () => { S.search = ''; $('search').value = ''; render(); });
   $('clearFilter').addEventListener('click', () => { S.filter = null; render(); });
   $('factWines').addEventListener('click', () => { S.filter = null; S.search = ''; $('search').value = ''; closeDrawer(); render(); toLedger(); });
-  $('factOldest').addEventListener('click', () => {
-    const list = active().filter(w => Number(w.vintage) > 1800);
-    if (!list.length) return;
-    const oldest = list.reduce((a, w) => Number(w.vintage) < Number(a.vintage) ? w : a);
-    S.sort = 'vintage'; S.filter = null; S.search = ''; $('search').value = '';
-    try { localStorage.setItem('cellarSort', S.sort); } catch {}
-    render(); toLedger(); openDrawer(oldest.wineId);
-  });
   $('factOrigins').addEventListener('click', openOrigins);
   $('originList').addEventListener('click', e => {
     const b = e.target.closest('[data-origin]'); if (!b) return;
