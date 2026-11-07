@@ -5,41 +5,70 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com; connect-src 'self' https://api.github.com https://raw.githubusercontent.com; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
-<title>紅酒收藏管理</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%238a1325'/%3E%3Cpath d='M8 4h8l.5 4A4.5 4.5 0 0 1 12 13a4.5 4.5 0 0 1-4.5-5ZM12 13v5M9 19h6' fill='none' stroke='%23fff' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<meta name="theme-color" content="#eef0ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1412" media="(prefers-color-scheme: dark)">
+<title>酒窖</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%237a1f33'/%3E%3Cpath d='M13 5h6v5c0 1 3 3 3 6v10a1 1 0 0 1-1 1H11a1 1 0 0 1-1-1V16c0-3 3-5 3-6Z' fill='%23f2efe8'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="wrap">
-<header class="top">
-  <div class="brand">
-    <div class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10l.6 5.2A5.6 5.6 0 0 1 12 14a5.6 5.6 0 0 1-5.6-5.8Z"/><path d="M12 14v6M8.5 20h7"/><path d="M6.7 8.5h10.6"/></svg></div>
-    <div><h1>紅酒收藏管理</h1><p>收藏、存放位置與每一次品飲</p></div>
+<header class="bar">
+ <div class="bar-in">
+  <a class="mark" href="#" id="homeLink" aria-label="回到全部酒款">
+   <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M13 4h6v5.5c0 1.2 3.5 3 3.5 6.5v10.5a1.5 1.5 0 0 1-1.5 1.5H11a1.5 1.5 0 0 1-1.5-1.5V16c0-3.5 3.5-5.3 3.5-6.5Z"/><path d="M10 18h12v6H10z" class="lbl"/></svg>
+   <span class="mark-t">酒窖</span>
+  </a>
+  <span class="sync" id="sync"><span class="dot"></span><span id="syncText">讀取中</span></span>
+  <div class="who">
+   <span class="pill" id="whoPill">訪客</span>
+   <button class="ghost" id="loginBtn">管理登入</button>
+   <button class="ghost" id="adminBtn" hidden>管理</button>
+   <button class="ghost" id="logoutBtn" hidden>登出</button>
   </div>
-  <div class="who"><span class="pill" id="whoPill">訪客（僅瀏覽）</span><button class="ghost" id="loginBtn">管理登入</button><button class="ghost" id="adminBtn" hidden>管理</button><button class="ghost" id="logoutBtn" hidden>登出</button></div>
+ </div>
 </header>
 
-<main class="panel">
-  <a class="back" id="backLink" href="#" hidden>← 查看全部收藏</a>
-  <div class="notice" id="notice" role="status">正在讀取酒庫…</div>
-  <div id="content">
-  <section class="stats" id="stats" aria-label="庫存總覽"></section>
-  <div class="sync"><span>資料來源：GitHub <span id="repoName"></span></span><span>最後異動：<span id="lastMod">—</span></span><span>最後同步：<span id="syncTime">—</span></span><button class="small" id="reloadBtn">重新整理</button></div>
-  <div class="toolbar">
-    <div class="search"><input id="search" type="search" aria-label="搜尋收藏" placeholder="搜尋酒名、編號、產地、年份、位置或備註…"><button id="clearSearch" aria-label="清除搜尋">×</button></div>
-    <button class="ghost" id="viewBtn">▦ 圖片模式</button>
-    <button class="ghost" id="exportBtn">⇩ 匯出 CSV</button>
-    <button class="ghost" id="qrBtn">▣ QR 標籤</button>
-    <button class="primary" id="qrGoBtn" hidden>產生標籤</button>
-    <button class="primary" id="addBtn" hidden>＋ 新增紅酒</button>
+<main class="page">
+ <div class="notice" id="notice" role="status" hidden></div>
+
+ <section class="summary" aria-label="庫存總覽">
+  <div class="total"><span class="num" id="sumBottles">—</span><span class="unit">瓶在庫</span></div>
+  <dl class="facts">
+   <div><dt>酒款</dt><dd id="sumWines">—</dd></div>
+   <div><dt>最老年份</dt><dd id="sumOldest">—</dd></div>
+   <div><dt>產地</dt><dd id="sumOrigins">—</dd></div>
+   <div><dt>最後異動</dt><dd id="lastMod">—</dd></div>
+  </dl>
+ </section>
+
+ <section class="map-wrap" aria-labelledby="mapTitle">
+  <div class="sec-h"><h2 id="mapTitle">酒櫃配置</h2><span class="hint">點一層只看那一層的酒</span></div>
+  <div class="map" id="map"></div>
+ </section>
+
+ <section class="ledger" aria-labelledby="ledgerTitle">
+  <div class="sec-h"><h2 id="ledgerTitle">酒款</h2><span class="hint" id="countText"></span></div>
+  <div class="tools">
+   <label class="search"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="6"/><path d="m14 14 4 4"/></svg><input id="search" type="search" placeholder="搜尋酒名、酒莊、年份、產地、備註" aria-label="搜尋"><button type="button" id="clearSearch" aria-label="清除搜尋">×</button></label>
+   <select id="sortSel" aria-label="排序"><option value="loc">依位置</option><option value="id">依編號</option><option value="vintage">年份：舊到新</option><option value="qty">瓶數：多到少</option><option value="name">依酒名</option></select>
+   <div class="seg" role="group" aria-label="顯示方式"><button id="viewList" class="on" aria-pressed="true">清單</button><button id="viewGrid" aria-pressed="false">照片</button></div>
+   <button class="ghost" id="exportBtn">匯出 CSV</button>
+   <button class="ghost" id="qrBtn">QR 標籤</button>
+   <button class="primary" id="qrGoBtn" hidden>產生標籤</button>
+   <button class="primary" id="addBtn" hidden>＋ 新增酒款</button>
   </div>
   <div class="filterbar" id="filterBar" hidden><span id="filterText"></span><button class="small" id="clearFilter">顯示全部</button></div>
-  <div class="list" id="list"></div>
+  <div class="rows" id="list"></div>
   <div class="empty" id="empty" hidden></div>
-  </div>
+ </section>
+ <footer class="foot"><span>資料存放在 GitHub <a id="repoName" target="_blank" rel="noopener"></a></span><button class="link" id="reloadBtn">立即同步</button></footer>
 </main>
-</div>
+
+<button class="fab" id="fab" hidden aria-label="新增酒款">＋</button>
+
+<dialog class="drawer" id="drawer" aria-labelledby="dwName"><div id="drawerBody"></div></dialog>
 
 <dialog class="small" id="loginModal" aria-labelledby="loginTitle"><div class="dh"><h2 id="loginTitle">管理登入</h2><button data-close aria-label="關閉">×</button></div>
 <form class="db" id="loginForm" novalidate>
