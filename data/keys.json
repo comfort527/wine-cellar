@@ -7,15 +7,6 @@
  },
  "slots": [
   {
-   "id": "5ba26424-9c5c-4a5e-a951-1885fd5e97b5",
-   "label": "鴻家裡電腦",
-   "role": "admin",
-   "salt": "bRefKhwFvtfMgbmselQTGg==",
-   "iv": "rpx7LFbmAsqqNvQf",
-   "ct": "TWPhl35UcAQwrex968y+ivVIQ+aOLCvI49ZJosXU4AkU93pd+UJOcmZtclW4daZ6",
-   "createdAt": "2026-11-07T10:35:08.289Z"
-  },
-  {
    "id": "b5f201b9-1af6-4e19-81aa-f26dc3d881c5",
    "label": "廖炎鴻",
    "role": "admin",
