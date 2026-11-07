@@ -228,6 +228,7 @@ function readHash() {
 addEventListener('hashchange', readHash);
 
 /* ---------- 畫面 ---------- */
+const countryOf = w => (w.origin || '').split(/[,，/]/)[0].trim() || '未填產地';
 const shelfNo = s => { const m = /\d+/.exec(s || ''); return m ? Number(m[0]) : 999; };
 const isWhite = w => /白酒|white|riesling|sauvignon blanc|chardonnay/i.test(`${w.grapeNotes} ${w.wineName}`);
 function renderSync() {
@@ -257,7 +258,7 @@ function render() {
   $('sumWines').textContent = S.data ? list.length + ' 款' : '—';
   const years = list.map(w => Number(w.vintage)).filter(y => y > 1800);
   $('sumOldest').textContent = years.length ? Math.min(...years) : '—';
-  const origins = new Set(list.map(w => (w.origin || '').split(/[,，]/)[0].trim()).filter(Boolean));
+  const origins = new Set(list.map(countryOf).filter(o => o !== '未填產地'));
   $('sumOrigins').textContent = origins.size ? origins.size + ' 國' : '—';
   const last = S.data?.updatedAt || wines().reduce((m, w) => w.updatedAt > m ? w.updatedAt : m, '');
   $('lastMod').innerHTML = last ? `${new Date(last).toLocaleDateString('zh-TW', {month: 'numeric', day: 'numeric'})} <small>${new Date(last).toLocaleTimeString('zh-TW', {hour12: false, hour: '2-digit', minute: '2-digit'})}</small>` : '—';
@@ -301,10 +302,11 @@ function sortWines(rows) {
 }
 function renderList(list) {
   $('filterBar').hidden = !S.filter;
-  if (S.filter) $('filterText').textContent = `只顯示 ${S.filter.cabinet}${S.filter.shelf ? ' · ' + S.filter.shelf : ''}`;
+  if (S.filter) $('filterText').textContent = S.filter.origin ? `只顯示產地：${S.filter.origin}` : `只顯示 ${S.filter.cabinet}${S.filter.shelf ? ' · ' + S.filter.shelf : ''}`;
   const q = S.search.trim().toLowerCase();
   const rows = sortWines(list.filter(w => {
-    if (S.filter && !(w.locations || []).some(l => l.quantity > 0 && l.cabinet === S.filter.cabinet && (!S.filter.shelf || l.shelf === S.filter.shelf))) return false;
+    if (S.filter?.origin && countryOf(w) !== S.filter.origin) return false;
+    if (S.filter?.cabinet && !(w.locations || []).some(l => l.quantity > 0 && l.cabinet === S.filter.cabinet && (!S.filter.shelf || l.shelf === S.filter.shelf))) return false;
     if (!q) return true;
     return [w.wineId, ...FIELDS.map(f => w[f[0]]), ...(w.locations || []).map(l => l.cabinet + ' ' + l.shelf)].join(' ').toLowerCase().includes(q);
   }));
@@ -368,6 +370,21 @@ function wire() {
   $('search').addEventListener('input', e => { S.search = e.target.value; render(); });
   $('clearSearch').addEventListener('click', () => { S.search = ''; $('search').value = ''; render(); });
   $('clearFilter').addEventListener('click', () => { S.filter = null; render(); });
+  $('factWines').addEventListener('click', () => { S.filter = null; S.search = ''; $('search').value = ''; closeDrawer(); render(); toLedger(); });
+  $('factOldest').addEventListener('click', () => {
+    const list = active().filter(w => Number(w.vintage) > 1800);
+    if (!list.length) return;
+    const oldest = list.reduce((a, w) => Number(w.vintage) < Number(a.vintage) ? w : a);
+    S.sort = 'vintage'; S.filter = null; S.search = ''; $('search').value = '';
+    try { localStorage.setItem('cellarSort', S.sort); } catch {}
+    render(); toLedger(); openDrawer(oldest.wineId);
+  });
+  $('factOrigins').addEventListener('click', openOrigins);
+  $('originList').addEventListener('click', e => {
+    const b = e.target.closest('[data-origin]'); if (!b) return;
+    S.filter = b.dataset.origin ? {origin: b.dataset.origin} : null; S.search = ''; $('search').value = '';
+    $('originModal').close(); render(); toLedger();
+  });
   $('sortSel').addEventListener('change', e => { S.sort = e.target.value; try { localStorage.setItem('cellarSort', S.sort); } catch {} render(); });
   $('reloadBtn').addEventListener('click', async () => { try { await loadData(true); render(); toast('已同步。'); } catch (e) { toast(msgOf(e)); } });
   $('viewList').addEventListener('click', () => setView('list'));
@@ -429,6 +446,16 @@ function wire() {
   const openHist = e => { const h = e.target.closest('[data-hist]'); if (!h || (e.type === 'keydown' && e.key !== 'Enter')) return; $('adminModal').close(); openDrawer(h.dataset.hist); };
   $('histList').addEventListener('click', openHist); $('histList').addEventListener('keydown', openHist);
   $('slotList').addEventListener('click', e => { const b = e.target.closest('[data-delslot]'); if (b) deleteSlot(b); });
+}
+function toLedger() { document.querySelector('.ledger').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'}); }
+function openOrigins() {
+  const groups = new Map();
+  for (const w of active()) { const c = countryOf(w), g = groups.get(c) || {wines: 0, bottles: 0}; g.wines++; g.bottles += total(w); groups.set(c, g); }
+  const rows = [...groups].sort((a, b) => (a[0] === '未填產地') - (b[0] === '未填產地') || b[1].bottles - a[1].bottles || a[0].localeCompare(b[0]));
+  const cur = S.filter?.origin;
+  $('originList').innerHTML = `<button class="origin ${cur ? '' : 'on'}" data-origin=""><b>全部產地</b><span>${active().length} 款</span><span>${active().reduce((a, w) => a + total(w), 0)} 瓶</span></button>` +
+    rows.map(([c, g]) => `<button class="origin ${cur === c ? 'on' : ''}" data-origin="${esc(c)}"><b>${esc(c)}</b><span>${g.wines} 款</span><span>${g.bottles} 瓶</span></button>`).join('');
+  showDialog('originModal');
 }
 function setView(v) { S.view = v; try { localStorage.setItem('cellarView', v); } catch {} render(); }
 async function submit(formId, errId, fn) {
