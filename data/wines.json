@@ -3,7 +3,8 @@
  "catalog": {
   "cabinets": [
    "8樓右LB櫃",
-   "8樓外冰箱"
+   "8樓外冰箱",
+   "陽明"
   ],
   "shelves": [
    "第1層",
@@ -1598,5 +1599,7 @@
    "wineName": "Sauvignon Blanc",
    "wineryRegion": "Shaw + Smith"
   }
- }
+ },
+ "rev": 1,
+ "updatedAt": "2026-11-07T11:26:04.346Z"
 }
