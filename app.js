@@ -348,25 +348,30 @@ function openDrawer(id, fromHash) {
 }
 function closeDrawer() { if ($('drawer').open) $('drawer').close(); }
 function outsHtml(w) {
-  const outs = (w.outs || []).slice().sort((a, b) => (b.date + b.at).localeCompare(a.date + a.at));
-  if (!outs.length) return '';
-  const sum = outs.reduce((a, o) => a + (Number(o.qty) || 0), 0);
-  return `<section class="dw-outs"><h3>出庫紀錄 <span class="hint">共 ${outs.length} 次、${sum} 瓶</span></h3>${outs.map(o => `<div class="out"><span class="d">${fmtDate(o.date)}</span><span class="q">−${o.qty}</span><span class="r"><b>${esc(o.reason)}</b><small>${esc(o.cabinet)} · ${esc(o.shelf)} · ${esc(nameOf(o.by))}</small></span></div>`).join('')}</section>`;
+  const outs = (w.outs || []).map(o => ({...o, kind: 'out'})), moves = (w.moves || []).map(m => ({...m, kind: 'move'}));
+  const all = [...outs, ...moves].sort((a, b) => ((b.date || '') + (b.at || '')).localeCompare((a.date || '') + (a.at || '')));
+  if (!all.length) return '';
+  const outQty = outs.reduce((a, o) => a + (Number(o.qty) || 0), 0);
+  const sumText = [outs.length ? `出庫 ${outs.length} 次、${outQty} 瓶` : '', moves.length ? `移動 ${moves.length} 次` : ''].filter(Boolean).join('；');
+  const row = e => e.kind === 'out'
+    ? `<div class="out"><span class="d">${fmtDate(e.date)}</span><span class="q">−${e.qty}</span><span class="r"><b>${esc(e.type ? e.type + (e.reason ? '　' + e.reason : '') : e.reason)}</b><small>${esc(e.cabinet)} · ${esc(e.shelf)} · ${esc(nameOf(e.by))}</small></span></div>`
+    : `<div class="out mv"><span class="d">${fmtDate(e.date)}</span><span class="q">⇄${e.qty}</span><span class="r"><b>${esc(e.from.cabinet)} · ${esc(e.from.shelf)} → ${esc(e.to.cabinet)} · ${esc(e.to.shelf)}</b><small>移動${e.note ? ' · ' + esc(e.note) : ''} · ${esc(nameOf(e.by))}</small></span></div>`;
+  return `<section class="dw-outs"><h3>庫存紀錄 <span class="hint">${sumText}</span></h3>${all.map(row).join('')}</section>`;
 }
 function renderDrawer() {
   const w = byId(S.drawer); if (!w) { closeDrawer(); return; }
   const p = photoUrl(w), ed = canEdit(), t = total(w), archived = w.status === 'archived';
   const facts = [['wineryRegion', '酒莊／產區'], ['origin', '產地'], ['volume', '容量'], ['source', '來源'], ['referencePrice', '參考價格'], ['entryDate', '入庫日期'], ['drinkWindow', '適飲期']]
     .map(([k, l]) => `<div><dt>${l}</dt><dd>${k === 'referencePrice' ? fmtPrice(w[k]) : esc(w[k] || '—')}</dd></div>`).join('');
-  const locs = (w.locations || []).map(l => `<div class="dw-loc"><span class="where">${esc(l.cabinet)} <small>· ${esc(l.shelf)}</small></span><span class="n">${l.quantity}</span>${ed && l.quantity > 0 ? `<button class="small" data-stock="${esc(w.wineId)}" data-cab="${esc(l.cabinet)}" data-shelf="${esc(l.shelf)}">出庫</button>` : '<span></span>'}</div>`).join('');
+  const locs = (w.locations || []).map(l => `<div class="dw-loc"><span class="where">${esc(l.cabinet)} <small>· ${esc(l.shelf)}</small></span><span class="n">${l.quantity}</span>${ed && l.quantity > 0 ? `<span class="loc-btns"><button class="small" data-move="${esc(w.wineId)}" data-cab="${esc(l.cabinet)}" data-shelf="${esc(l.shelf)}">移動</button><button class="small" data-stock="${esc(w.wineId)}" data-cab="${esc(l.cabinet)}" data-shelf="${esc(l.shelf)}">出庫</button></span>` : '<span></span>'}</div>`).join('');
   $('drawerBody').innerHTML = `
    <div class="dw-top"><span class="id">${archived ? '已出清' : esc(w.volume || '')}</span><button class="x" data-dwclose aria-label="關閉">×</button></div>
    <div class="dw">
     <div class="dw-head"><span class="vin">${esc(w.vintage || 'NV')}</span><h2 id="dwName">${esc(w.wineName)}</h2>${w.wineryRegion ? `<p>${esc(w.wineryRegion)}</p>` : ''}</div>
     ${p ? `<img class="dw-photo" src="${esc(p)}" alt="${esc(w.wineName)} 酒標照片">` : ''}
     <div class="dw-stock"><div class="sum"><span>目前庫存</span><b>${t} <small style="font-size:15px">瓶</small></b></div>${locs || '<div class="dw-loc"><span class="where hint">沒有存放位置</span></div>'}</div>
-    <div class="dw-act">${ed ? `${archived ? '' : `<button class="primary" data-stockany="${esc(w.wineId)}" ${t ? '' : 'disabled'}>出庫</button>`}<button class="primary" data-edit="${esc(w.wineId)}">編輯</button><button data-photo="${esc(w.wineId)}">${p ? '更換照片' : '加照片'}</button>` : ''}<button data-copy="${esc(w.wineId)}">複製連結</button>${ed ? `<button data-log="${esc(w.wineId)}">異動紀錄</button>` : ''}</div>
-    ${ed ? (archived ? '<p class="hint" style="margin:0">這款酒已全部出庫。要補回庫存，請按「編輯」填入瓶數，它會回到目前酒款。</p>' : '') : '<p class="hint" style="margin:0">登入管理後可以出庫與編輯這款酒。</p>'}
+    <div class="dw-act">${ed ? `${archived ? '' : `<button class="primary" data-stockany="${esc(w.wineId)}" ${t ? '' : 'disabled'}>出庫</button><button class="primary" data-moveany="${esc(w.wineId)}" ${t ? '' : 'disabled'}>移動</button>`}<button class="primary" data-edit="${esc(w.wineId)}">編輯</button><button data-photo="${esc(w.wineId)}">${p ? '更換照片' : '加照片'}</button>` : ''}${ed ? `<button data-log="${esc(w.wineId)}">異動紀錄</button>` : ''}</div>
+    ${ed ? (archived ? '<p class="hint" style="margin:0">這款酒已全部出庫。要補回庫存，請按「編輯」填入瓶數，它會回到目前酒款。</p>' : '') : '<p class="hint" style="margin:0">登入管理後可以出庫、移動與編輯這款酒。</p>'}
     <dl class="dw-facts">${facts}${w.grapeNotes ? `<div class="wide"><dt>葡萄品種／備註</dt><dd class="note">${esc(w.grapeNotes)}</dd></div>` : ''}</dl>
     ${outsHtml(w)}
     <div class="dw-meta">${w.createdAt ? `建立 ${fmtTime(w.createdAt)}（${esc(nameOf(w.createdBy))}）<br>` : ''}最後修改 ${fmtTime(w.updatedAt)}（${esc(nameOf(w.updatedBy))}）${archived ? `<br>出清 ${fmtTime(w.archivedAt)}（${esc(nameOf(w.archivedBy))}）` : ''}</div>
@@ -429,9 +434,10 @@ function wire() {
     if (e.target.closest('[data-dwclose]')) return closeDrawer();
     const st = e.target.closest('[data-stock]'); if (st) return openStock(st.dataset.stock, st.dataset.cab, st.dataset.shelf);
     const sa = e.target.closest('[data-stockany]'); if (sa) return openStock(sa.dataset.stockany);
+    const mv = e.target.closest('[data-move]'); if (mv) return openMove(mv.dataset.move, mv.dataset.cab, mv.dataset.shelf);
+    const ma = e.target.closest('[data-moveany]'); if (ma) return openMove(ma.dataset.moveany);
     const ed = e.target.closest('[data-edit]'); if (ed) return openWineForm(byId(ed.dataset.edit));
     const ph = e.target.closest('[data-photo]'); if (ph) return openPhoto(byId(ph.dataset.photo));
-    const cp = e.target.closest('[data-copy]'); if (cp) return copyLink(cp.dataset.copy);
     const lg = e.target.closest('[data-log]'); if (lg) { showDialog('adminModal'); switchTab('audit'); loadAudit(lg.dataset.log, 1); }
   });
   $('f_volumeChoice').addEventListener('change', e => { $('f_volumeOther').hidden = e.target.value !== '__other__'; });
@@ -444,6 +450,8 @@ function wire() {
   $('setupForm').addEventListener('submit', e => { e.preventDefault(); submit('setupForm', 'setupErr', doSetup); });
   $('wineForm').addEventListener('submit', e => { e.preventDefault(); submit('wineForm', 'wineErr', saveWine); });
   $('stockForm').addEventListener('submit', e => { e.preventDefault(); submit('stockForm', 'stockErr', saveStock); });
+  $('moveForm').addEventListener('submit', e => { e.preventDefault(); submit('moveForm', 'moveErr', saveMove); });
+  document.querySelectorAll('input[name=s_type]').forEach(r => r.addEventListener('change', () => { $('s_reasonLbl').textContent = r.value === '其他' ? '說明 *' : '說明（選填）'; }));
   $('photoForm').addEventListener('submit', e => { e.preventDefault(); submit('photoForm', 'photoErr', savePhoto); });
   $('locForm').addEventListener('submit', e => { e.preventDefault(); submit('locForm', 'locErr', saveCatalog); });
   $('slotForm').addEventListener('submit', e => { e.preventDefault(); submit('slotForm', 'keysErr', addSlot); });
@@ -480,7 +488,6 @@ function switchTab(name) {
   if (name === 'hist' || name === 'loc') renderAdmin();
   if (name === 'keys') renderSlots();
 }
-async function copyLink(id) { const url = wineUrl(id); try { await navigator.clipboard.writeText(url); toast('已複製「' + (byId(id)?.wineName || '') + '」的連結。'); } catch { toast(url); } }
 
 /* ---------- 登入與初始設定 ---------- */
 function openLogin() {
@@ -656,15 +663,17 @@ function openStock(id, cab, shelf) {
   sel.innerHTML = (w.locations || []).map((l, i) => l.quantity > 0 ? `<option value="${i}">${esc(l.cabinet)} / ${esc(l.shelf)}（目前 ${l.quantity} 瓶）</option>` : '').join('');
   if (cab) { const i = w.locations.findIndex(l => l.cabinet === cab && l.shelf === shelf); if (i >= 0) sel.value = String(i); }
   $('s_reason').value = ''; $('s_qty').value = '1'; $('s_date').value = today(); $('s_date').max = today();
-  showDialog('stockModal'); $('s_reason').focus();
+  document.querySelectorAll('input[name=s_type]').forEach(r => r.checked = false); $('s_reasonLbl').textContent = '說明（選填）';
+  showDialog('stockModal');
 }
 async function saveStock() {
-  const id = S.stock.wineId, picked = S.stock.locations?.[Number($('s_loc').value)] || {}, {cabinet, shelf} = picked, qty = Number($('s_qty').value), reason = $('s_reason').value.trim(), date = $('s_date').value, who = S.session.label;
+  const id = S.stock.wineId, picked = S.stock.locations?.[Number($('s_loc').value)] || {}, {cabinet, shelf} = picked, qty = Number($('s_qty').value), reason = $('s_reason').value.trim(), date = $('s_date').value, type = document.querySelector('input[name=s_type]:checked')?.value || '', who = S.session.label;
   if (!cabinet) fail('請選擇目前有庫存的位置。');
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date))) fail('請填寫出庫日期。');
   if (date > today()) fail('出庫日期不能晚於今天。');
   if (date < '1990-01-01') fail('出庫日期不正確，請重新選擇。');
-  if (!reason) fail('請填寫出庫原因。');
+  if (!type) fail('請選擇出庫類型：自飲、聚餐、送禮或其他。');
+  if (type === '其他' && !reason) fail('選「其他」時請填寫說明。');
   if (!Number.isInteger(qty) || qty < 1) fail('瓶數必須是 1 以上的整數。');
   const res = await mutate(d => {
     const cur = d.wines[id]; if (!cur) fail('這款酒已不存在。');
@@ -673,13 +682,55 @@ async function saveStock() {
     if (l.quantity < qty) fail(`此位置只剩 ${l.quantity} 瓶，沒有扣除任何瓶數。`);
     const old = l.quantity; l.quantity -= qty;
     const t = now(); cur.updatedAt = t; cur.updatedBy = who; cur.revision = (cur.revision || 0) + 1;
-    cur.outs = [...(cur.outs || []), {date, qty, cabinet, shelf, reason, by: who, at: t}];
+    cur.outs = [...(cur.outs || []), {date, type, qty, cabinet, shelf, reason, by: who, at: t}];
     const archived = cur.locations.every(x => !x.quantity);
     if (archived) { cur.status = 'archived'; cur.archivedAt = t; cur.archivedBy = who; }
     return {old, left: l.quantity, archived, name: cur.wineName};
-  }, x => `出庫 ${id} ${x.name}：${cabinet}/${shelf} ${x.old}→${x.left}（−${qty}）${x.archived ? '，全部出清' : ''}\n\n日期：${date}\n原因：${reason}`);
+  }, x => `出庫 ${id} ${x.name}（${type}）：${cabinet}/${shelf} ${x.old}→${x.left}（−${qty}）${x.archived ? '，全部出清' : ''}\n\n日期：${date}\n類型：${type}${reason ? '\n說明：' + reason : ''}`);
   $('stockModal').close();
-  toast(res.archived ? `「${res.name}」已全部出庫，移入歷史酒單。` : `${fmtDate(date)} 出庫 ${qty} 瓶，${cabinet} / ${shelf} 剩 ${res.left} 瓶。`);
+  toast(res.archived ? `「${res.name}」已全部出庫，移入歷史酒單。` : `${fmtDate(date)} ${type}出庫 ${qty} 瓶，${cabinet} / ${shelf} 剩 ${res.left} 瓶。`);
+}
+
+/* ---------- 移動位置 ---------- */
+function openMove(id, cab, shelf) {
+  const w = byId(id); if (!w) return; S.move = w; ensureLists();
+  $('moveWine').textContent = [w.wineName, w.vintage].filter(Boolean).join('　');
+  const sel = $('m_from');
+  sel.innerHTML = (w.locations || []).map((l, i) => l.quantity > 0 ? `<option value="${i}">${esc(l.cabinet)} / ${esc(l.shelf)}（${l.quantity} 瓶）</option>` : '').join('');
+  if (cab) { const i = w.locations.findIndex(l => l.cabinet === cab && l.shelf === shelf); if (i >= 0) sel.value = String(i); }
+  $('m_cab').value = ''; $('m_shelf').value = ''; $('m_qty').value = '1'; $('m_note').value = '';
+  $('m_date').value = today(); $('m_date').max = today();
+  showDialog('moveModal');
+}
+async function saveMove() {
+  const id = S.move.wineId, from = S.move.locations?.[Number($('m_from').value)];
+  const to = {cabinet: $('m_cab').value.trim(), shelf: $('m_shelf').value.trim()};
+  const qty = Number($('m_qty').value), date = $('m_date').value, note = $('m_note').value.trim(), who = S.session.label;
+  if (!from) fail('請選擇要從哪個位置移出。');
+  if (!to.cabinet || !to.shelf) fail('請填寫要移到的櫃位和層位。');
+  if (to.cabinet === from.cabinet && to.shelf === from.shelf) fail('新位置和原位置相同。');
+  if (!Number.isInteger(qty) || qty < 1) fail('瓶數必須是 1 以上的整數。');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date))) fail('請填寫日期。');
+  if (date > today()) fail('日期不能晚於今天。');
+  const res = await mutate(d => {
+    const cur = d.wines[id]; if (!cur) fail('這款酒已不存在。');
+    const locs = cur.locations || [];
+    const src = locs.find(x => x.cabinet === from.cabinet && x.shelf === from.shelf);
+    if (!src || src.quantity <= 0) fail('原位置已沒有庫存，請重新整理。');
+    if (src.quantity < qty) fail(`原位置只剩 ${src.quantity} 瓶。`);
+    src.quantity -= qty;
+    let dst = locs.find(x => x.cabinet === to.cabinet && x.shelf === to.shelf);
+    if (dst) dst.quantity += qty; else { dst = {cabinet: to.cabinet, shelf: to.shelf, quantity: qty}; locs.push(dst); }
+    cur.locations = locs.filter(x => x.quantity > 0 || x === dst);
+    const t = now(); cur.updatedAt = t; cur.updatedBy = who; cur.revision = (cur.revision || 0) + 1;
+    cur.moves = [...(cur.moves || []), {date, qty, from: {cabinet: from.cabinet, shelf: from.shelf}, to, note, by: who, at: t}];
+    d.catalog = d.catalog || {cabinets: [], shelves: []};
+    if (!d.catalog.cabinets.includes(to.cabinet)) d.catalog.cabinets.push(to.cabinet);
+    if (!d.catalog.shelves.includes(to.shelf)) d.catalog.shelves.push(to.shelf);
+    return {name: cur.wineName, now: dst.quantity};
+  }, x => `移動 ${id} ${x.name}：${from.cabinet}/${from.shelf} → ${to.cabinet}/${to.shelf}（×${qty}）\n\n日期：${date}${note ? '\n備註：' + note : ''}`);
+  $('moveModal').close();
+  toast(`已移動 ${qty} 瓶到 ${to.cabinet} / ${to.shelf}（那裡現有 ${res.now} 瓶）。`);
 }
 
 /* ---------- 照片 ---------- */

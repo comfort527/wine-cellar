@@ -117,10 +117,34 @@
  <p id="stockWine" class="strong"></p>
  <div class="field"><label for="s_loc">選擇位置</label><select id="s_loc" required></select></div>
  <div class="field" style="margin-top:10px"><label for="s_date">出庫日期 *</label><input id="s_date" type="date" required></div>
- <div class="field" style="margin-top:10px"><label for="s_reason">出庫原因 *</label><input id="s_reason" maxlength="500" placeholder="例如 家庭聚餐、送禮、品飲" required></div>
+ <fieldset class="types" style="margin-top:12px"><legend>出庫類型 *</legend>
+  <label><input type="radio" name="s_type" value="自飲"><span>自飲</span></label>
+  <label><input type="radio" name="s_type" value="聚餐"><span>聚餐</span></label>
+  <label><input type="radio" name="s_type" value="送禮"><span>送禮</span></label>
+  <label><input type="radio" name="s_type" value="其他"><span>其他</span></label>
+ </fieldset>
+ <div class="field" style="margin-top:10px"><label for="s_reason" id="s_reasonLbl">說明（選填）</label><input id="s_reason" maxlength="500" placeholder="例如 送給王先生、萬聖節聚餐"></div>
  <div class="field" style="margin-top:10px"><label for="s_qty">瓶數</label><input id="s_qty" type="number" min="1" step="1" value="1" inputmode="numeric" required></div>
  <div class="ferr" id="stockErr" hidden></div>
  <div class="dact"><button type="button" data-close>取消</button><button type="submit" class="primary">確認出庫</button></div>
+</form></dialog>
+
+<dialog class="small" id="moveModal" aria-labelledby="moveTitle"><div class="dh"><h2 id="moveTitle">移動位置</h2><button data-close aria-label="關閉">×</button></div>
+<form class="db" id="moveForm" novalidate>
+ <p id="moveWine" class="strong"></p>
+ <div class="field"><label for="m_from">從</label><select id="m_from" required></select></div>
+ <div class="move-to">
+  <div class="field"><label for="m_cab">移到櫃位</label><input id="m_cab" list="cabList" maxlength="80" autocomplete="off"></div>
+  <div class="field"><label for="m_shelf">層位</label><input id="m_shelf" list="shelfList" maxlength="80" autocomplete="off"></div>
+ </div>
+ <div class="move-to">
+  <div class="field"><label for="m_qty">瓶數</label><input id="m_qty" type="number" min="1" step="1" value="1" inputmode="numeric"></div>
+  <div class="field"><label for="m_date">日期</label><input id="m_date" type="date"></div>
+ </div>
+ <div class="field" style="margin-top:10px"><label for="m_note">備註（選填）</label><input id="m_note" maxlength="200" placeholder="例如 冰箱清空、準備聚餐"></div>
+ <p class="hint">移動不會改變總瓶數；舊位置移空後會自動移除。</p>
+ <div class="ferr" id="moveErr" hidden></div>
+ <div class="dact"><button type="button" data-close>取消</button><button type="submit" class="primary">確認移動</button></div>
 </form></dialog>
 
 <dialog class="small" id="photoModal" aria-labelledby="photoTitle"><div class="dh"><h2 id="photoTitle">補上／更換照片</h2><button data-close aria-label="關閉">×</button></div>
