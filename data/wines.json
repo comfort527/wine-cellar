@@ -1,0 +1,1602 @@
+{
+ "schema": 1,
+ "catalog": {
+  "cabinets": [
+   "8樓右LB櫃",
+   "8樓外冰箱"
+  ],
+  "shelves": [
+   "第1層",
+   "第2層",
+   "第3層",
+   "第4層",
+   "第5層",
+   "第6層",
+   "第7層",
+   "第8層"
+  ]
+ },
+ "wines": {
+  "H001": {
+   "archivedAt": "2026-09-29T12:58:37.556Z",
+   "archivedBy": "comfort527",
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "淡江大橋落成紀念；舊系統編號 W002",
+   "locations": [],
+   "origin": "Italy",
+   "photo": "",
+   "referencePrice": 1500,
+   "revision": 1,
+   "source": "贈",
+   "status": "archived",
+   "updatedAt": "2026-09-29T12:58:37.556Z",
+   "updatedBy": "comfort527",
+   "vintage": "2023",
+   "volume": "1500ml",
+   "wineName": "Rosso di Montepulciano DOC",
+   "wineryRegion": "Azienda Agricola Campino delle Querce/Toscana"
+  },
+  "W001": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "淡江大橋落成紀念",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第1層"
+    }
+   ],
+   "origin": "Italy",
+   "photo": "",
+   "referencePrice": 1500,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-30T08:20:39.014Z",
+   "updatedBy": "comfort527",
+   "vintage": "2023",
+   "volume": "1500ml",
+   "wineName": "Rosso di Montepulciano DOC",
+   "wineryRegion": "Azienda Agricola Campino delle Querce/Toscana"
+  },
+  "W002": {
+   "createdAt": "",
+   "createdBy": "z1990729",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "甜酒/貴腐酒",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第2層"
+    }
+   ],
+   "origin": "Hungary",
+   "photo": "",
+   "referencePrice": 720,
+   "revision": 1,
+   "source": "",
+   "status": "active",
+   "updatedAt": "2026-10-03T02:56:27.294Z",
+   "updatedBy": "z1990729",
+   "vintage": "2006",
+   "volume": "500ml",
+   "wineName": "Tokaji Aszú 3 Puttonyos",
+   "wineryRegion": "Bodvin"
+  },
+  "W003": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "誠品/Pinot Noir",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第8層"
+    }
+   ],
+   "origin": "France",
+   "photo": "",
+   "referencePrice": 2765,
+   "revision": 1,
+   "source": "購",
+   "status": "active",
+   "updatedAt": "2026-09-29T13:27:25.591Z",
+   "updatedBy": "comfort527",
+   "vintage": "2005",
+   "volume": "750ml",
+   "wineName": "Premier Cru Pommard Les Pézerolles",
+   "wineryRegion": "Bouchard Père et Fils"
+  },
+  "W004": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "誠品/Pinot Noir",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第8層"
+    }
+   ],
+   "origin": "France",
+   "photo": "",
+   "referencePrice": 6750,
+   "revision": 1,
+   "source": "購",
+   "status": "active",
+   "updatedAt": "2026-09-29T13:29:30.027Z",
+   "updatedBy": "comfort527",
+   "vintage": "2010",
+   "volume": "750ml",
+   "wineName": "Premier Cru Volnay Caillerets Ancienne Cuvée Carnot",
+   "wineryRegion": "Bouchard Père et Fils"
+  },
+  "W005": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "市價＄6500Cabernet Sauvignon",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 4,
+     "shelf": "第5層"
+    }
+   ],
+   "origin": "United States",
+   "photo": "",
+   "referencePrice": 5900,
+   "revision": 1,
+   "source": "購",
+   "status": "active",
+   "updatedAt": "2026-09-29T13:30:54.552Z",
+   "updatedBy": "comfort527",
+   "vintage": "2017",
+   "volume": "750ml",
+   "wineName": "Caymus Vineyards Special Selection",
+   "wineryRegion": "Caymus Vineyards/Napa Valley"
+  },
+  "W006": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "新加坡Joseph",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第3層"
+    }
+   ],
+   "origin": "France",
+   "photo": "",
+   "referencePrice": 3685,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-29T13:32:04.849Z",
+   "updatedBy": "comfort527",
+   "vintage": "2010",
+   "volume": "750ml",
+   "wineName": "Margaux (Grand Cru Classé)",
+   "wineryRegion": "Château d'Issan"
+  },
+  "W007": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "新加坡駐台2019.1",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第8層"
+    }
+   ],
+   "origin": "France",
+   "photo": "",
+   "referencePrice": 5500,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-29T13:32:49.891Z",
+   "updatedBy": "comfort527",
+   "vintage": "2007",
+   "volume": "750ml",
+   "wineName": "Saint-Julien (Grand Cru Classé)",
+   "wineryRegion": "Château Ducru-Beaucaillou"
+  },
+  "W008": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "Connie法國購(行館另有二軍酒*2）；原參考價格：NT$3500-4800",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 4,
+     "shelf": "第1層"
+    }
+   ],
+   "origin": "France,Bdx",
+   "photo": "",
+   "referencePrice": null,
+   "revision": 1,
+   "source": "購",
+   "status": "active",
+   "updatedAt": "2026-09-29T13:38:10.538Z",
+   "updatedBy": "comfort527",
+   "vintage": "2017",
+   "volume": "750ml",
+   "wineName": "Château Duhart-Milon",
+   "wineryRegion": "Château Duhart-Milon"
+  },
+  "W009": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "新加坡",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第3層"
+    }
+   ],
+   "origin": "France",
+   "photo": "",
+   "referencePrice": 2666,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-29T13:37:53.478Z",
+   "updatedBy": "comfort527",
+   "vintage": "2017",
+   "volume": "750ml",
+   "wineName": "Saint-Julien (Grand Cru Classé)",
+   "wineryRegion": "Château Gruaud Larose"
+  },
+  "W010": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "Connie",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第3層"
+    }
+   ],
+   "origin": "France",
+   "photo": "",
+   "referencePrice": 1399,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-29T13:39:06.761Z",
+   "updatedBy": "comfort527",
+   "vintage": "2009",
+   "volume": "750ml",
+   "wineName": "Pauillac (Grand Cru Classé)/Cabernet Sauvignon",
+   "wineryRegion": "Château Haut-Bages Libéral"
+  },
+  "W011": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第3層"
+    }
+   ],
+   "origin": "France",
+   "photo": "",
+   "referencePrice": 2337,
+   "revision": 1,
+   "source": "",
+   "status": "active",
+   "updatedAt": "2026-09-29T13:39:38.104Z",
+   "updatedBy": "comfort527",
+   "vintage": "2008",
+   "volume": "750ml",
+   "wineName": "Saint-Julien (Grand Cru Classé)/Merlot",
+   "wineryRegion": "Château Lagrange"
+  },
+  "W012": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "★林戊坤/Cabernet Franc",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第8層"
+    }
+   ],
+   "origin": "France",
+   "photo": "",
+   "referencePrice": 41212,
+   "revision": 1,
+   "source": "寄存",
+   "status": "active",
+   "updatedAt": "2026-09-29T13:40:19.173Z",
+   "updatedBy": "comfort527",
+   "vintage": "1999",
+   "volume": "750ml",
+   "wineName": "Grand Vin Pauillac (Premier Grand Cru Classé)",
+   "wineryRegion": "Château Latour拉圖堡★"
+  },
+  "W013": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "安貝松堡酒莊；原參考價格：*",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第1層"
+    }
+   ],
+   "origin": "France",
+   "photo": "",
+   "referencePrice": null,
+   "revision": 1,
+   "source": "*",
+   "status": "active",
+   "updatedAt": "2026-09-29T13:44:34.375Z",
+   "updatedBy": "comfort527",
+   "vintage": "2017",
+   "volume": "3000ML",
+   "wineName": "Bordeaux 安貝松堡2020紀念珍藏3公升裝",
+   "wineryRegion": "Château le Pin d'Ambert"
+  },
+  "W014": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "宋文洲/Cabernet Sauvignon",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第8層"
+    }
+   ],
+   "origin": "France",
+   "photo": "",
+   "referencePrice": 7272,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-29T13:48:33.902Z",
+   "updatedBy": "comfort527",
+   "vintage": "2009",
+   "volume": "750ml",
+   "wineName": "Saint-Julien (Grand Cru Classé)",
+   "wineryRegion": "Château Léoville Barton"
+  },
+  "W015": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第3層"
+    }
+   ],
+   "origin": "France",
+   "photo": "",
+   "referencePrice": 4084,
+   "revision": 1,
+   "source": "",
+   "status": "active",
+   "updatedAt": "2026-09-29T13:49:15.552Z",
+   "updatedBy": "comfort527",
+   "vintage": "2011",
+   "volume": "750ml",
+   "wineName": "Saint-Julien(Grand Cru Classé)",
+   "wineryRegion": "Château Léoville Poyferré"
+  },
+  "W016": {
+   "createdAt": "",
+   "createdBy": "z1990729",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 2,
+     "shelf": "第1層"
+    }
+   ],
+   "origin": "France",
+   "photo": "",
+   "referencePrice": 1200,
+   "revision": 1,
+   "source": "購",
+   "status": "active",
+   "updatedAt": "2026-10-03T02:58:36.462Z",
+   "updatedBy": "z1990729",
+   "vintage": "2019",
+   "volume": "750ml",
+   "wineName": "Major",
+   "wineryRegion": "Château l'Escadre"
+  },
+  "W017": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "★林戊坤",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第8層"
+    }
+   ],
+   "origin": "France",
+   "photo": "",
+   "referencePrice": 19561,
+   "revision": 1,
+   "source": "寄存",
+   "status": "active",
+   "updatedAt": "2026-09-29T14:07:30.438Z",
+   "updatedBy": "comfort527",
+   "vintage": "1995",
+   "volume": "750ml",
+   "wineName": "Pauillac (Premier Grand Cru Classé)",
+   "wineryRegion": "Château Mouton Rothschild木桐堡★"
+  },
+  "W018": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "親友",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第3層"
+    }
+   ],
+   "origin": "France",
+   "photo": "",
+   "referencePrice": 1960,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-29T14:07:58.119Z",
+   "updatedBy": "comfort527",
+   "vintage": "2012",
+   "volume": "750ml",
+   "wineName": "Margaux",
+   "wineryRegion": "Château Rauzan-Gassies"
+  },
+  "W019": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第8層"
+    }
+   ],
+   "origin": "France",
+   "photo": "",
+   "referencePrice": 1352,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-29T13:50:10.592Z",
+   "updatedBy": "comfort527",
+   "vintage": "1994",
+   "volume": "750ml",
+   "wineName": "Margaux",
+   "wineryRegion": "Château Segonnes"
+  },
+  "W020": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "家樂福(Michael Lin)",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 7,
+     "shelf": "第4層"
+    }
+   ],
+   "origin": "France",
+   "photo": "",
+   "referencePrice": 1890,
+   "revision": 1,
+   "source": "購",
+   "status": "active",
+   "updatedAt": "2026-09-29T14:09:22.075Z",
+   "updatedBy": "comfort527",
+   "vintage": "2020",
+   "volume": "750ml",
+   "wineName": "Jean Gautreau Red",
+   "wineryRegion": "Château Sociando-Mallet"
+  },
+  "W021": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "icheers/芙嵐侯堡二軍",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 4,
+     "shelf": "第7層"
+    }
+   ],
+   "origin": "France",
+   "photo": "",
+   "referencePrice": 2070,
+   "revision": 1,
+   "source": "購",
+   "status": "active",
+   "updatedAt": "2026-09-29T14:10:02.778Z",
+   "updatedBy": "comfort527",
+   "vintage": "2018",
+   "volume": "750ml",
+   "wineName": "Virginie de Valandraud",
+   "wineryRegion": "Château Valandraud"
+  },
+  "W022": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第3層"
+    }
+   ],
+   "origin": "Australia",
+   "photo": "",
+   "referencePrice": 2520,
+   "revision": 1,
+   "source": "",
+   "status": "active",
+   "updatedAt": "2026-09-29T14:10:28.674Z",
+   "updatedBy": "comfort527",
+   "vintage": "2015",
+   "volume": "750ml",
+   "wineName": "Blewitt Springs Grenache",
+   "wineryRegion": "Clarendon Hills"
+  },
+  "W023": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第3層"
+    }
+   ],
+   "origin": "France",
+   "photo": "",
+   "referencePrice": 1366,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-29T14:11:01.574Z",
+   "updatedBy": "comfort527",
+   "vintage": "2014",
+   "volume": "750ml",
+   "wineName": "Margaux",
+   "wineryRegion": "Clos de Bigos"
+  },
+  "W024": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 7,
+     "shelf": "第2層"
+    },
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 5,
+     "shelf": "第3層"
+    }
+   ],
+   "origin": "",
+   "photo": "",
+   "referencePrice": 1485,
+   "revision": 1,
+   "source": "購",
+   "status": "active",
+   "updatedAt": "2026-09-29T14:53:43.902Z",
+   "updatedBy": "comfort527",
+   "vintage": "2020",
+   "volume": "750ml",
+   "wineName": "Le Clos",
+   "wineryRegion": "Clos Venturi"
+  },
+  "W026": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "黃育徵",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第1層"
+    }
+   ],
+   "origin": "Chile",
+   "photo": "",
+   "referencePrice": 2500,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-29T14:13:04.399Z",
+   "updatedBy": "comfort527",
+   "vintage": "2011",
+   "volume": "750ml",
+   "wineName": "Lota",
+   "wineryRegion": "Cousiño Macul/Maipo Valley Chile"
+  },
+  "W027": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "法國民議會2019.9",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第3層"
+    }
+   ],
+   "origin": "France",
+   "photo": "",
+   "referencePrice": 1792,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-29T14:13:48.236Z",
+   "updatedBy": "comfort527",
+   "vintage": "2014",
+   "volume": "750ml",
+   "wineName": "Gevrey-Chambertin Les Marchais/Pinot Noir",
+   "wineryRegion": "Domaine Faiveley"
+  },
+  "W028": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "史明",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第8層"
+    }
+   ],
+   "origin": "Chile",
+   "photo": "",
+   "referencePrice": 5817,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-29T14:14:07.142Z",
+   "updatedBy": "comfort527",
+   "vintage": "2006",
+   "volume": "750ml",
+   "wineName": "Cabernet Sauvignon(CONCHA Y TORO)",
+   "wineryRegion": "Don Melchor/Puente Alto"
+  },
+  "W029": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "富奕酒藏購入",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 3,
+     "shelf": "第4層"
+    }
+   ],
+   "origin": "Italy",
+   "photo": "",
+   "referencePrice": 1750,
+   "revision": 1,
+   "source": "購",
+   "status": "active",
+   "updatedAt": "2026-09-29T14:14:30.129Z",
+   "updatedBy": "comfort527",
+   "vintage": "NV",
+   "volume": "750ml",
+   "wineName": "Edizione CINQUE AUTOCTONI(混血王子)",
+   "wineryRegion": "Fantini"
+  },
+  "W030": {
+   "createdAt": "",
+   "createdBy": "z1990729",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "利錦祥贈(7樓*3)",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 2,
+     "shelf": "第1層"
+    }
+   ],
+   "origin": "",
+   "photo": "",
+   "referencePrice": 1000,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-10-03T03:00:51.054Z",
+   "updatedBy": "z1990729",
+   "vintage": "2023",
+   "volume": "750ml",
+   "wineName": "Diamond Collection Black Label Claret",
+   "wineryRegion": "Francis Ford Coppola"
+  },
+  "W031": {
+   "createdAt": "",
+   "createdBy": "zickyfu",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "殷琪/Nebbiolo",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第8層"
+    }
+   ],
+   "origin": "Italy",
+   "photo": "",
+   "referencePrice": 15500,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-29T14:26:44.127Z",
+   "updatedBy": "zickyfu",
+   "vintage": "2011",
+   "volume": "750ml",
+   "wineName": "Sorì Tildìn (Barbaresco) Langhe",
+   "wineryRegion": "GAJA/Barbaresco歌雅酒莊★"
+  },
+  "W032": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "連律師/伯恩濟貧院拍賣",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 2,
+     "shelf": "第8層"
+    }
+   ],
+   "origin": "France",
+   "photo": "",
+   "referencePrice": 33600,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-29T14:16:31.297Z",
+   "updatedBy": "comfort527",
+   "vintage": "2015",
+   "volume": "750ml",
+   "wineName": "Echezeaux Grand Cru Cuvee Jean-Luc Bissey",
+   "wineryRegion": "Hospices de Beaune★"
+  },
+  "W033": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第1層"
+    }
+   ],
+   "origin": "United States",
+   "photo": "",
+   "referencePrice": 1950,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-29T14:17:06.679Z",
+   "updatedBy": "comfort527",
+   "vintage": "2018",
+   "volume": "750ml",
+   "wineName": "Cabernet Sauvignon",
+   "wineryRegion": "Jordan/Alexander Valley Sonoma County"
+  },
+  "W034": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "黃輝珍",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第1層"
+    }
+   ],
+   "origin": "United States",
+   "photo": "",
+   "referencePrice": 961,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-29T14:18:12.743Z",
+   "updatedBy": "comfort527",
+   "vintage": "2018",
+   "volume": "750ml",
+   "wineName": "Cabernet Sauvignon",
+   "wineryRegion": "Koenig Vineyards/Columbia Valley"
+  },
+  "W035": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "留存紀念。AIT處長先生",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第7層"
+    }
+   ],
+   "origin": "Turkey",
+   "photo": "",
+   "referencePrice": 900,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-29T14:18:46.243Z",
+   "updatedBy": "comfort527",
+   "vintage": "2021",
+   "volume": "750ml",
+   "wineName": "Arkeo Acikara/Cabernet Sauvignon",
+   "wineryRegion": "Likya/Mediterranean"
+  },
+  "W036": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "AIT處長先生",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 2,
+     "shelf": "第8層"
+    }
+   ],
+   "origin": "Turkey",
+   "photo": "",
+   "referencePrice": 900,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-29T14:19:20.999Z",
+   "updatedBy": "comfort527",
+   "vintage": "2021",
+   "volume": "750ml",
+   "wineName": "Arkeo Acikara/Cabernet Sauvignon",
+   "wineryRegion": "Likya/Mediterranean"
+  },
+  "W037": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "林鴻道/Pinot Noir",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第8層"
+    }
+   ],
+   "origin": "France",
+   "photo": "",
+   "referencePrice": 7200,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-29T14:19:42.470Z",
+   "updatedBy": "comfort527",
+   "vintage": "2012",
+   "volume": "750ml",
+   "wineName": "Charmes-Chambertin Grand Cru",
+   "wineryRegion": "Lupé-Cholet/Burgundy Region"
+  },
+  "W038": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "吳榮彬董事長",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 5,
+     "shelf": "第4層"
+    },
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 2,
+     "shelf": "第7層"
+    }
+   ],
+   "origin": "Spain",
+   "photo": "",
+   "referencePrice": 930,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-30T04:23:14.162Z",
+   "updatedBy": "comfort527",
+   "vintage": "2013",
+   "volume": "750ml",
+   "wineName": "Selección Especial",
+   "wineryRegion": "Marqués de Arviza(Boltun Group)"
+  },
+  "W040": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 12,
+     "shelf": "第7層"
+    }
+   ],
+   "origin": "Italy",
+   "photo": "",
+   "referencePrice": 1217,
+   "revision": 1,
+   "source": "購",
+   "status": "active",
+   "updatedAt": "2026-09-30T04:25:47.821Z",
+   "updatedBy": "comfort527",
+   "vintage": "2019",
+   "volume": "750ml",
+   "wineName": "Ser Lapo",
+   "wineryRegion": "Mazzei/Chianti Classico Riserva DOCG"
+  },
+  "W041": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "留存紀念",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第7層"
+    }
+   ],
+   "origin": "Italy",
+   "photo": "",
+   "referencePrice": 840,
+   "revision": 1,
+   "source": "購",
+   "status": "active",
+   "updatedAt": "2026-09-30T04:26:18.162Z",
+   "updatedBy": "comfort527",
+   "vintage": "2012",
+   "volume": "750ml",
+   "wineName": "Ser Lapo",
+   "wineryRegion": "Mazzei/Chianti Classico Riserva DOCG"
+  },
+  "W042": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第5層"
+    },
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第7層"
+    }
+   ],
+   "origin": "Italy",
+   "photo": "",
+   "referencePrice": 1150,
+   "revision": 1,
+   "source": "購",
+   "status": "active",
+   "updatedAt": "2026-09-30T04:30:09.906Z",
+   "updatedBy": "comfort527",
+   "vintage": "2020",
+   "volume": "750ml",
+   "wineName": "Fonterutoli Chianti Classico DOCG",
+   "wineryRegion": "Mazzei/Fonterutoli"
+  },
+  "W043": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 11,
+     "shelf": "第5層"
+    },
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 2,
+     "shelf": "第7層"
+    }
+   ],
+   "origin": "Italy",
+   "photo": "",
+   "referencePrice": 1150,
+   "revision": 1,
+   "source": "購",
+   "status": "active",
+   "updatedAt": "2026-09-30T04:31:40.428Z",
+   "updatedBy": "comfort527",
+   "vintage": "2021",
+   "volume": "750ml",
+   "wineName": "Fonterutoli Chianti Classico DOCG",
+   "wineryRegion": "Mazzei/Fonterutoli"
+  },
+  "W044": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 3,
+     "shelf": "第7層"
+    }
+   ],
+   "origin": "Italy",
+   "photo": "",
+   "referencePrice": 2560,
+   "revision": 1,
+   "source": "購",
+   "status": "active",
+   "updatedAt": "2026-09-30T04:29:05.713Z",
+   "updatedBy": "comfort527",
+   "vintage": "2016",
+   "volume": "750ml",
+   "wineName": "Castello Fonterutoli Chianti Classico Gran Selezione",
+   "wineryRegion": "Mazzei/Fonterutoli"
+  },
+  "W047": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "留存紀念",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第7層"
+    }
+   ],
+   "origin": "Italy",
+   "photo": "",
+   "referencePrice": 1486,
+   "revision": 1,
+   "source": "購",
+   "status": "active",
+   "updatedAt": "2026-09-30T04:33:13.621Z",
+   "updatedBy": "comfort527",
+   "vintage": "2001",
+   "volume": "750ml",
+   "wineName": "Castello di Fonterutoli Chianti Classico",
+   "wineryRegion": "Mazzei/Fonterutoli"
+  },
+  "W048": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "留存紀念",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第7層"
+    }
+   ],
+   "origin": "Italy",
+   "photo": "",
+   "referencePrice": 600,
+   "revision": 1,
+   "source": "購",
+   "status": "active",
+   "updatedAt": "2026-09-30T04:34:43.619Z",
+   "updatedBy": "comfort527",
+   "vintage": "2013",
+   "volume": "750ml",
+   "wineName": "Zisola Noto Rosso",
+   "wineryRegion": "Mazzei/Zisola"
+  },
+  "W049": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 4,
+     "shelf": "第2層"
+    },
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 2,
+     "shelf": "第3層"
+    }
+   ],
+   "origin": "South Africa",
+   "photo": "",
+   "referencePrice": 1830,
+   "revision": 1,
+   "source": "購",
+   "status": "active",
+   "updatedAt": "2026-09-30T04:38:06.763Z",
+   "updatedBy": "comfort527",
+   "vintage": "2020",
+   "volume": "750ml",
+   "wineName": "Rhodium",
+   "wineryRegion": "Oldenburg Vineyards"
+  },
+  "W051": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "大瓶裝",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第4層"
+    }
+   ],
+   "origin": "Spain",
+   "photo": "",
+   "referencePrice": 7560,
+   "revision": 1,
+   "source": "",
+   "status": "active",
+   "updatedAt": "2026-09-30T04:39:57.619Z",
+   "updatedBy": "comfort527",
+   "vintage": "2003",
+   "volume": "1500ml",
+   "wineName": "Rioja Reserva(1500ml)",
+   "wineryRegion": "Remírez de Ganuza"
+  },
+  "W052": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "新加坡贈後自購",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 3,
+     "shelf": "第6層"
+    }
+   ],
+   "origin": "France",
+   "photo": "",
+   "referencePrice": 700,
+   "revision": 1,
+   "source": "購",
+   "status": "active",
+   "updatedAt": "2026-09-30T04:48:25.328Z",
+   "updatedBy": "comfort527",
+   "vintage": "2020",
+   "volume": "750ml",
+   "wineName": "VENTOUX",
+   "wineryRegion": "RÉMY FERBRAS/VENTOUX"
+  },
+  "W053": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "白酒，黃教漳董事長",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第3層"
+    }
+   ],
+   "origin": "Germany",
+   "photo": "",
+   "referencePrice": 2060,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-30T04:42:18.723Z",
+   "updatedBy": "comfort527",
+   "vintage": "2021",
+   "volume": "750ml",
+   "wineName": "Kiedrich Klosterberg Riesling Trocken",
+   "wineryRegion": "Robert Weil"
+  },
+  "W054": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "簡社長",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 3,
+     "shelf": "第2層"
+    }
+   ],
+   "origin": "South Africa",
+   "photo": "",
+   "referencePrice": 2050,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-30T04:43:28.476Z",
+   "updatedBy": "comfort527",
+   "vintage": "2008",
+   "volume": "750ml",
+   "wineName": "Baron Edmond",
+   "wineryRegion": "Rupert & Rothschild"
+  },
+  "W055": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "簡社長",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 7,
+     "shelf": "第6層"
+    }
+   ],
+   "origin": "Spain",
+   "photo": "",
+   "referencePrice": 1704,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-30T04:44:36.748Z",
+   "updatedBy": "comfort527",
+   "vintage": "2015",
+   "volume": "750ml",
+   "wineName": "Pam de Nas",
+   "wineryRegion": "Trossos del Priorat"
+  },
+  "W056": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "簡社長",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 4,
+     "shelf": "第6層"
+    }
+   ],
+   "origin": "Spain",
+   "photo": "",
+   "referencePrice": 1704,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-30T04:44:55.727Z",
+   "updatedBy": "comfort527",
+   "vintage": "2016",
+   "volume": "750ml",
+   "wineName": "Pam de Nas",
+   "wineryRegion": "Trossos del Priorat"
+  },
+  "W057": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "簡社長",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第6層"
+    }
+   ],
+   "origin": "Spain",
+   "photo": "",
+   "referencePrice": 1704,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-30T04:45:13.923Z",
+   "updatedBy": "comfort527",
+   "vintage": "2018",
+   "volume": "750ml",
+   "wineName": "Pam de Nas",
+   "wineryRegion": "Trossos del Priorat"
+  },
+  "W058": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "白酒；簡社長",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第7層"
+    }
+   ],
+   "origin": "Spain",
+   "photo": "",
+   "referencePrice": 960,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-30T04:46:22.471Z",
+   "updatedBy": "comfort527",
+   "vintage": "2022",
+   "volume": "750ml",
+   "wineName": "Abracadabra",
+   "wineryRegion": "Trossos del Priorat"
+  },
+  "W059": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "誠品",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 4,
+     "shelf": "第1層"
+    }
+   ],
+   "origin": "",
+   "photo": "",
+   "referencePrice": 7350,
+   "revision": 1,
+   "source": "購",
+   "status": "active",
+   "updatedAt": "2026-09-30T04:45:59.969Z",
+   "updatedBy": "comfort527",
+   "vintage": "2001",
+   "volume": "375ml",
+   "wineName": "Vieux Château Certan/Grand vin",
+   "wineryRegion": "Vieux Château CertanPOMEROL"
+  },
+  "W060": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "酒商直購",
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 2,
+     "shelf": "第5層"
+    }
+   ],
+   "origin": "",
+   "photo": "",
+   "referencePrice": 825,
+   "revision": 1,
+   "source": "購",
+   "status": "active",
+   "updatedAt": "2026-09-30T04:45:48.186Z",
+   "updatedBy": "comfort527",
+   "vintage": "2020",
+   "volume": "750ml",
+   "wineName": "VITICCIO CHIANTI CLASSCIO 55(金鑰匙)",
+   "wineryRegion": "VITICCIO/CHIANTI CLASSCIO"
+  },
+  "W061": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "白酒，黃教漳董事長",
+   "locations": [
+    {
+     "cabinet": "8樓外冰箱",
+     "quantity": 3,
+     "shelf": "第1層"
+    }
+   ],
+   "origin": "Germany",
+   "photo": "",
+   "referencePrice": 2060,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-30T04:50:04.822Z",
+   "updatedBy": "comfort527",
+   "vintage": "2021",
+   "volume": "750ml",
+   "wineName": "Kiedrich Klosterberg Riesling Trocken",
+   "wineryRegion": "Robert Weil"
+  },
+  "W062": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "白酒，黃教漳董事長",
+   "locations": [
+    {
+     "cabinet": "8樓外冰箱",
+     "quantity": 2,
+     "shelf": "第1層"
+    }
+   ],
+   "origin": "Germany",
+   "photo": "",
+   "referencePrice": 2060,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-30T04:50:50.517Z",
+   "updatedBy": "comfort527",
+   "vintage": "2023",
+   "volume": "750ml",
+   "wineName": "Kiedrich Klosterberg Riesling Trocken",
+   "wineryRegion": "Robert Weil"
+  },
+  "W063": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "",
+   "locations": [
+    {
+     "cabinet": "8樓外冰箱",
+     "quantity": 1,
+     "shelf": "第1層"
+    }
+   ],
+   "origin": "France",
+   "photo": "",
+   "referencePrice": 450,
+   "revision": 1,
+   "source": "贈",
+   "status": "active",
+   "updatedAt": "2026-09-30T04:51:33.546Z",
+   "updatedBy": "comfort527",
+   "vintage": "2023",
+   "volume": "750ml",
+   "wineName": "An 940/Pinot Noir",
+   "wineryRegion": "Gérard Bertrand"
+  },
+  "W064": {
+   "createdAt": "",
+   "createdBy": "comfort527",
+   "drinkWindow": "",
+   "entryDate": "",
+   "grapeNotes": "白酒，icheers",
+   "locations": [
+    {
+     "cabinet": "8樓外冰箱",
+     "quantity": 2,
+     "shelf": "第1層"
+    }
+   ],
+   "origin": "Australia",
+   "photo": "",
+   "referencePrice": 760,
+   "revision": 1,
+   "source": "購",
+   "status": "active",
+   "updatedAt": "2026-09-30T04:52:12.887Z",
+   "updatedBy": "comfort527",
+   "vintage": "2024",
+   "volume": "750ml",
+   "wineName": "Sauvignon Blanc",
+   "wineryRegion": "Shaw + Smith"
+  }
+ }
+}
