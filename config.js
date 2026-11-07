@@ -1,6 +1,6 @@
 // 公開 repo 設定。網頁放在 main 分支（GitHub Pages），資料放在 data 分支。
 window.CELLAR_CONFIG = {
-  owner: 'YOUR_GITHUB_ACCOUNT',
+  owner: 'comfort527',
   repo: 'wine-cellar',
   dataBranch: 'data',
   dataPath: 'data/wines.json',
