@@ -333,7 +333,7 @@ function rowHtml(w) {
 }
 function cardHtml(w) {
   const p = photoUrl(w);
-  return `<button class="card" data-open="${esc(w.wineId)}">${p ? `<img class="ph" src="${esc(p)}" alt="${esc(w.wineName)}" loading="lazy">` : `<span class="ph">${esc(w.vintage || 'NV')}</span>`}<span class="cb"><b>${esc(w.wineName)}</b><span>${esc(w.wineryRegion || '')}</span><span>${esc(w.vintage || 'NV')} · ${total(w)} 瓶 · ${esc(w.wineId)}</span></span></button>`;
+  return `<button class="card" data-open="${esc(w.wineId)}">${p ? `<img class="ph" src="${esc(p)}" alt="${esc(w.wineName)}" loading="lazy">` : `<span class="ph">${esc(w.vintage || 'NV')}</span>`}<span class="cb"><b>${esc(w.wineName)}</b><span>${esc(w.wineryRegion || '')}</span><span>${esc(w.vintage || 'NV')} · ${total(w)} 瓶</span></span></button>`;
 }
 
 /* ---------- 詳細資料抽屜 ---------- */
@@ -351,7 +351,7 @@ function renderDrawer() {
     .map(([k, l]) => `<div><dt>${l}</dt><dd>${k === 'referencePrice' ? fmtPrice(w[k]) : esc(w[k] || '—')}</dd></div>`).join('');
   const locs = (w.locations || []).map(l => `<div class="dw-loc"><span class="where">${esc(l.cabinet)} <small>· ${esc(l.shelf)}</small></span><span class="n">${l.quantity}</span>${ed && l.quantity > 0 ? `<button class="small" data-stock="${esc(w.wineId)}" data-cab="${esc(l.cabinet)}" data-shelf="${esc(l.shelf)}">出庫</button>` : '<span></span>'}</div>`).join('');
   $('drawerBody').innerHTML = `
-   <div class="dw-top"><span class="id">${esc(w.wineId)}${archived ? ' · 已出清' : ''}</span><button class="x" data-dwclose aria-label="關閉">×</button></div>
+   <div class="dw-top"><span class="id">${archived ? '已出清' : esc(w.volume || '')}</span><button class="x" data-dwclose aria-label="關閉">×</button></div>
    <div class="dw">
     <div class="dw-head"><span class="vin">${esc(w.vintage || 'NV')}</span><h2 id="dwName">${esc(w.wineName)}</h2>${w.wineryRegion ? `<p>${esc(w.wineryRegion)}</p>` : ''}</div>
     ${p ? `<img class="dw-photo" src="${esc(p)}" alt="${esc(w.wineName)} 酒標照片">` : ''}
@@ -443,7 +443,7 @@ function switchTab(name) {
   if (name === 'hist' || name === 'loc') renderAdmin();
   if (name === 'keys') renderSlots();
 }
-async function copyLink(id) { const url = wineUrl(id); try { await navigator.clipboard.writeText(url); toast('已複製 ' + id + ' 的連結。'); } catch { toast(url); } }
+async function copyLink(id) { const url = wineUrl(id); try { await navigator.clipboard.writeText(url); toast('已複製「' + (byId(id)?.wineName || '') + '」的連結。'); } catch { toast(url); } }
 
 /* ---------- 登入與初始設定 ---------- */
 function openLogin() {
@@ -552,7 +552,7 @@ function setChoice(selId, otherId, value, fallback) {
 }
 function openWineForm(w) {
   S.editing = w; S.newPhotoBlob = null; ensureLists();
-  $('wineTitle').textContent = w ? '編輯 ' + w.wineId : '新增紅酒';
+  $('wineTitle').textContent = w ? '編輯酒款' : '新增紅酒';
   for (const [k] of FIELDS) { const el = $('f_' + k); if (el) el.value = w?.[k] ?? ''; }
   setChoice('f_volumeChoice', 'f_volumeOther', w?.volume, '750ml');
   setChoice('f_sourceChoice', 'f_sourceOther', w?.source, '');
@@ -597,7 +597,7 @@ async function saveWine() {
       if (JSON.stringify(cur.locations || []) !== JSON.stringify(r.locations)) changes.push(`位置：${locText(cur.locations)} → ${locText(r.locations)}`);
       return changes;
     }, changes => `編輯 ${id} ${r.wineName}${changes.length ? '' : '（無變更）'}${changes.length ? '\n\n' + changes.join('\n') : ''}`);
-    $('wineModal').close(); toast('已更新 ' + id + '。');
+    $('wineModal').close(); toast('已更新「' + r.wineName + '」。');
   } else {
     let photo = '';
     if (S.newPhotoBlob) photo = await uploadPhoto(S.newPhotoBlob, 'new');
@@ -607,14 +607,14 @@ async function saveWine() {
       d.wines[wid] = {...r, photo, status: total(r) > 0 ? 'active' : 'archived', createdAt: t, createdBy: who, updatedAt: t, updatedBy: who, revision: 1};
       return wid;
     }, wid => `新增 ${wid} ${r.wineName}\n\n位置：${locText(r.locations)}`);
-    $('wineModal').close(); openDrawer(id); toast('已新增 ' + id + '。');
+    $('wineModal').close(); openDrawer(id); toast('已新增「' + r.wineName + '」。');
   }
 }
 
 /* ---------- 出庫 ---------- */
 function openStock(id, cab, shelf) {
   const w = byId(id); if (!w) return; S.stock = w;
-  $('stockWine').textContent = `${w.wineName}（${w.wineId}）`;
+  $('stockWine').textContent = [w.wineName, w.vintage].filter(Boolean).join('　');
   const sel = $('s_loc');
   sel.innerHTML = (w.locations || []).map((l, i) => l.quantity > 0 ? `<option value="${i}">${esc(l.cabinet)} / ${esc(l.shelf)}（目前 ${l.quantity} 瓶）</option>` : '').join('');
   if (cab) { const i = w.locations.findIndex(l => l.cabinet === cab && l.shelf === shelf); if (i >= 0) sel.value = String(i); }
@@ -638,7 +638,7 @@ async function saveStock() {
     return {old, left: l.quantity, archived, name: cur.wineName};
   }, x => `出庫 ${id} ${x.name}：${cabinet}/${shelf} ${x.old}→${x.left}（−${qty}）${x.archived ? '，全部出清' : ''}\n\n原因：${reason}`);
   $('stockModal').close();
-  toast(res.archived ? `${id} 已全部出庫，移入歷史酒單。` : `已出庫 ${qty} 瓶，${cabinet} / ${shelf} 剩 ${res.left} 瓶。`);
+  toast(res.archived ? `「${res.name}」已全部出庫，移入歷史酒單。` : `已出庫 ${qty} 瓶，${cabinet} / ${shelf} 剩 ${res.left} 瓶。`);
 }
 
 /* ---------- 照片 ---------- */
@@ -665,7 +665,7 @@ async function uploadPhoto(blob, id) {
   S.localPhotos.set(path, URL.createObjectURL(blob));
   return path;
 }
-function openPhoto(w) { if (!w) return; S.photo = w; S.photoBlob = null; $('photoWine').textContent = `${w.wineName}（${w.wineId}）`; $('p_preview').hidden = true; $('p_camera').value = ''; $('p_gallery').value = ''; $('photoSave').disabled = true; showDialog('photoModal'); }
+function openPhoto(w) { if (!w) return; S.photo = w; S.photoBlob = null; $('photoWine').textContent = [w.wineName, w.vintage].filter(Boolean).join('　'); $('p_preview').hidden = true; $('p_camera').value = ''; $('p_gallery').value = ''; $('photoSave').disabled = true; showDialog('photoModal'); }
 async function savePhoto() {
   if (!S.photoBlob) fail('請先選擇照片。');
   const id = S.photo.wineId, path = await uploadPhoto(S.photoBlob, id), who = S.session.label;
@@ -681,7 +681,7 @@ function labelEl(w) {
   const el = document.createElement('div'); el.className = 'qr-label';
   const q = document.createElement('div'); q.className = 'q'; el.append(q);
   const b = document.createElement('b'); b.textContent = w.wineName; el.append(b);
-  const s = document.createElement('span'); s.textContent = [w.vintage, w.wineId].filter(Boolean).join(' · '); el.append(s);
+  const s = document.createElement('span'); s.textContent = [w.vintage, w.volume].filter(Boolean).join(' · '); el.append(s);
   try { new QRCode(q, {text: wineUrl(w.wineId), width: 120, height: 120, correctLevel: QRCode.CorrectLevel.M}); } catch { q.textContent = 'QR 產生失敗'; }
   return el;
 }
@@ -697,11 +697,11 @@ function printLabels() { $('printArea').replaceChildren(...qrItems.map(labelEl))
 /* ---------- CSV ---------- */
 function exportCsv() {
   const cell = v => { const s = String(v ?? ''); return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
-  const lines = [['資料類型', '編號', ...FIELDS.map(f => f[1]), '櫃位', '層位', '瓶數', '最後修改者', '最後修改時間'].join(',')];
+  const lines = [['資料類型', ...FIELDS.map(f => f[1]), '櫃位', '層位', '瓶數', '最後修改者', '最後修改時間'].join(',')];
   for (const w of wines()) {
     const type = w.status === 'archived' ? '歷史酒單' : '目前酒款';
     const locs = w.locations?.length ? w.locations : [{cabinet: '', shelf: '', quantity: 0}];
-    for (const l of locs) lines.push([type, w.wineId, ...FIELDS.map(f => w[f[0]]), l.cabinet, l.shelf, l.quantity, nameOf(w.updatedBy), w.updatedAt].map(cell).join(','));
+    for (const l of locs) lines.push([type, ...FIELDS.map(f => w[f[0]]), l.cabinet, l.shelf, l.quantity, nameOf(w.updatedBy), w.updatedAt].map(cell).join(','));
   }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['﻿' + lines.join('\r\n')], {type: 'text/csv;charset=utf-8'}));
@@ -716,12 +716,12 @@ function renderAdmin() {
   $('cabChips').innerHTML = cat.cabinets.map(chip).join('') || '<span class="hint">尚未建立。</span>';
   $('shelfChips').innerHTML = cat.shelves.map(chip).join('') || '<span class="hint">尚未建立。</span>';
   const hist = wines().filter(w => w.status === 'archived').sort((a, b) => (b.archivedAt || '') > (a.archivedAt || '') ? 1 : -1);
-  $('histList').innerHTML = hist.map(w => `<div><span><b>${esc(w.wineName)}</b> ${esc(w.vintage || '')} <span class="hint">${esc(w.wineId)} · ${esc(w.wineryRegion || '')}</span></span><span class="hint">出清於 ${fmtTime(w.archivedAt)}（${esc(nameOf(w.archivedBy))}）</span></div>`).join('') || '<p class="hint">還沒有出清的酒款。</p>';
+  $('histList').innerHTML = hist.map(w => `<div><span><b>${esc(w.wineName)}</b> ${esc(w.vintage || '')} <span class="hint">${esc(w.wineryRegion || '')}</span></span><span class="hint">出清於 ${fmtTime(w.archivedAt)}（${esc(nameOf(w.archivedBy))}）</span></div>`).join('') || '<p class="hint">還沒有出清的酒款。</p>';
 }
 async function loadAudit(wineId, page) {
   S.auditWine = wineId; S.auditPage = page;
   if (page === 1) S.audit = [];
-  $('auditHint').textContent = wineId ? `${wineId} 的異動紀錄，由新到舊。` : '每次異動都是一筆 GitHub commit，由新到舊。';
+  $('auditHint').textContent = wineId ? `「${byId(wineId)?.wineName || ''}」的異動紀錄，由新到舊。` : '每次異動都是一筆 GitHub commit，由新到舊。';
   $('auditList').innerHTML = page === 1 ? '<p class="hint">讀取中…</p>' : $('auditList').innerHTML;
   try {
     const pages = wineId ? [page, page + 1, page + 2] : [page];
@@ -739,7 +739,7 @@ async function loadAudit(wineId, page) {
     }
     $('moreAudit').hidden = !more;
     $('auditList').innerHTML = S.audit.map(c => {
-      const lines = c.commit.message.split('\n').map(s => s.trim()).filter(Boolean);
+      const lines = c.commit.message.split('\n').map(s => s.replace(/\b[WH]\d{3,}\b\s*/g, '').trim()).filter(Boolean);
       const op = lines.find(l => l.startsWith('操作者：'));
       const body = lines.slice(1).filter(l => l !== op);
       return `<div><span class="t">${fmtTime(c.commit.author?.date)}</span> · ${esc(op ? op.slice(4) : (c.author?.login || c.commit.author?.name || ''))}<br><b>${esc(lines[0] || '')}</b>${body.length ? '<br>' + body.map(esc).join('<br>') : ''}</div>`;
