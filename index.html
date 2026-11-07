@@ -69,7 +69,7 @@
 <dialog class="small" id="originModal" aria-labelledby="originTitle"><div class="dh"><h2 id="originTitle">依產地查看</h2><button data-close aria-label="關閉">×</button></div>
 <div class="db"><div class="origins" id="originList"></div></div></dialog>
 
-<dialog class="drawer" id="drawer" aria-labelledby="dwName"><div id="drawerBody"></div></dialog>
+<dialog class="drawer" id="drawer" aria-labelledby="dwName" tabindex="-1"><div id="drawerBody"></div></dialog>
 
 <dialog class="small" id="loginModal" aria-labelledby="loginTitle"><div class="dh"><h2 id="loginTitle">管理登入</h2><button data-close aria-label="關閉">×</button></div>
 <form class="db" id="loginForm" novalidate>
@@ -116,6 +116,7 @@
 <form class="db" id="stockForm" novalidate>
  <p id="stockWine" class="strong"></p>
  <div class="field"><label for="s_loc">選擇位置</label><select id="s_loc" required></select></div>
+ <div class="field" style="margin-top:10px"><label for="s_date">出庫日期 *</label><input id="s_date" type="date" required></div>
  <div class="field" style="margin-top:10px"><label for="s_reason">出庫原因 *</label><input id="s_reason" maxlength="500" placeholder="例如 家庭聚餐、送禮、品飲" required></div>
  <div class="field" style="margin-top:10px"><label for="s_qty">瓶數</label><input id="s_qty" type="number" min="1" step="1" value="1" inputmode="numeric" required></div>
  <div class="ferr" id="stockErr" hidden></div>

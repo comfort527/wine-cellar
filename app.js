@@ -10,6 +10,8 @@ const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const fmtTime = v => v ? new Date(v).toLocaleString('zh-TW', {hour12:false, year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'}) : '—';
 const fmtPrice = v => (v === null || v === undefined || v === '') ? '—' : 'NT$ ' + Number(v).toLocaleString('zh-TW');
 const now = () => new Date().toISOString();
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+const fmtDate = v => v ? v.replace(/^(\d{4})-(\d{2})-(\d{2})$/, (m, y, mo, d) => `${y}/${Number(mo)}/${Number(d)}`) : '—';
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const enc = new TextEncoder(), dec = new TextDecoder();
 const FIELDS = [['wineName','酒名'],['wineryRegion','酒莊／產區'],['vintage','年份'],['entryDate','入庫日期'],['volume','容量'],['source','來源'],['referencePrice','參考價格'],['origin','產地'],['drinkWindow','適飲期'],['grapeNotes','葡萄品種／備註']];
@@ -341,10 +343,16 @@ function cardHtml(w) {
 function openDrawer(id, fromHash) {
   if (!byId(id)) return;
   S.drawer = id; renderDrawer();
-  if (!$('drawer').open) $('drawer').showModal();
+  if (!$('drawer').open) { $('drawer').showModal(); $('drawer').focus({preventScroll: true}); }
   if (!fromHash && location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
 }
 function closeDrawer() { if ($('drawer').open) $('drawer').close(); }
+function outsHtml(w) {
+  const outs = (w.outs || []).slice().sort((a, b) => (b.date + b.at).localeCompare(a.date + a.at));
+  if (!outs.length) return '';
+  const sum = outs.reduce((a, o) => a + (Number(o.qty) || 0), 0);
+  return `<section class="dw-outs"><h3>出庫紀錄 <span class="hint">共 ${outs.length} 次、${sum} 瓶</span></h3>${outs.map(o => `<div class="out"><span class="d">${fmtDate(o.date)}</span><span class="q">−${o.qty}</span><span class="r"><b>${esc(o.reason)}</b><small>${esc(o.cabinet)} · ${esc(o.shelf)} · ${esc(nameOf(o.by))}</small></span></div>`).join('')}</section>`;
+}
 function renderDrawer() {
   const w = byId(S.drawer); if (!w) { closeDrawer(); return; }
   const p = photoUrl(w), ed = canEdit(), t = total(w), archived = w.status === 'archived';
@@ -360,6 +368,7 @@ function renderDrawer() {
     <div class="dw-act">${ed ? `${archived ? '' : `<button class="primary" data-stockany="${esc(w.wineId)}" ${t ? '' : 'disabled'}>出庫</button>`}<button class="primary" data-edit="${esc(w.wineId)}">編輯</button><button data-photo="${esc(w.wineId)}">${p ? '更換照片' : '加照片'}</button>` : ''}<button data-copy="${esc(w.wineId)}">複製連結</button>${ed ? `<button data-log="${esc(w.wineId)}">異動紀錄</button>` : ''}</div>
     ${ed ? (archived ? '<p class="hint" style="margin:0">這款酒已全部出庫。要補回庫存，請按「編輯」填入瓶數，它會回到目前酒款。</p>' : '') : '<p class="hint" style="margin:0">登入管理後可以出庫與編輯這款酒。</p>'}
     <dl class="dw-facts">${facts}${w.grapeNotes ? `<div class="wide"><dt>葡萄品種／備註</dt><dd class="note">${esc(w.grapeNotes)}</dd></div>` : ''}</dl>
+    ${outsHtml(w)}
     <div class="dw-meta">${w.createdAt ? `建立 ${fmtTime(w.createdAt)}（${esc(nameOf(w.createdBy))}）<br>` : ''}最後修改 ${fmtTime(w.updatedAt)}（${esc(nameOf(w.updatedBy))}）${archived ? `<br>出清 ${fmtTime(w.archivedAt)}（${esc(nameOf(w.archivedBy))}）` : ''}</div>
    </div>`;
 }
@@ -646,12 +655,15 @@ function openStock(id, cab, shelf) {
   const sel = $('s_loc');
   sel.innerHTML = (w.locations || []).map((l, i) => l.quantity > 0 ? `<option value="${i}">${esc(l.cabinet)} / ${esc(l.shelf)}（目前 ${l.quantity} 瓶）</option>` : '').join('');
   if (cab) { const i = w.locations.findIndex(l => l.cabinet === cab && l.shelf === shelf); if (i >= 0) sel.value = String(i); }
-  $('s_reason').value = ''; $('s_qty').value = '1';
+  $('s_reason').value = ''; $('s_qty').value = '1'; $('s_date').value = today(); $('s_date').max = today();
   showDialog('stockModal'); $('s_reason').focus();
 }
 async function saveStock() {
-  const id = S.stock.wineId, picked = S.stock.locations?.[Number($('s_loc').value)] || {}, {cabinet, shelf} = picked, qty = Number($('s_qty').value), reason = $('s_reason').value.trim(), who = S.session.label;
+  const id = S.stock.wineId, picked = S.stock.locations?.[Number($('s_loc').value)] || {}, {cabinet, shelf} = picked, qty = Number($('s_qty').value), reason = $('s_reason').value.trim(), date = $('s_date').value, who = S.session.label;
   if (!cabinet) fail('請選擇目前有庫存的位置。');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date))) fail('請填寫出庫日期。');
+  if (date > today()) fail('出庫日期不能晚於今天。');
+  if (date < '1990-01-01') fail('出庫日期不正確，請重新選擇。');
   if (!reason) fail('請填寫出庫原因。');
   if (!Number.isInteger(qty) || qty < 1) fail('瓶數必須是 1 以上的整數。');
   const res = await mutate(d => {
@@ -661,12 +673,13 @@ async function saveStock() {
     if (l.quantity < qty) fail(`此位置只剩 ${l.quantity} 瓶，沒有扣除任何瓶數。`);
     const old = l.quantity; l.quantity -= qty;
     const t = now(); cur.updatedAt = t; cur.updatedBy = who; cur.revision = (cur.revision || 0) + 1;
+    cur.outs = [...(cur.outs || []), {date, qty, cabinet, shelf, reason, by: who, at: t}];
     const archived = cur.locations.every(x => !x.quantity);
     if (archived) { cur.status = 'archived'; cur.archivedAt = t; cur.archivedBy = who; }
     return {old, left: l.quantity, archived, name: cur.wineName};
-  }, x => `出庫 ${id} ${x.name}：${cabinet}/${shelf} ${x.old}→${x.left}（−${qty}）${x.archived ? '，全部出清' : ''}\n\n原因：${reason}`);
+  }, x => `出庫 ${id} ${x.name}：${cabinet}/${shelf} ${x.old}→${x.left}（−${qty}）${x.archived ? '，全部出清' : ''}\n\n日期：${date}\n原因：${reason}`);
   $('stockModal').close();
-  toast(res.archived ? `「${res.name}」已全部出庫，移入歷史酒單。` : `已出庫 ${qty} 瓶，${cabinet} / ${shelf} 剩 ${res.left} 瓶。`);
+  toast(res.archived ? `「${res.name}」已全部出庫，移入歷史酒單。` : `${fmtDate(date)} 出庫 ${qty} 瓶，${cabinet} / ${shelf} 剩 ${res.left} 瓶。`);
 }
 
 /* ---------- 照片 ---------- */

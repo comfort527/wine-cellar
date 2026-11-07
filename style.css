@@ -288,3 +288,12 @@ legend{font-size:13px;color:var(--muted);padding:0 6px}
 .storage.warn{color:var(--warn)}
 .storage.warn .fill{background:var(--warn)}
 .ledger{scroll-margin-top:calc(64px + env(safe-area-inset-top,0px))}
+.dw-outs h3{font:700 14px var(--body);letter-spacing:.1em;margin-bottom:8px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.dw-outs h3 .hint{font-weight:400;letter-spacing:0}
+.out{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:4px 14px;align-items:baseline;padding:9px 0;border-top:1px solid var(--line)}
+.out .d{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.out .q{font:600 18px/1 var(--display);color:var(--wine);font-variant-numeric:lining-nums tabular-nums}
+.out .r{min-width:0}
+.out .r b{font-weight:500;overflow-wrap:anywhere}
+.out .r small{display:block;font-size:12px;color:var(--muted)}
+.drawer:focus{outline:none}
