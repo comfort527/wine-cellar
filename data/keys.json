@@ -14,6 +14,15 @@
    "iv": "rpx7LFbmAsqqNvQf",
    "ct": "TWPhl35UcAQwrex968y+ivVIQ+aOLCvI49ZJosXU4AkU93pd+UJOcmZtclW4daZ6",
    "createdAt": "2026-11-07T10:35:08.289Z"
+  },
+  {
+   "id": "b5f201b9-1af6-4e19-81aa-f26dc3d881c5",
+   "label": "廖炎鴻",
+   "role": "admin",
+   "salt": "+flBywEWGllKXfAxbWWKcA==",
+   "iv": "zFDqafVrY6TPzYDn",
+   "ct": "h9LfK9knxBww7CBP03sbKn8GCDRzS6XhC9LYKiOS9pS+M2E++LLEw0Qgm0lj65/w",
+   "createdAt": "2026-11-07T11:24:12.151Z"
   }
  ]
 }
