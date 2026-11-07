@@ -339,21 +339,21 @@
    "locations": [
     {
      "cabinet": "8樓右LB櫃",
-     "quantity": 1,
-     "shelf": "第1層"
+     "shelf": "第1層",
+     "quantity": 1
     }
    ],
    "origin": "France",
    "photo": "",
    "referencePrice": null,
-   "revision": 1,
+   "revision": 2,
    "source": "*",
    "status": "active",
-   "updatedAt": "2026-09-29T13:44:34.375Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-07T14:20:31.629Z",
+   "updatedBy": "廖炎鴻",
    "vintage": "2017",
    "volume": "3000ML",
-   "wineName": "Bordeaux 安貝松堡2020紀念珍藏3公升裝",
+   "wineName": "Bordeaux 安貝松堡2020紀念珍藏",
    "wineryRegion": "Château le Pin d'Ambert"
   },
   "W014": {
@@ -1579,6 +1579,6 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 3,
- "updatedAt": "2026-11-07T12:11:39.288Z"
+ "rev": 4,
+ "updatedAt": "2026-11-07T14:20:31.629Z"
 }
