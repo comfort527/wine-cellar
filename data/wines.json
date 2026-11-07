@@ -422,17 +422,18 @@
     }
    ],
    "origin": "France",
-   "photo": "",
+   "photo": "images/W016-1794053494809.jpg",
    "referencePrice": 1200,
-   "revision": 1,
+   "revision": 2,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-10-03T02:58:36.462Z",
-   "updatedBy": "z1990729",
+   "updatedAt": "2026-11-07T12:11:39.288Z",
+   "updatedBy": "浩銓",
    "vintage": "2019",
    "volume": "750ml",
    "wineName": "Major",
-   "wineryRegion": "Château l'Escadre"
+   "wineryRegion": "Château l'Escadre",
+   "thumb": "images/W016-1794053494809-t.jpg"
   },
   "W017": {
    "createdAt": "",
@@ -1578,6 +1579,6 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 2,
- "updatedAt": "2026-11-07T11:36:58.000Z"
+ "rev": 3,
+ "updatedAt": "2026-11-07T12:11:39.288Z"
 }
