@@ -1,0 +1,19 @@
+{
+ "schema": 1,
+ "iterations": 600000,
+ "token": {
+  "iv": "1su8dyapHHaqb5IX",
+  "ct": "pgsy+XzkQTR+eXYbm31zlaZn0NMfix1amdsrNDmAitm83nsWQEYTPTZ6GApIaAOstjBWtsVto4i2ky3aFJCa4feJSp5Cksp8FNUFcved7vSgYNoygB+a4AtezSsfVFnZTi/RDeL4EUIYFspUbg=="
+ },
+ "slots": [
+  {
+   "id": "5ba26424-9c5c-4a5e-a951-1885fd5e97b5",
+   "label": "鴻家裡電腦",
+   "role": "admin",
+   "salt": "bRefKhwFvtfMgbmselQTGg==",
+   "iv": "rpx7LFbmAsqqNvQf",
+   "ct": "TWPhl35UcAQwrex968y+ivVIQ+aOLCvI49ZJosXU4AkU93pd+UJOcmZtclW4daZ6",
+   "createdAt": "2026-11-07T10:35:08.289Z"
+  }
+ ]
+}
