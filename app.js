@@ -369,7 +369,7 @@ function renderDrawer() {
    <div class="dw">
     <div class="dw-head"><span class="vin">${esc(w.vintage || 'NV')}</span><h2 id="dwName">${esc(w.wineName)}</h2>${w.wineryRegion ? `<p>${esc(w.wineryRegion)}</p>` : ''}</div>
     ${p ? `<img class="dw-photo" src="${esc(p)}" alt="${esc(w.wineName)} 酒標照片">` : ''}
-    <div class="dw-stock"><div class="sum"><span>目前庫存</span><b>${t} <small style="font-size:15px">瓶</small></b></div>${locs || '<div class="dw-loc"><span class="where hint">沒有存放位置</span></div>'}</div>
+    <div class="dw-stock"><div class="sum"><span>目前庫存</span><b>${t} <small style="font-size:22px">瓶</small></b></div>${locs || '<div class="dw-loc"><span class="where hint">沒有存放位置</span></div>'}</div>
     <div class="dw-act">${ed ? `${archived ? '' : `<button class="primary" data-stockany="${esc(w.wineId)}" ${t ? '' : 'disabled'}>出庫</button><button class="primary" data-moveany="${esc(w.wineId)}" ${t ? '' : 'disabled'}>移動</button>`}<button class="primary" data-edit="${esc(w.wineId)}">編輯</button><button data-photo="${esc(w.wineId)}">${p ? '更換照片' : '加照片'}</button>` : ''}${ed ? `<button data-log="${esc(w.wineId)}">異動紀錄</button>` : ''}</div>
     ${ed ? (archived ? '<p class="hint" style="margin:0">這款酒已全部出庫。要補回庫存，請按「編輯」填入瓶數，它會回到目前酒款。</p>' : '') : '<p class="hint" style="margin:0">登入管理後可以出庫、移動與編輯這款酒。</p>'}
     <dl class="dw-facts">${facts}${w.grapeNotes ? `<div class="wide"><dt>葡萄品種／備註</dt><dd class="note">${esc(w.grapeNotes)}</dd></div>` : ''}</dl>
@@ -656,18 +656,22 @@ async function saveWine() {
 }
 
 /* ---------- 出庫 ---------- */
+function locPicker(el, name, legend, w, cab, shelf) {
+  const locs = (w.locations || []).map((l, i) => ({...l, i})).filter(l => l.quantity > 0);
+  let pick = locs.find(l => l.cabinet === cab && l.shelf === shelf) || locs[0];
+  el.innerHTML = `<legend>${legend}</legend>` + locs.map(l => `<label><input type="radio" name="${name}" value="${l.i}" ${l === pick ? 'checked' : ''}><span><b>${esc(l.cabinet)} · ${esc(l.shelf)}</b><em>${l.quantity} 瓶</em></span></label>`).join('');
+}
+const pickedLoc = (name, w) => { const v = document.querySelector(`input[name=${name}]:checked`)?.value; return v === undefined ? null : w.locations?.[Number(v)]; };
 function openStock(id, cab, shelf) {
   const w = byId(id); if (!w) return; S.stock = w;
   $('stockWine').textContent = [w.wineName, w.vintage].filter(Boolean).join('　');
-  const sel = $('s_loc');
-  sel.innerHTML = (w.locations || []).map((l, i) => l.quantity > 0 ? `<option value="${i}">${esc(l.cabinet)} / ${esc(l.shelf)}（目前 ${l.quantity} 瓶）</option>` : '').join('');
-  if (cab) { const i = w.locations.findIndex(l => l.cabinet === cab && l.shelf === shelf); if (i >= 0) sel.value = String(i); }
+  locPicker($('s_loc'), 's_locr', '選擇位置', w, cab, shelf);
   $('s_reason').value = ''; $('s_qty').value = '1'; $('s_date').value = today(); $('s_date').max = today();
   document.querySelectorAll('input[name=s_type]').forEach(r => r.checked = false); $('s_reasonLbl').textContent = '說明（選填）';
   showDialog('stockModal');
 }
 async function saveStock() {
-  const id = S.stock.wineId, picked = S.stock.locations?.[Number($('s_loc').value)] || {}, {cabinet, shelf} = picked, qty = Number($('s_qty').value), reason = $('s_reason').value.trim(), date = $('s_date').value, type = document.querySelector('input[name=s_type]:checked')?.value || '', who = S.session.label;
+  const id = S.stock.wineId, picked = pickedLoc('s_locr', S.stock) || {}, {cabinet, shelf} = picked, qty = Number($('s_qty').value), reason = $('s_reason').value.trim(), date = $('s_date').value, type = document.querySelector('input[name=s_type]:checked')?.value || '', who = S.session.label;
   if (!cabinet) fail('請選擇目前有庫存的位置。');
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date))) fail('請填寫出庫日期。');
   if (date > today()) fail('出庫日期不能晚於今天。');
@@ -695,15 +699,13 @@ async function saveStock() {
 function openMove(id, cab, shelf) {
   const w = byId(id); if (!w) return; S.move = w; ensureLists();
   $('moveWine').textContent = [w.wineName, w.vintage].filter(Boolean).join('　');
-  const sel = $('m_from');
-  sel.innerHTML = (w.locations || []).map((l, i) => l.quantity > 0 ? `<option value="${i}">${esc(l.cabinet)} / ${esc(l.shelf)}（${l.quantity} 瓶）</option>` : '').join('');
-  if (cab) { const i = w.locations.findIndex(l => l.cabinet === cab && l.shelf === shelf); if (i >= 0) sel.value = String(i); }
+  locPicker($('m_from'), 'm_fromr', '從哪裡移出', w, cab, shelf);
   $('m_cab').value = ''; $('m_shelf').value = ''; $('m_qty').value = '1'; $('m_note').value = '';
   $('m_date').value = today(); $('m_date').max = today();
   showDialog('moveModal');
 }
 async function saveMove() {
-  const id = S.move.wineId, from = S.move.locations?.[Number($('m_from').value)];
+  const id = S.move.wineId, from = pickedLoc('m_fromr', S.move);
   const to = {cabinet: $('m_cab').value.trim(), shelf: $('m_shelf').value.trim()};
   const qty = Number($('m_qty').value), date = $('m_date').value, note = $('m_note').value.trim(), who = S.session.label;
   if (!from) fail('請選擇要從哪個位置移出。');
