@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com; connect-src 'self' https://api.github.com https://raw.githubusercontent.com; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>紅酒收藏管理</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%238a1325'/%3E%3Cpath d='M8 4h8l.5 4A4.5 4.5 0 0 1 12 13a4.5 4.5 0 0 1-4.5-5ZM12 13v5M9 19h6' fill='none' stroke='%23fff' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div class="brand">
+    <div class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10l.6 5.2A5.6 5.6 0 0 1 12 14a5.6 5.6 0 0 1-5.6-5.8Z"/><path d="M12 14v6M8.5 20h7"/><path d="M6.7 8.5h10.6"/></svg></div>
+    <div><h1>紅酒收藏管理</h1><p>收藏、存放位置與每一次品飲</p></div>
+  </div>
+  <div class="who"><span class="pill" id="whoPill">訪客（僅瀏覽）</span><button class="ghost" id="loginBtn">管理登入</button><button class="ghost" id="adminBtn" hidden>管理</button><button class="ghost" id="logoutBtn" hidden>登出</button></div>
+</header>
+
+<main class="panel">
+  <a class="back" id="backLink" href="#" hidden>← 查看全部收藏</a>
+  <div class="notice" id="notice" role="status">正在讀取酒庫…</div>
+  <div id="content">
+  <section class="stats" id="stats" aria-label="庫存總覽"></section>
+  <div class="sync"><span>資料來源：GitHub <span id="repoName"></span></span><span>最後異動：<span id="lastMod">—</span></span><span>最後同步：<span id="syncTime">—</span></span><button class="small" id="reloadBtn">重新整理</button></div>
+  <div class="toolbar">
+    <div class="search"><input id="search" type="search" aria-label="搜尋收藏" placeholder="搜尋酒名、編號、產地、年份、位置或備註…"><button id="clearSearch" aria-label="清除搜尋">×</button></div>
+    <button class="ghost" id="viewBtn">▦ 圖片模式</button>
+    <button class="ghost" id="exportBtn">⇩ 匯出 CSV</button>
+    <button class="ghost" id="qrBtn">▣ QR 標籤</button>
+    <button class="primary" id="qrGoBtn" hidden>產生標籤</button>
+    <button class="primary" id="addBtn" hidden>＋ 新增紅酒</button>
+  </div>
+  <div class="filterbar" id="filterBar" hidden><span id="filterText"></span><button class="small" id="clearFilter">顯示全部</button></div>
+  <div class="list" id="list"></div>
+  <div class="empty" id="empty" hidden></div>
+  </div>
+</main>
+</div>
+
+<dialog class="small" id="loginModal" aria-labelledby="loginTitle"><div class="dh"><h2 id="loginTitle">管理登入</h2><button data-close aria-label="關閉">×</button></div>
+<form class="db" id="loginForm" novalidate>
+ <div class="field"><label for="g_slot">裝置</label><select id="g_slot"></select></div>
+ <div class="field" style="margin-top:10px"><label for="g_pass">裝置密碼</label><input id="g_pass" type="password" autocomplete="current-password"></div>
+ <label class="check" style="margin-top:10px"><input type="checkbox" id="g_remember" checked> 在這台裝置保持登入</label>
+ <p class="hint">共用電腦請取消勾選，關閉瀏覽器後就會登出。</p>
+ <div class="ferr" id="loginErr" hidden></div>
+ <div class="dact"><button type="submit" class="primary">登入</button></div>
+</form></dialog>
+
+<dialog class="small" id="setupModal" aria-labelledby="setupTitle"><div class="dh"><h2 id="setupTitle">初始設定</h2><button data-close aria-label="關閉">×</button></div>
+<form class="db" id="setupForm" novalidate>
+ <p class="hint" style="margin-top:0">第一次使用：貼上 GitHub 權杖，並替這台裝置設定管理員密碼。權杖會加密後存進 repo，不會以明文保存。</p>
+ <div class="field"><label for="u_token">GitHub 權杖（只授權這個 repo 的 Contents 讀寫）</label><input id="u_token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></div>
+ <div class="field" style="margin-top:10px"><label for="u_label">這台裝置的名稱</label><input id="u_label" maxlength="40" placeholder="例如 我的手機"></div>
+ <div class="field" style="margin-top:10px"><label for="u_pass">管理員密碼（至少 10 個字元）</label><input id="u_pass" type="password" autocomplete="new-password"></div>
+ <div class="field" style="margin-top:10px"><label for="u_pass2">再輸入一次</label><input id="u_pass2" type="password" autocomplete="new-password"></div>
+ <div class="ferr" id="setupErr" hidden></div>
+ <div class="dact"><button type="submit" class="primary">完成設定</button></div>
+</form></dialog>
+
+<dialog id="wineModal" aria-labelledby="wineTitle"><div class="dh"><h2 id="wineTitle">新增紅酒</h2><button data-close aria-label="關閉">×</button></div>
+<form class="db" id="wineForm" novalidate>
+ <div class="form">
+  <div class="field"><label for="f_wineName">酒名 *</label><input id="f_wineName" maxlength="200" required></div>
+  <div class="field"><label for="f_wineryRegion">酒莊／產區</label><input id="f_wineryRegion" maxlength="200"></div>
+  <div class="field"><label for="f_vintage">年份</label><input id="f_vintage" maxlength="40" placeholder="例如 2018 或 NV"></div>
+  <div class="field"><label for="f_entryDate">入庫日期</label><input id="f_entryDate" type="date"></div>
+  <div class="field"><label for="f_volumeChoice">容量</label><select id="f_volumeChoice"><option>750ml</option><option>500ml</option><option>375ml</option><option>1500ml</option><option>3000ml</option><option value="__other__">其他（手動輸入）</option></select><input id="f_volumeOther" hidden maxlength="40" placeholder="例如 187ml"></div>
+  <div class="field"><label for="f_sourceChoice">來源</label><select id="f_sourceChoice"><option value="">請選擇</option><option>購</option><option>贈</option><option>寄存</option><option value="__other__">其他（手動輸入）</option></select><input id="f_sourceOther" hidden maxlength="80" placeholder="輸入其他來源"></div>
+  <div class="field"><label for="f_referencePrice">參考價格（NT$）</label><input id="f_referencePrice" type="number" min="0" step="1" inputmode="numeric"></div>
+  <div class="field"><label for="f_origin">產地</label><input id="f_origin" maxlength="200"></div>
+  <div class="field"><label for="f_drinkWindow">適飲期</label><input id="f_drinkWindow" maxlength="200" placeholder="例如 2026–2035"></div>
+  <div class="field span"><label for="f_grapeNotes">葡萄品種／備註</label><textarea id="f_grapeNotes" maxlength="2000"></textarea></div>
+  <div class="field span"><span class="lbl" id="locLbl">存放位置與瓶數</span><div id="locInputs"></div><div><button type="button" class="small" id="addLoc">＋ 新增位置</button></div><p class="hint" id="locHint" hidden>要扣除瓶數請用「出庫」，才會留下原因；這裡的瓶數調整會記為「資料修正」。</p></div>
+  <div class="field span" id="newPhotoField"><span class="lbl">酒款照片</span><div class="photo-in"><label>📷 拍照<input type="file" id="f_camera" accept="image/*" capture="environment"></label><label>從相簿選擇<input type="file" id="f_gallery" accept="image/*"></label></div><img class="prev" id="f_preview" alt="待上傳照片" hidden></div>
+ </div>
+ <div class="ferr" id="wineErr" hidden></div>
+ <div class="dact"><button type="button" data-close>取消</button><button type="submit" class="primary">儲存資料</button></div>
+</form></dialog>
+
+<dialog class="small" id="stockModal" aria-labelledby="stockTitle"><div class="dh"><h2 id="stockTitle">出庫</h2><button data-close aria-label="關閉">×</button></div>
+<form class="db" id="stockForm" novalidate>
+ <p id="stockWine" class="strong"></p>
+ <div class="field"><label for="s_loc">選擇位置</label><select id="s_loc" required></select></div>
+ <div class="field" style="margin-top:10px"><label for="s_reason">出庫原因 *</label><input id="s_reason" maxlength="500" placeholder="例如 家庭聚餐、送禮、品飲" required></div>
+ <div class="field" style="margin-top:10px"><label for="s_qty">瓶數</label><input id="s_qty" type="number" min="1" step="1" value="1" inputmode="numeric" required></div>
+ <div class="ferr" id="stockErr" hidden></div>
+ <div class="dact"><button type="button" data-close>取消</button><button type="submit" class="primary">確認出庫</button></div>
+</form></dialog>
+
+<dialog class="small" id="photoModal" aria-labelledby="photoTitle"><div class="dh"><h2 id="photoTitle">補上／更換照片</h2><button data-close aria-label="關閉">×</button></div>
+<form class="db" id="photoForm" novalidate>
+ <p id="photoWine" class="strong"></p>
+ <div class="photo-in"><label>📷 拍照<input type="file" id="p_camera" accept="image/*" capture="environment"></label><label>從相簿選擇<input type="file" id="p_gallery" accept="image/*"></label></div>
+ <img class="prev" id="p_preview" alt="待上傳照片" hidden style="margin-top:12px">
+ <div class="ferr" id="photoErr" hidden></div>
+ <div class="dact"><button type="button" data-close>取消</button><button type="submit" class="primary" id="photoSave" disabled>儲存照片</button></div>
+</form></dialog>
+
+<dialog id="qrModal" aria-labelledby="qrTitle"><div class="dh"><h2 id="qrTitle">QR 瓶身標籤</h2><button data-close aria-label="關閉">×</button></div>
+<div class="db"><p class="hint" id="qrSummary" style="margin-top:0"></p><div class="qr-grid" id="qrGrid"></div>
+<div class="dact"><button type="button" data-close>關閉</button><button class="primary" id="printBtn">列印標籤</button></div></div></dialog>
+
+<dialog id="adminModal" aria-labelledby="adminTitle"><div class="dh"><h2 id="adminTitle">管理</h2><button data-close aria-label="關閉">×</button></div>
+<div class="db">
+ <div class="tabs"><button data-tab="audit" class="on">異動紀錄</button><button data-tab="hist">歷史酒單</button><button data-tab="loc">櫃位／層位</button><button data-tab="keys" id="keysTab">裝置密碼</button></div>
+ <section id="tab-audit"><p class="hint" style="margin-top:0" id="auditHint">每次異動都是一筆 GitHub commit，由新到舊。</p><div class="audit" id="auditList"></div><button class="small" id="moreAudit" hidden style="margin-top:10px">載入更多</button></section>
+ <section id="tab-hist" hidden><p class="hint" style="margin-top:0">庫存歸零的酒款會自動移到這裡。再入手同一款酒時，請新增一筆新的酒款。</p><div class="hist" id="histList"></div></section>
+ <section id="tab-loc" hidden>
+  <p class="hint" style="margin-top:0">新增酒款時可從這裡的清單選擇，也可以直接輸入新的名稱。</p>
+  <p class="hint">櫃位</p><div class="chips" id="cabChips"></div>
+  <p class="hint">層位</p><div class="chips" id="shelfChips"></div>
+  <form class="inline" id="locForm" novalidate><div class="field"><label for="l_type">類型</label><select id="l_type"><option value="cabinets">櫃位</option><option value="shelves">層位</option></select></div><div class="field"><label for="l_name">名稱</label><input id="l_name" maxlength="80" placeholder="例如 A櫃、第 2 層"></div><button class="primary" type="submit">新增</button></form>
+  <div class="ferr" id="locErr" hidden></div>
+ </section>
+ <section id="tab-keys" hidden>
+  <p class="hint" style="margin-top:0">每台裝置一組密碼。刪除後該裝置就無法再登入管理。編輯者可新增、編輯、出庫與上傳照片；管理員另可管理裝置密碼與更換權杖。</p>
+  <div id="slotList"></div>
+  <form id="slotForm" novalidate><fieldset><legend>新增裝置</legend>
+   <div class="inline" style="margin-top:0"><div class="field"><label for="k_label">裝置名稱</label><input id="k_label" maxlength="40" placeholder="例如 客廳 iPad"></div><div class="field"><label for="k_role">角色</label><select id="k_role"><option value="editor">編輯者</option><option value="admin">管理員</option></select></div></div>
+   <div class="inline"><div class="field"><label for="k_pass">密碼（至少 10 個字元）</label><input id="k_pass" type="password" autocomplete="new-password"></div><button class="primary" type="submit">新增</button></div>
+  </fieldset></form>
+  <form id="tokenForm" novalidate><fieldset><legend>更換 GitHub 權杖（權杖到期或外流時）</legend>
+   <div class="inline" style="margin-top:0"><div class="field"><label for="t_token">新權杖</label><input id="t_token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></div><button class="primary" type="submit">更換</button></div>
+   <p class="hint">更換後所有裝置密碼照常可用。</p>
+  </fieldset></form>
+  <div class="ferr" id="keysErr" hidden></div>
+  <p><a id="repoLink" target="_blank" rel="noopener">開啟 GitHub repo</a></p>
+ </section>
+</div></dialog>
+
+<div id="printArea" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="config.js"></script>
+<script src="vendor/qrcode.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
