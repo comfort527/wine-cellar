@@ -643,8 +643,8 @@ async function saveStock() {
 }
 
 /* ---------- 照片 ---------- */
-/* 照片：大圖壓到 200 KB 以內（長邊 1280→1024→800px、品質 82%→52%），超過 400 KB 拒絕；另存 320px 縮圖給照片模式。 */
-const PHOTO = {target: 200 * 1024, max: 400 * 1024, sizes: [1280, 1024, 800], qualities: [.82, .72, .62, .52], thumb: 320, thumbQ: .72};
+/* 照片：大圖壓到 200 KB 以內（長邊 1280→1024→800px、品質 82%→52%），超過 400 KB 拒絕；另存 480px 縮圖給照片模式。 */
+const PHOTO = {target: 200 * 1024, max: 400 * 1024, sizes: [1280, 1024, 800], qualities: [.82, .72, .62, .52], thumb: 480, thumbQ: .74};
 const kb = n => Math.round(n / 1024) + ' KB';
 function pickPhoto(file, previewId, set, errId) {
   if (!file) return; showErr(errId, '');
