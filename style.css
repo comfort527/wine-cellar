@@ -251,3 +251,8 @@ legend{font-size:13px;color:var(--muted);padding:0 6px}
 
 .hrow{cursor:pointer}
 .hrow:hover{background:var(--sunk)}
+.storage{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.storage .track{flex:0 0 140px;height:6px;border-radius:3px;background:var(--sunk);overflow:hidden}
+.storage .fill{height:100%;background:var(--glass);border-radius:3px}
+.storage.warn{color:var(--warn)}
+.storage.warn .fill{background:var(--warn)}

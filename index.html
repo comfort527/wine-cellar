@@ -103,7 +103,7 @@
   <div class="field"><label for="f_drinkWindow">適飲期</label><input id="f_drinkWindow" maxlength="200" placeholder="例如 2026–2035"></div>
   <div class="field span"><label for="f_grapeNotes">葡萄品種／備註</label><textarea id="f_grapeNotes" maxlength="2000"></textarea></div>
   <div class="field span"><span class="lbl" id="locLbl">存放位置與瓶數</span><div id="locInputs"></div><div><button type="button" class="small" id="addLoc">＋ 新增位置</button></div><p class="hint" id="locHint" hidden>要扣除瓶數請用「出庫」，才會留下原因；這裡的瓶數調整會記為「資料修正」。</p></div>
-  <div class="field span" id="newPhotoField"><span class="lbl">酒款照片</span><div class="photo-in"><label>📷 拍照<input type="file" id="f_camera" accept="image/*" capture="environment"></label><label>從相簿選擇<input type="file" id="f_gallery" accept="image/*"></label></div><img class="prev" id="f_preview" alt="待上傳照片" hidden></div>
+  <div class="field span" id="newPhotoField"><span class="lbl">酒款照片</span><div class="photo-in"><label>📷 拍照<input type="file" id="f_camera" accept="image/*" capture="environment"></label><label>從相簿選擇<input type="file" id="f_gallery" accept="image/*"></label></div><img class="prev" id="f_preview" alt="待上傳照片" hidden><span class="hint">照片會自動壓縮到 200 KB 以內，另存一張小縮圖。</span></div>
  </div>
  <div class="ferr" id="wineErr" hidden></div>
  <div class="dact"><button type="button" data-close>取消</button><button type="submit" class="primary">儲存資料</button></div>
@@ -124,6 +124,7 @@
  <p id="photoWine" class="strong"></p>
  <div class="photo-in"><label>📷 拍照<input type="file" id="p_camera" accept="image/*" capture="environment"></label><label>從相簿選擇<input type="file" id="p_gallery" accept="image/*"></label></div>
  <img class="prev" id="p_preview" alt="待上傳照片" hidden style="margin-top:12px">
+ <p class="hint">照片會自動壓縮到 200 KB 以內；換新照片時舊的會刪除。</p>
  <div class="ferr" id="photoErr" hidden></div>
  <div class="dact"><button type="button" data-close>取消</button><button type="submit" class="primary" id="photoSave" disabled>儲存照片</button></div>
 </form></dialog>
@@ -131,6 +132,7 @@
 
 <dialog id="adminModal" aria-labelledby="adminTitle"><div class="dh"><h2 id="adminTitle">管理</h2><button data-close aria-label="關閉">×</button></div>
 <div class="db">
+ <div class="storage" id="storageBar" hidden><div class="track"><div class="fill"></div></div><span class="txt"></span></div>
  <div class="tabs"><button data-tab="audit" class="on">異動紀錄</button><button data-tab="hist">歷史酒單</button><button data-tab="loc">櫃位／層位</button><button data-tab="keys" id="keysTab">裝置密碼</button></div>
  <section id="tab-audit"><p class="hint" style="margin-top:0" id="auditHint">每次異動都是一筆 GitHub commit，由新到舊。</p><div class="audit" id="auditList"></div><button class="small" id="moreAudit" hidden style="margin-top:10px">載入更多</button></section>
  <section id="tab-hist" hidden><p class="hint" style="margin-top:0">庫存歸零的酒款會自動移到這裡。再入手同一款酒時，請新增一筆新的酒款。</p><div class="hist" id="histList"></div></section>

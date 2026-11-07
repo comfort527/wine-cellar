@@ -41,7 +41,9 @@ const nameOf = v => !v ? '—' : String(v).includes('@') ? String(v).split('@')[
 const siteUrl = () => location.origin + location.pathname;
 const wineUrl = id => siteUrl() + '#' + id;
 const locText = ls => (ls || []).map(l => `${l.cabinet}/${l.shelf}×${l.quantity}`).join('、') || '無';
-const photoUrl = w => !w.photo ? '' : S.localPhotos.get(w.photo) || `${CFG.rawBase}/${CFG.owner}/${CFG.repo}/${CFG.dataBranch}/${w.photo.split('/').map(encodeURIComponent).join('/')}`;
+const fileUrl = path => S.localPhotos.get(path) || `${CFG.rawBase}/${CFG.owner}/${CFG.repo}/${CFG.dataBranch}/${path.split('/').map(encodeURIComponent).join('/')}`;
+const photoUrl = w => w.photo ? fileUrl(w.photo) : '';
+const thumbUrl = w => w.thumb ? fileUrl(w.thumb) : photoUrl(w);
 function b64e(bytes) { let s = ''; const b = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes); for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); return btoa(s); }
 function b64d(s) { return Uint8Array.from(atob(String(s).replace(/\s/g, '')), c => c.charCodeAt(0)); }
 
@@ -115,9 +117,10 @@ async function loadData(force) {
 }
 async function loadKeys() {
   let res;
+  let sure = true;
   try { res = await readJson(CFG.keysPath, {auth: !!S.session}); }
-  catch (e) { if (e.user) throw e; res = await readRaw(CFG.keysPath); }
-  S.keys = res ? res.json : null; S.keysSha = res?.sha || null;
+  catch (e) { if (e.user) throw e; res = await readRaw(CFG.keysPath); sure = !!res; } // raw 檔可能是舊快取，讀不到不代表沒設定
+  S.keys = res ? res.json : null; S.keysSha = res?.sha || null; S.keysSure = sure;
 }
 
 /* 寫入：每次都讀最新版本、套用變更、帶 sha 寫回；有人同時修改就自動重試。 */
@@ -200,7 +203,7 @@ async function start() {
   wire();
   try {
     await loadKeys();
-    if (S.session && !S.keys?.slots?.some(s => s.id === S.session.slotId)) { logout(true); notice('這台裝置的密碼已被刪除，請重新登入。', true); }
+    if (S.session && (S.keys || S.keysSure) && !S.keys?.slots?.some(s => s.id === S.session.slotId)) { logout(true); notice('這台裝置的密碼已被刪除，請重新登入。', true); }
     await loadData(true);
     notice(S.rawFallback ? 'GitHub 暫時限制訪客讀取次數，畫面可能慢幾分鐘才更新；登入管理後即時同步。' : '');
   } catch (e) { notice(msgOf(e), true); }
@@ -236,9 +239,9 @@ function renderSync() {
   el.title = S.session ? `每 ${CFG.pollSecondsEditor} 秒自動同步` : `每 ${CFG.pollSecondsViewer} 秒自動同步`;
 }
 function render() {
-  const setup = !!S.data && !S.keys;
+  const setup = !!S.data && !S.keys && S.keysSure;
   $('whoPill').innerHTML = S.session ? `<b>${esc(S.session.label)}</b> · ${isAdmin() ? '管理員' : '編輯者'}` : '訪客瀏覽';
-  $('loginBtn').hidden = !!S.session || (!S.keys && !setup);
+  $('loginBtn').hidden = !!S.session || !S.data;
   $('loginBtn').textContent = setup ? '初始設定' : '管理登入';
   $('logoutBtn').hidden = !S.session;
   $('adminBtn').hidden = !S.session;
@@ -328,7 +331,7 @@ function rowHtml(w) {
    <span class="qt">${t}<small>${esc(w.volume || '瓶')}</small></span></button>`;
 }
 function cardHtml(w) {
-  const p = photoUrl(w);
+  const p = thumbUrl(w);
   return `<button class="card" data-open="${esc(w.wineId)}">${p ? `<img class="ph" src="${esc(p)}" alt="${esc(w.wineName)}" loading="lazy">` : `<span class="ph">${esc(w.vintage || 'NV')}</span>`}<span class="cb"><b>${esc(w.wineName)}</b><span>${esc(w.wineryRegion || '')}</span><span>${esc(w.vintage || 'NV')} · ${total(w)} 瓶</span></span></button>`;
 }
 
@@ -370,11 +373,17 @@ function wire() {
   $('viewList').addEventListener('click', () => setView('list'));
   $('viewGrid').addEventListener('click', () => setView('grid'));
   $('homeLink').addEventListener('click', e => { e.preventDefault(); S.filter = null; S.search = ''; $('search').value = ''; closeDrawer(); scrollTo({top: 0, behavior: 'smooth'}); render(); });
-  $('loginBtn').addEventListener('click', () => S.keys ? openLogin() : showDialog('setupModal'));
+  $('loginBtn').addEventListener('click', async () => {
+    try { await loadKeys(); } catch (e) { return toast(msgOf(e)); }
+    render();
+    if (S.keys) openLogin();
+    else if (S.keysSure) showDialog('setupModal');
+    else toast('暫時讀不到裝置設定，請稍後再試。');
+  });
   $('logoutBtn').addEventListener('click', () => logout());
   $('addBtn').addEventListener('click', () => openWineForm(null));
   $('fab').addEventListener('click', () => openWineForm(null));
-  $('adminBtn').addEventListener('click', () => { showDialog('adminModal'); switchTab('audit'); loadAudit('', 1); });
+  $('adminBtn').addEventListener('click', () => { showDialog('adminModal'); switchTab('audit'); loadAudit('', 1); checkStorage(); });
   $('exportBtn').addEventListener('click', exportCsv);
   $('map').addEventListener('click', e => {
     const b = e.target.closest('[data-cab]'); if (!b) return;
@@ -468,7 +477,7 @@ async function doSetup() {
   if (!label) fail('請填寫裝置名稱。');
   checkPass(pass, $('u_pass2').value);
   await loadKeys();
-  if (S.keys) fail('已經完成過初始設定，請改用「管理登入」。');
+  if (S.keys) { $('setupModal').close(); render(); openLogin(); toast('已經完成過初始設定，請選擇裝置並輸入密碼登入。'); return; }
   await checkToken(token);
   const dataKey = crypto.getRandomValues(new Uint8Array(32));
   const keys = {schema: 1, iterations: PBKDF2_ITER, token: await seal(await aesKey(dataKey), enc.encode(token)), slots: [await makeSlot(label, 'admin', pass, dataKey)]};
@@ -591,12 +600,12 @@ async function saveWine() {
     }, changes => `編輯 ${id} ${r.wineName}${changes.length ? '' : '（無變更）'}${changes.length ? '\n\n' + changes.join('\n') : ''}`);
     $('wineModal').close(); toast('已更新「' + r.wineName + '」。');
   } else {
-    let photo = '';
-    if (S.newPhotoBlob) photo = await uploadPhoto(S.newPhotoBlob, 'new');
+    let photo = '', thumb = '';
+    if (S.newPhotoBlob) ({photo, thumb} = await uploadPhoto(S.newPhotoBlob, 'new'));
     const id = await mutate(d => {
       const n = Object.keys(d.wines).reduce((m, k) => /^W\d+$/.test(k) ? Math.max(m, Number(k.slice(1))) : m, 0) + 1;
       const wid = 'W' + String(n).padStart(3, '0'), t = now();
-      d.wines[wid] = {...r, photo, status: total(r) > 0 ? 'active' : 'archived', createdAt: t, createdBy: who, updatedAt: t, updatedBy: who, revision: 1};
+      d.wines[wid] = {...r, photo, thumb, status: total(r) > 0 ? 'active' : 'archived', createdAt: t, createdBy: who, updatedAt: t, updatedBy: who, revision: 1};
       return wid;
     }, wid => `新增 ${wid} ${r.wineName}\n\n位置：${locText(r.locations)}`);
     $('wineModal').close(); openDrawer(id); toast('已新增「' + r.wineName + '」。');
@@ -634,38 +643,85 @@ async function saveStock() {
 }
 
 /* ---------- 照片 ---------- */
+/* 照片：大圖壓到 200 KB 以內（長邊 1280→1024→800px、品質 82%→52%），超過 400 KB 拒絕；另存 320px 縮圖給照片模式。 */
+const PHOTO = {target: 200 * 1024, max: 400 * 1024, sizes: [1280, 1024, 800], qualities: [.82, .72, .62, .52], thumb: 320, thumbQ: .72};
+const kb = n => Math.round(n / 1024) + ' KB';
 function pickPhoto(file, previewId, set, errId) {
   if (!file) return; showErr(errId, '');
-  compress(file).then(blob => { set(blob); const img = $(previewId); img.src = URL.createObjectURL(blob); img.hidden = false; }).catch(() => { set(null); showErr(errId, '無法讀取這張圖片，請換一張。'); });
+  const img = $(previewId); img.hidden = true;
+  compress(file).then(ph => { set(ph); img.src = URL.createObjectURL(ph.full); img.hidden = false; img.title = `壓縮後 ${kb(ph.full.size)}`; })
+    .catch(e => { set(null); showErr(errId, e?.user ? e.message : '無法讀取這張圖片，請換一張。'); });
 }
-function compress(file) {
-  return new Promise((res, rej) => {
-    const img = new Image();
-    img.onload = () => {
-      const s = Math.min(1, 1280 / Math.max(img.width, img.height)), c = document.createElement('canvas');
-      c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
-      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-      c.toBlob(b => b ? res(b) : rej(), 'image/jpeg', .82); URL.revokeObjectURL(img.src);
-    };
-    img.onerror = rej; img.src = URL.createObjectURL(file);
-  });
+function loadImage(file) {
+  return new Promise((res, rej) => { const img = new Image(); img.onload = () => res(img); img.onerror = rej; img.src = URL.createObjectURL(file); });
 }
-async function uploadPhoto(blob, id) {
-  const path = `${CFG.imageDir}/${id}-${Date.now()}.jpg`;
-  const r = await putFile(path, new Uint8Array(await blob.arrayBuffer()), null, `照片 ${id}\n\n操作者：${S.session.label}`);
-  if (!r.ok) fail('照片上傳失敗，請再試一次。');
-  S.localPhotos.set(path, URL.createObjectURL(blob));
-  return path;
+function encode(img, longSide, q) {
+  const s = Math.min(1, longSide / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(img.naturalWidth * s)); c.height = Math.max(1, Math.round(img.naturalHeight * s));
+  const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+  return new Promise((res, rej) => c.toBlob(b => b ? res(b) : rej(new Error('encode')), 'image/jpeg', q));
+}
+async function compress(file) {
+  const img = await loadImage(file);
+  try {
+    let best = null;
+    search: for (const size of PHOTO.sizes) for (const q of PHOTO.qualities) {
+      const b = await encode(img, size, q);
+      if (!best || b.size < best.size) best = b;
+      if (b.size <= PHOTO.target) { best = b; break search; }
+    }
+    if (best.size > PHOTO.max) fail(`這張照片壓縮後仍有 ${kb(best.size)}，超過上限 ${kb(PHOTO.max)}，請換一張或裁切後再試。`);
+    return {full: best, thumb: await encode(img, PHOTO.thumb, PHOTO.thumbQ)};
+  } finally { URL.revokeObjectURL(img.src); }
+}
+async function uploadPhoto(ph, id) {
+  const base = `${CFG.imageDir}/${id}-${Date.now()}`, who = `\n\n操作者：${S.session.label}`;
+  const full = await putFile(`${base}.jpg`, new Uint8Array(await ph.full.arrayBuffer()), null, `照片 ${id}（${kb(ph.full.size)}）${who}`);
+  if (!full.ok) fail('照片上傳失敗，請再試一次。');
+  const thumb = await putFile(`${base}-t.jpg`, new Uint8Array(await ph.thumb.arrayBuffer()), null, `縮圖 ${id}（${kb(ph.thumb.size)}）${who}`);
+  S.localPhotos.set(`${base}.jpg`, URL.createObjectURL(ph.full));
+  if (thumb.ok) S.localPhotos.set(`${base}-t.jpg`, URL.createObjectURL(ph.thumb));
+  return {photo: `${base}.jpg`, thumb: thumb.ok ? `${base}-t.jpg` : ''};
+}
+/* 換照片後刪掉舊檔（git 歷史仍保留，但資料夾保持整齊）。失敗不影響使用。 */
+async function deleteFiles(paths, id) {
+  for (const path of paths.filter(Boolean)) {
+    try {
+      const r = await gh(`${REPO}/contents/${path}?ref=${encodeURIComponent(CFG.dataBranch)}`);
+      if (!r.ok) continue;
+      const {sha} = await r.json();
+      await gh(`${REPO}/contents/${path}`, {method: 'DELETE', body: {message: `刪除舊照片 ${id}\n\n操作者：${S.session.label}`, sha, branch: CFG.dataBranch}});
+    } catch {}
+  }
 }
 function openPhoto(w) { if (!w) return; S.photo = w; S.photoBlob = null; $('photoWine').textContent = [w.wineName, w.vintage].filter(Boolean).join('　'); $('p_preview').hidden = true; $('p_camera').value = ''; $('p_gallery').value = ''; $('photoSave').disabled = true; showDialog('photoModal'); }
 async function savePhoto() {
   if (!S.photoBlob) fail('請先選擇照片。');
-  const id = S.photo.wineId, path = await uploadPhoto(S.photoBlob, id), who = S.session.label;
-  await mutate(d => {
+  const id = S.photo.wineId, up = await uploadPhoto(S.photoBlob, id), who = S.session.label;
+  const old = await mutate(d => {
     const cur = d.wines[id]; if (!cur) fail('這款酒已不存在。');
-    const had = !!cur.photo; cur.photo = path; cur.updatedAt = now(); cur.updatedBy = who; cur.revision = (cur.revision || 0) + 1; return had;
-  }, had => `${had ? '更換' : '新增'}照片 ${id} ${S.photo.wineName}`);
-  $('photoModal').close(); toast('照片已儲存。');
+    const prev = [cur.photo, cur.thumb];
+    cur.photo = up.photo; cur.thumb = up.thumb; cur.updatedAt = now(); cur.updatedBy = who; cur.revision = (cur.revision || 0) + 1; return prev;
+  }, prev => `${prev[0] ? '更換' : '新增'}照片 ${id} ${S.photo.wineName}`);
+  $('photoModal').close(); toast(`照片已儲存（${kb(S.photoBlob.full.size)}）。`);
+  deleteFiles(old, id).then(checkStorage);
+}
+
+/* ---------- 儲存空間 ---------- */
+const STORAGE_LIMIT_MB = 500;
+async function checkStorage() {
+  try {
+    const r = await gh(REPO); if (!r.ok) return null;
+    const mb = (await r.json()).size / 1024, pct = mb / STORAGE_LIMIT_MB;
+    S.storage = {mb, pct};
+    const el = $('storageBar');
+    if (el) {
+      el.hidden = false; el.classList.toggle('warn', pct >= .8);
+      el.querySelector('.fill').style.width = Math.min(100, pct * 100).toFixed(1) + '%';
+      el.querySelector('.txt').textContent = `儲存空間：已用 ${mb < 10 ? mb.toFixed(1) : Math.round(mb)} MB／建議上限 ${STORAGE_LIMIT_MB} MB${pct >= .8 ? '。空間快滿了，請減少更換照片。' : ''}`;
+    }
+    return S.storage;
+  } catch { return null; }
 }
 
 /* ---------- CSV ---------- */
