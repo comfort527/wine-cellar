@@ -344,3 +344,6 @@ legend{font-size:20px;color:var(--muted);padding:0 6px}
   .card .cb .prod{display:none}
   .card .ph{font-size:24px}
 }
+.admin-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.admin-top .storage{margin-bottom:0}
+.admin-top #exportBtn{margin-left:auto}

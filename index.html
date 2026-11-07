@@ -54,7 +54,6 @@
    <label class="search"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="6"/><path d="m14 14 4 4"/></svg><input id="search" type="search" placeholder="搜尋酒名、酒莊、年份、產地、備註" aria-label="搜尋"><button type="button" id="clearSearch" aria-label="清除搜尋">×</button></label>
    <select id="sortSel" aria-label="排序"><option value="loc">依位置</option><option value="id">依登錄先後</option><option value="vintage">年份：舊到新</option><option value="qty">瓶數：多到少</option><option value="name">依酒名</option></select>
    <div class="seg" role="group" aria-label="顯示方式"><button id="viewList" class="on" aria-pressed="true">清單</button><button id="viewGrid" aria-pressed="false">照片</button></div>
-   <button class="ghost" id="exportBtn">匯出 CSV</button>
    <button class="primary" id="addBtn" hidden>＋ 新增酒款</button>
   </div>
   <div class="filterbar" id="filterBar" hidden><span id="filterText"></span><button class="small" id="clearFilter">顯示全部</button></div>
@@ -160,7 +159,10 @@
 
 <dialog id="adminModal" aria-labelledby="adminTitle"><div class="dh"><h2 id="adminTitle">管理</h2><button data-close aria-label="關閉">×</button></div>
 <div class="db">
- <div class="storage" id="storageBar" hidden><div class="track"><div class="fill"></div></div><span class="txt"></span></div>
+ <div class="admin-top">
+  <div class="storage" id="storageBar" hidden><div class="track"><div class="fill"></div></div><span class="txt"></span></div>
+  <button class="ghost" id="exportBtn">⇩ 匯出 CSV</button>
+ </div>
  <div class="tabs"><button data-tab="audit" class="on">異動紀錄</button><button data-tab="hist">歷史酒單</button><button data-tab="loc">櫃位／層位</button><button data-tab="keys" id="keysTab">裝置密碼</button></div>
  <section id="tab-audit"><p class="hint" style="margin-top:0" id="auditHint">每次異動都是一筆 GitHub commit，由新到舊。</p><div class="audit" id="auditList"></div><button class="small" id="moreAudit" hidden style="margin-top:10px">載入更多</button></section>
  <section id="tab-hist" hidden><p class="hint" style="margin-top:0">庫存歸零的酒款會自動移到這裡。再入手同一款酒時，請新增一筆新的酒款。</p><div class="hist" id="histList"></div></section>

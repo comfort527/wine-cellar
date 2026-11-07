@@ -828,7 +828,7 @@ function exportCsv() {
   }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['﻿' + lines.join('\r\n')], {type: 'text/csv;charset=utf-8'}));
-  a.download = `紅酒收藏-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.download = `wine-cellar-${today()}.csv`;
   document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
 
