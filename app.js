@@ -336,7 +336,7 @@ function rowHtml(w) {
 }
 function cardHtml(w) {
   const p = thumbUrl(w);
-  return `<button class="card" data-open="${esc(w.wineId)}">${p ? `<img class="ph" src="${esc(p)}" alt="${esc(w.wineName)}" loading="lazy">` : `<span class="ph">${esc(w.vintage || 'NV')}</span>`}<span class="cb"><b>${esc(w.wineName)}</b><span>${esc(w.wineryRegion || '')}</span><span>${esc(w.vintage || 'NV')} · ${total(w)} 瓶</span></span></button>`;
+  return `<button class="card" data-open="${esc(w.wineId)}">${p ? `<img class="ph" src="${esc(p)}" alt="${esc(w.wineName)}" loading="lazy">` : `<span class="ph">${esc(w.vintage || 'NV')}</span>`}<span class="cb"><b>${esc(w.wineName)}</b><span class="prod">${esc(w.wineryRegion || '')}</span><span>${esc(w.vintage || 'NV')} · ${total(w)} 瓶</span></span></button>`;
 }
 
 /* ---------- 詳細資料抽屜 ---------- */

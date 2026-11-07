@@ -124,7 +124,7 @@ button.fact .k::after{content:" ›";color:var(--wine)}
 
 /* ---------- 帳冊清單 ---------- */
 .rows{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
-.rows.grid{background:none;border:0;box-shadow:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.rows.grid{background:none;border:0;box-shadow:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
 .row{display:grid;grid-template-columns:104px minmax(0,1fr) minmax(0,240px) 84px;align-items:center;gap:6px 18px;width:100%;padding:12px 18px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;text-align:left;white-space:normal}
 .row:last-child{border-bottom:0}
 .row:hover{background:var(--surface-2)}
@@ -138,10 +138,10 @@ button.fact .k::after{content:" ›";color:var(--wine)}
 .row .qt{text-align:right;font:600 39px/1 var(--display);font-variant-numeric:lining-nums tabular-nums}
 .row .qt small{display:block;font:500 16px/1.4 var(--body);color:var(--muted);margin-top:3px}
 .card{display:flex;flex-direction:column;padding:0;overflow:hidden;text-align:left;border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow);white-space:normal}
-.card .ph{aspect-ratio:3/4;width:100%;max-width:100%;object-fit:cover;background:var(--sunk);display:grid;place-items:center;color:var(--faint);font:600 45px var(--display)}
-.card .cb{padding:10px 12px 12px;display:flex;flex-direction:column;gap:2px}
-.card .cb b{font:600 26px/1.2 var(--display);overflow-wrap:anywhere}
-.card .cb span{font-size:18px;color:var(--muted)}
+.card .ph{aspect-ratio:3/4;width:100%;max-width:100%;object-fit:cover;background:var(--sunk);display:grid;place-items:center;color:var(--faint);font:600 32px var(--display)}
+.card .cb{padding:8px 10px 10px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.card .cb b{font:600 19px/1.2 var(--display);overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.4em}
+.card .cb span{font-size:15px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .empty{padding:48px 20px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:var(--r)}
 .empty h3{font:700 26px var(--serif-tc);color:var(--ink);margin-bottom:6px}
 .foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:20px;color:var(--muted);padding-top:8px;border-top:1px solid var(--line)}
@@ -262,7 +262,7 @@ legend{font-size:20px;color:var(--muted);padding:0 6px}
   .row{grid-template-columns:92px minmax(0,1fr) minmax(0,200px) 76px;padding:14px 18px;gap:6px 14px}
     .row .vin{font-size:36px}
   .drawer{width:min(580px,70vw)}
-  .rows.grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+  .rows.grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
 }
 @media (min-width:761px) and (max-width:900px){
   .drawer{width:min(560px,82vw)}
@@ -337,3 +337,10 @@ legend{font-size:20px;color:var(--muted);padding:0 6px}
   .shelf .dots{gap:4px}
 }
 @media (max-width:760px){.move-to{grid-template-columns:1fr}}
+@media (max-width:760px){
+  .rows.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .card .cb{padding:6px 8px 8px}
+  .card .cb b{font-size:17px}
+  .card .cb .prod{display:none}
+  .card .ph{font-size:24px}
+}
