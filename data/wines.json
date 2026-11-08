@@ -1572,14 +1572,15 @@
    "revision": 1,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-11-08T04:42:31.114Z",
+   "updatedAt": "2026-11-08T04:42:38.480Z",
    "updatedBy": "廖炎鴻",
    "vintage": "2024",
    "volume": "750ml",
    "wineName": "Sauvignon Blanc",
-   "wineryRegion": "Shaw + Smith"
+   "wineryRegion": "Shaw + Smith",
+   "priority": 2
   }
  },
- "rev": 14,
- "updatedAt": "2026-11-08T04:42:36.233Z"
+ "rev": 15,
+ "updatedAt": "2026-11-08T04:42:38.480Z"
 }
