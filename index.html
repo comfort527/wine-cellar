@@ -91,20 +91,7 @@
     <button type="button" class="addx" id="jAdd">＋紀錄</button>
    </div>
   </div>
-  <h3 class="hist-h">出庫紀錄</h3>
-  <p class="hint" style="margin-top:0">每一次出庫（含送禮）都記在這裡，由新到舊。點一筆可以查看那款酒。</p>
-  <div class="hist-filter">
-   <select id="h_year" aria-label="年份"></select>
-   <div class="htypes" id="h_types" role="group" aria-label="出庫類型">
-    <button data-htype="" class="on">全部</button><button data-htype="自飲">自飲</button><button data-htype="聚餐">聚餐</button><button data-htype="送禮">送禮</button><button data-htype="其他">其他</button>
-   </div>
-  </div>
-  <div class="hist-sum" id="histSum"></div>
-  <div class="hist-outs" id="histList"></div>
-  <h3 class="hist-h">已出清的酒款</h3>
-  <p class="hint" style="margin-top:0">庫存全部出完的酒。再入手同一款酒時，可以按「編輯」補上瓶數。</p>
-  <div class="hist" id="histGone"></div>
- </div></dialog>
+</div></dialog>
 
 <dialog class="drawer" id="drawer" aria-labelledby="dwName" tabindex="-1"><div id="drawerBody"></div></dialog>
 
@@ -199,8 +186,9 @@
    <p class="hint">酒窖裡本來就有、但沒登錄過的酒：儲存時會補登到酒窖並記一筆出庫。</p>
    <div class="field"><label for="j_mname">酒名 *</label><input id="j_mname" maxlength="200" autocomplete="off"></div>
    <div class="field"><label for="j_mvintage">年份</label><input id="j_mvintage" maxlength="40" placeholder="例如 2018 或 NV"></div>
-   <div class="field"><label for="j_left">酒窖裡還剩幾瓶</label><input id="j_left" type="number" min="0" step="1" value="0" inputmode="numeric"></div>
-   <div class="move-to" id="j_leftLoc" hidden><div class="field"><label for="j_cab">存放櫃位</label><input id="j_cab" list="cabList" maxlength="80" autocomplete="off"></div><div class="field"><label for="j_shelf">層位</label><input id="j_shelf" list="shelfList" maxlength="80" autocomplete="off"></div></div>
+   <div class="field"><span class="lbl">原本的位置 *</span></div>
+   <div class="move-to" id="j_leftLoc" style="margin-top:0"><div class="field" style="margin-top:0"><label for="j_cab">櫃位</label><input id="j_cab" list="cabList" maxlength="80" autocomplete="off"></div><div class="field" style="margin-top:0"><label for="j_shelf">層位</label><input id="j_shelf" list="shelfList" maxlength="80" autocomplete="off"></div></div>
+   <div class="field"><label for="j_left">酒窖裡還剩幾瓶（留在原本的位置）</label><input id="j_left" type="number" min="0" step="1" value="0" inputmode="numeric"></div>
   </div>
  </div>
 
@@ -239,8 +227,22 @@
 
 <dialog id="adminModal" aria-labelledby="adminTitle"><div class="dh"><h2 id="adminTitle">管理</h2><button data-close aria-label="關閉">×</button></div>
 <div class="db">
- <div class="tabs"><button data-tab="audit" class="on">異動紀錄</button><button data-tab="loc">櫃位／層位</button><button data-tab="keys" id="keysTab">裝置密碼</button></div>
+ <div class="tabs"><button data-tab="audit" class="on">異動紀錄</button><button data-tab="outs">出庫紀錄</button><button data-tab="loc">櫃位／層位</button><button data-tab="keys" id="keysTab">裝置密碼</button></div>
  <section id="tab-audit"><p class="hint" style="margin-top:0" id="auditHint">每次異動都是一筆 GitHub commit，由新到舊。</p><div class="audit" id="auditList"></div><button class="small" id="moreAudit" hidden style="margin-top:10px">載入更多</button></section>
+ <section id="tab-outs" hidden>
+  <p class="hint" style="margin-top:0">每一次出庫（含送禮）都記在這裡，由新到舊。點一筆可以查看那款酒。</p>
+  <div class="hist-filter">
+   <select id="h_year" aria-label="年份"></select>
+   <div class="htypes" id="h_types" role="group" aria-label="出庫類型">
+    <button data-htype="" class="on">全部</button><button data-htype="自飲">自飲</button><button data-htype="聚餐">聚餐</button><button data-htype="送禮">送禮</button><button data-htype="其他">其他</button>
+   </div>
+  </div>
+  <div class="hist-sum" id="histSum"></div>
+  <div class="hist-outs" id="histList"></div>
+  <h3 class="hist-h">已出清的酒款</h3>
+  <p class="hint" style="margin-top:0">庫存全部出完的酒。再入手同一款酒時，可以按「編輯」補上瓶數。</p>
+  <div class="hist" id="histGone"></div>
+ </section>
  <section id="tab-loc" hidden>
   <p class="hint" style="margin-top:0">新增酒款時可從這裡的清單選擇，也可以直接輸入新的名稱。</p>
   <p class="hint">櫃位</p><div class="chips" id="cabChips"></div>

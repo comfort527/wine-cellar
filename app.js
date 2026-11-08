@@ -267,7 +267,7 @@ function render() {
   renderMap(list);
   renderList(list);
   if ($('drawer').open && S.drawer) renderDrawer();
-  if ($('journalView').open) renderHistory();
+  if ($('journalView').open || ($('adminModal').open && !$('tab-outs').hidden)) renderHistory();
 }
 function renderMap(list) {
   const cabs = new Map();
@@ -503,9 +503,10 @@ async function submit(formId, errId, fn) {
 }
 function switchTab(name) {
   document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
-  for (const t of ['audit', 'loc', 'keys']) $('tab-' + t).hidden = t !== name;
+  for (const t of ['audit', 'outs', 'loc', 'keys']) $('tab-' + t).hidden = t !== name;
   $('keysTab').hidden = !isAdmin();
   if (name === 'loc') renderAdmin();
+  if (name === 'outs') renderHistory();
   if (name === 'keys') renderSlots();
   if (name === 'audit' && S.auditLoadedFor !== undefined) loadAudit('', 1);
 }
@@ -1014,7 +1015,6 @@ function syncJournalForm() {
   $('j_common').hidden = !ready;
   $('j_typeSet').hidden = !cellar;
   $('j_photoF').hidden = cellar && !f.miss;
-  $('j_leftLoc').hidden = !(Number($('j_left').value) > 0);
   if (cellar && f.wineId) {
     const l = (byId(f.wineId)?.locations || []).find(x => x.cabinet === f.cab && x.shelf === f.shelf);
     if (l) $('j_qty').max = l.quantity;
@@ -1071,7 +1071,7 @@ async function saveJournal() {
     const left = Number($('j_left').value || 0), cab = $('j_cab').value.trim(), shelf = $('j_shelf').value.trim();
     if (!name) fail('請填寫酒名。');
     if (!Number.isInteger(left) || left < 0) fail('剩下的瓶數必須是 0 以上的整數。');
-    if (left > 0 && (!cab || !shelf)) fail('還有剩的話，請填寫存放的櫃位和層位。');
+    if (!cab || !shelf) fail('請填寫這瓶酒原本的櫃位和層位。');
     let photo = '', thumb = '';
     if (S.jPhoto) ({photo, thumb} = await uploadPhoto(S.jPhoto, 'new'));
     await mutate(d => {
@@ -1079,15 +1079,13 @@ async function saveJournal() {
       const id = 'W' + String(n).padStart(3, '0'), t = now();
       d.wines[id] = {wineName: name, wineryRegion: '', vintage, entryDate: '', volume: '750ml', source: '', referencePrice: null, origin: '', drinkWindow: '', grapeNotes: '飲用時補登',
         photo, thumb, status: left > 0 ? 'active' : 'archived', locations: left > 0 ? [{cabinet: cab, shelf, quantity: left}] : [],
-        outs: [{date, type, qty, cabinet: left > 0 ? cab : (S.jf.cab || '（補登）'), shelf: left > 0 ? shelf : (S.jf.shelf || ''), reason: note, ...stamp, by: me, at: t}],
+        outs: [{date, type, qty, cabinet: cab, shelf, reason: note, ...stamp, by: me, at: t}],
         createdAt: t, createdBy: me, updatedAt: t, updatedBy: me, revision: 1, ...(left > 0 ? {} : {archivedAt: t, archivedBy: me})};
-      if (left > 0) {
-        d.catalog = d.catalog || {cabinets: [], shelves: []};
-        if (!d.catalog.cabinets.includes(cab)) d.catalog.cabinets.push(cab);
-        if (!d.catalog.shelves.includes(shelf)) d.catalog.shelves.push(shelf);
-      }
+      d.catalog = d.catalog || {cabinets: [], shelves: []};
+      if (!d.catalog.cabinets.includes(cab)) d.catalog.cabinets.push(cab);
+      if (!d.catalog.shelves.includes(shelf)) d.catalog.shelves.push(shelf);
       return id;
-    }, id => `補登並出庫 ${id} ${name}（${type}）：喝掉 ${qty} 瓶，剩 ${left} 瓶\n\n日期：${date}${note ? '\n說明：' + note : ''}`);
+    }, id => `補登並出庫 ${id} ${name}（${type}）：${cab}/${shelf} 喝掉 ${qty} 瓶，剩 ${left} 瓶\n\n日期：${date}${note ? '\n說明：' + note : ''}`);
     toast(left > 0 ? `已補登「${name}」並紀錄，酒窖還有 ${left} 瓶。` : `已補登「${name}」並紀錄。`);
   } else {
     const name = $('j_name').value.trim(), vintage = $('j_vintage').value.trim();
