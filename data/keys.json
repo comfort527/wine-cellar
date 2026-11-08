@@ -14,6 +14,15 @@
    "iv": "zFDqafVrY6TPzYDn",
    "ct": "h9LfK9knxBww7CBP03sbKn8GCDRzS6XhC9LYKiOS9pS+M2E++LLEw0Qgm0lj65/w",
    "createdAt": "2026-11-07T11:24:12.151Z"
+  },
+  {
+   "id": "02a3ce5a-3840-4cd2-a82d-6a0789a7fe17",
+   "label": "浩銓",
+   "role": "editor",
+   "salt": "liAlmReGU0AmRpKhKDwJnQ==",
+   "iv": "8Yp7tPTCYSrYxH+B",
+   "ct": "8bNmmK7nYrwpEUXolXemx9bt+tBX/brwzi2+V9VDe8A7fVwnkFHutBfeSqJd03Ol",
+   "createdAt": "2026-11-08T05:01:19.267Z"
   }
  ]
 }
