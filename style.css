@@ -77,7 +77,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 .total{display:flex;align-items:baseline;gap:10px}
 .total .num{font:600 clamp(64px,11vw,112px)/.85 var(--display);font-variant-numeric:lining-nums tabular-nums;color:var(--wine);letter-spacing:-.02em}
 .total .unit{font:600 27px/1 var(--serif-tc);color:var(--muted);letter-spacing:.1em}
-.facts{display:grid;grid-template-columns:repeat(3,auto);gap:4px 14px;margin:0}
+.facts{display:grid;grid-template-columns:repeat(4,auto);gap:4px 14px;margin:0}
 .fact{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0;padding:8px 12px;border:1px solid transparent;border-radius:var(--r-sm);background:transparent;text-align:left;color:var(--ink)}
 button.fact:hover{border-color:var(--line);background:var(--surface)}
 button.fact .k::after{content:" ›";color:var(--wine)}
@@ -257,7 +257,7 @@ legend{font-size:20px;color:var(--muted);padding:0 6px}
   .bar-in{padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
   .summary{align-items:center}
   .total .num{font-size:138px}
-  .facts{grid-template-columns:repeat(3,auto);gap:6px 20px}
+  .facts{grid-template-columns:repeat(2,auto);gap:6px 20px}
   .map{grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr))}
   .tools .search{flex-basis:100%}
   .tools select{flex:1 1 auto}
@@ -268,7 +268,7 @@ legend{font-size:20px;color:var(--muted);padding:0 6px}
 }
 @media (min-width:761px) and (max-width:900px){
   .drawer{width:min(560px,82vw)}
-  .facts{grid-template-columns:repeat(3,auto);gap:4px 8px}
+  .facts{grid-template-columns:repeat(4,auto);gap:4px 8px}
   .summary{align-items:flex-end}
   .total .num{font-size:126px}
 }
@@ -472,3 +472,21 @@ legend{font-size:20px;color:var(--muted);padding:0 6px}
   .msum span{padding:3px 10px;font-size:16px;gap:4px}
   .msum b{font-size:20px}
 }
+
+/* 飲酒日誌視窗與「紀錄」點選 */
+dialog.wide{width:min(1020px,96vw)}
+.jpath{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:14px 0 10px}
+.jpath button{border-radius:999px;padding:6px 14px;font-weight:500}
+.jpath button.on{border-color:var(--wine);color:var(--wine);background:var(--wine-soft)}
+.jpath .sep{color:var(--faint);font-size:20px}
+.jpick{display:flex;flex-direction:column;gap:8px}
+.pcard{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;padding:12px 16px;text-align:left;border-radius:var(--r-sm);background:var(--surface)}
+.pcard span{min-width:0}
+.pcard b{display:block;font-weight:500;overflow-wrap:anywhere}
+.pcard b .v{color:var(--brass);font-weight:400}
+.pcard small{display:block;font-size:17px;color:var(--muted);overflow-wrap:anywhere}
+.pcard em{font-style:normal;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.pcard.chosen{border:1px solid var(--wine);background:var(--wine-soft);box-shadow:inset 0 0 0 1px var(--wine)}
+.pcard.chosen em{color:var(--wine)}
+.jmiss{margin-top:10px;color:var(--ext);text-decoration:underline;text-underline-offset:4px}
+.fact .v small{font:500 15px var(--body);color:var(--muted)}

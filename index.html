@@ -46,6 +46,7 @@
   <div class="facts">
    <button class="fact" id="factWines" aria-label="顯示全部酒款"><span class="k">酒款</span><span class="v" id="sumWines">—</span></button>
    <button class="fact" id="factOrigins" aria-label="依產地查看"><span class="k">產地</span><span class="v" id="sumOrigins">—</span></button>
+   <button class="fact" id="factJournal" aria-label="打開飲酒日誌"><span class="k">飲酒日誌</span><span class="v" id="sumJournal">—</span></button>
    <div class="fact static"><span class="k">最後異動</span><span class="v" id="lastMod">—</span></div>
   </div>
  </section>
@@ -74,6 +75,36 @@
 
 <dialog class="small" id="originModal" aria-labelledby="originTitle"><div class="dh"><h2 id="originTitle">依產地查看</h2><button data-close aria-label="關閉">×</button></div>
 <div class="db"><div class="origins" id="originList"></div></div></dialog>
+
+<dialog id="journalView" class="wide" aria-labelledby="jvTitle"><div class="dh"><h2 id="jvTitle">飲酒日誌</h2><button data-close aria-label="關閉">×</button></div>
+<div class="db" id="tab-hist">
+  <div class="jr">
+   <div class="jcal">
+    <div class="mhead"><button type="button" id="jPrev" aria-label="上個月">‹</button><h3 id="jTitle"></h3><button type="button" id="jNext" aria-label="下個月">›</button></div>
+    <div class="msum" id="jSum"></div>
+    <div class="cal" id="jCal"></div>
+    <div class="jlegend"><span><i class="d-c"></i>酒窖</span><span><i class="d-e"></i>非酒窖</span></div>
+   </div>
+   <div class="jday">
+    <div class="dayh"><h4 id="jDayTitle"></h4><span class="hint" id="jDayCount"></span></div>
+    <div id="jDayList"></div>
+    <button type="button" class="addx" id="jAdd">＋紀錄</button>
+   </div>
+  </div>
+  <h3 class="hist-h">出庫紀錄</h3>
+  <p class="hint" style="margin-top:0">每一次出庫（含送禮）都記在這裡，由新到舊。點一筆可以查看那款酒。</p>
+  <div class="hist-filter">
+   <select id="h_year" aria-label="年份"></select>
+   <div class="htypes" id="h_types" role="group" aria-label="出庫類型">
+    <button data-htype="" class="on">全部</button><button data-htype="自飲">自飲</button><button data-htype="聚餐">聚餐</button><button data-htype="送禮">送禮</button><button data-htype="其他">其他</button>
+   </div>
+  </div>
+  <div class="hist-sum" id="histSum"></div>
+  <div class="hist-outs" id="histList"></div>
+  <h3 class="hist-h">已出清的酒款</h3>
+  <p class="hint" style="margin-top:0">庫存全部出完的酒。再入手同一款酒時，可以按「編輯」補上瓶數。</p>
+  <div class="hist" id="histGone"></div>
+ </div></dialog>
 
 <dialog class="drawer" id="drawer" aria-labelledby="dwName" tabindex="-1"><div id="drawerBody"></div></dialog>
 
@@ -153,36 +184,46 @@
  <div class="dact"><button type="button" data-close>取消</button><button type="submit" class="primary">確認移動</button></div>
 </form></dialog>
 
-<dialog class="small" id="journalModal" aria-labelledby="jFormTitle"><div class="dh"><h2 id="jFormTitle">記錄喝了什麼</h2><button data-close aria-label="關閉">×</button></div>
+<dialog class="small" id="journalModal" aria-labelledby="jFormTitle"><div class="dh"><h2 id="jFormTitle">紀錄</h2><button data-close aria-label="關閉">×</button></div>
 <form class="db" id="journalForm" novalidate>
- <fieldset class="types jsrc"><legend>這瓶酒是 *</legend>
-  <label id="j_srcCellar"><input type="radio" name="j_src" value="酒窖未登錄"><span>酒窖的（沒登錄過）</span></label>
-  <label><input type="radio" name="j_src" value="朋友帶來"><span>朋友帶來</span></label>
-  <label><input type="radio" name="j_src" value="別人送的"><span>別人送的</span></label>
-  <label><input type="radio" name="j_src" value="餐廳"><span>餐廳</span></label>
-  <label><input type="radio" name="j_src" value="其他"><span>其他</span></label>
+ <fieldset class="types jsrc" id="j_srcSet"><legend>這瓶酒是 *</legend>
+  <label><input type="radio" name="j_src" value="cellar"><span>酒窖</span></label>
+  <label><input type="radio" name="j_src" value="ext"><span>非酒窖</span></label>
  </fieldset>
- <p class="hint" id="j_srcHint"></p>
- <div class="field"><label for="j_date">日期 *</label><input id="j_date" type="date"></div>
- <div class="field"><label for="j_name">酒名 *</label><input id="j_name" maxlength="200" autocomplete="off"></div>
- <div class="move-to"><div class="field"><label for="j_vintage">年份</label><input id="j_vintage" maxlength="40" placeholder="例如 2018 或 NV"></div><div class="field"><label for="j_qty">喝了幾瓶</label><input id="j_qty" type="number" min="1" step="1" value="1" inputmode="numeric"></div></div>
- <div id="j_cellar" hidden>
-  <fieldset class="types" style="margin-top:12px"><legend>出庫類型 *</legend>
+
+ <div id="j_cellarBox" hidden>
+  <div class="jpath" id="j_path"></div>
+  <div class="jpick" id="j_pick"></div>
+  <button type="button" class="link jmiss" id="j_missBtn">找不到這瓶？補登一筆</button>
+  <div id="j_miss" hidden>
+   <p class="hint">酒窖裡本來就有、但沒登錄過的酒：儲存時會補登到酒窖並記一筆出庫。</p>
+   <div class="field"><label for="j_mname">酒名 *</label><input id="j_mname" maxlength="200" autocomplete="off"></div>
+   <div class="field"><label for="j_mvintage">年份</label><input id="j_mvintage" maxlength="40" placeholder="例如 2018 或 NV"></div>
+   <div class="field"><label for="j_left">酒窖裡還剩幾瓶</label><input id="j_left" type="number" min="0" step="1" value="0" inputmode="numeric"></div>
+   <div class="move-to" id="j_leftLoc" hidden><div class="field"><label for="j_cab">存放櫃位</label><input id="j_cab" list="cabList" maxlength="80" autocomplete="off"></div><div class="field"><label for="j_shelf">層位</label><input id="j_shelf" list="shelfList" maxlength="80" autocomplete="off"></div></div>
+  </div>
+ </div>
+
+ <div id="j_extBox" hidden>
+  <div class="field"><label for="j_name">酒名 *</label><input id="j_name" maxlength="200" autocomplete="off"></div>
+  <div class="field"><label for="j_vintage">年份</label><input id="j_vintage" maxlength="40" placeholder="例如 2018 或 NV"></div>
+ </div>
+
+ <div id="j_common" hidden>
+  <div class="move-to"><div class="field"><label for="j_qty">瓶數</label><input id="j_qty" type="number" min="1" step="1" value="1" inputmode="numeric"></div><div class="field"><label for="j_date">日期 *</label><input id="j_date" type="date"></div></div>
+  <fieldset class="types" id="j_typeSet" style="margin-top:12px"><legend>類型 *</legend>
    <label><input type="radio" name="j_type" value="自飲"><span>自飲</span></label>
    <label><input type="radio" name="j_type" value="聚餐"><span>聚餐</span></label>
    <label><input type="radio" name="j_type" value="其他"><span>其他</span></label>
   </fieldset>
-  <div class="field"><label for="j_left">酒窖裡還剩幾瓶</label><input id="j_left" type="number" min="0" step="1" value="0" inputmode="numeric"></div>
-  <div class="move-to" id="j_leftLoc" hidden><div class="field"><label for="j_cab">存放櫃位</label><input id="j_cab" list="cabList" maxlength="80" autocomplete="off"></div><div class="field"><label for="j_shelf">層位</label><input id="j_shelf" list="shelfList" maxlength="80" autocomplete="off"></div></div>
+  <div class="field"><label for="j_note">備註</label><input id="j_note" maxlength="500" placeholder="例如 配牛排，很順口"></div>
+  <div class="field"><span class="lbl">評分（選填）</span><span class="stars big" id="j_stars">
+   <button type="button" data-jstar="1" aria-label="1 顆星">★</button><button type="button" data-jstar="2" aria-label="2 顆星">★</button><button type="button" data-jstar="3" aria-label="3 顆星">★</button><button type="button" data-jstar="4" aria-label="4 顆星">★</button><button type="button" data-jstar="5" aria-label="5 顆星">★</button>
+  </span></div>
+  <div class="field" id="j_photoF"><span class="lbl">照片（選填）</span><div class="photo-in"><label>📷 拍照<input type="file" id="j_camera" accept="image/*" capture="environment"></label><label>從相簿選擇<input type="file" id="j_gallery" accept="image/*"></label></div><img class="prev" id="j_preview" alt="待上傳照片" hidden></div>
  </div>
- <div class="field" id="j_whoF"><label for="j_who">誰／場合</label><input id="j_who" maxlength="100" placeholder="例如 王先生"></div>
- <div class="field"><label for="j_note">備註</label><input id="j_note" maxlength="500" placeholder="例如 配牛排，很順口"></div>
- <div class="field"><span class="lbl">評分（選填）</span><span class="stars big" id="j_stars">
-  <button type="button" data-jstar="1" aria-label="1 顆星">★</button><button type="button" data-jstar="2" aria-label="2 顆星">★</button><button type="button" data-jstar="3" aria-label="3 顆星">★</button><button type="button" data-jstar="4" aria-label="4 顆星">★</button><button type="button" data-jstar="5" aria-label="5 顆星">★</button>
- </span></div>
- <div class="field"><span class="lbl">照片（選填）</span><div class="photo-in"><label>📷 拍照<input type="file" id="j_camera" accept="image/*" capture="environment"></label><label>從相簿選擇<input type="file" id="j_gallery" accept="image/*"></label></div><img class="prev" id="j_preview" alt="待上傳照片" hidden></div>
  <div class="ferr" id="journalErr" hidden></div>
- <div class="dact"><button type="button" data-close>取消</button><button type="submit" class="primary">儲存</button></div>
+ <div class="dact"><button type="button" data-close>取消</button><button type="submit" class="primary" id="j_save">儲存</button></div>
 </form></dialog>
 
 <dialog class="small" id="photoModal" aria-labelledby="photoTitle"><div class="dh"><h2 id="photoTitle">補上／更換照片</h2><button data-close aria-label="關閉">×</button></div>
@@ -198,36 +239,8 @@
 
 <dialog id="adminModal" aria-labelledby="adminTitle"><div class="dh"><h2 id="adminTitle">管理</h2><button data-close aria-label="關閉">×</button></div>
 <div class="db">
- <div class="tabs"><button data-tab="audit" class="on">異動紀錄</button><button data-tab="hist">飲酒日誌</button><button data-tab="loc">櫃位／層位</button><button data-tab="keys" id="keysTab">裝置密碼</button></div>
+ <div class="tabs"><button data-tab="audit" class="on">異動紀錄</button><button data-tab="loc">櫃位／層位</button><button data-tab="keys" id="keysTab">裝置密碼</button></div>
  <section id="tab-audit"><p class="hint" style="margin-top:0" id="auditHint">每次異動都是一筆 GitHub commit，由新到舊。</p><div class="audit" id="auditList"></div><button class="small" id="moreAudit" hidden style="margin-top:10px">載入更多</button></section>
- <section id="tab-hist" hidden>
-  <div class="jr">
-   <div class="jcal">
-    <div class="mhead"><button type="button" id="jPrev" aria-label="上個月">‹</button><h3 id="jTitle"></h3><button type="button" id="jNext" aria-label="下個月">›</button></div>
-    <div class="msum" id="jSum"></div>
-    <div class="cal" id="jCal"></div>
-    <div class="jlegend"><span><i class="d-c"></i>酒窖</span><span><i class="d-e"></i>外來</span></div>
-   </div>
-   <div class="jday">
-    <div class="dayh"><h4 id="jDayTitle"></h4><span class="hint" id="jDayCount"></span></div>
-    <div id="jDayList"></div>
-    <button type="button" class="addx" id="jAdd">＋ 記錄喝了什麼（這天）</button>
-   </div>
-  </div>
-  <h3 class="hist-h">出庫紀錄</h3>
-  <p class="hint" style="margin-top:0">每一次出庫（含送禮）都記在這裡，由新到舊。點一筆可以查看那款酒。</p>
-  <div class="hist-filter">
-   <select id="h_year" aria-label="年份"></select>
-   <div class="htypes" id="h_types" role="group" aria-label="出庫類型">
-    <button data-htype="" class="on">全部</button><button data-htype="自飲">自飲</button><button data-htype="聚餐">聚餐</button><button data-htype="送禮">送禮</button><button data-htype="其他">其他</button>
-   </div>
-  </div>
-  <div class="hist-sum" id="histSum"></div>
-  <div class="hist-outs" id="histList"></div>
-  <h3 class="hist-h">已出清的酒款</h3>
-  <p class="hint" style="margin-top:0">庫存全部出完的酒。再入手同一款酒時，可以按「編輯」補上瓶數。</p>
-  <div class="hist" id="histGone"></div>
- </section>
  <section id="tab-loc" hidden>
   <p class="hint" style="margin-top:0">新增酒款時可從這裡的清單選擇，也可以直接輸入新的名稱。</p>
   <p class="hint">櫃位</p><div class="chips" id="cabChips"></div>
