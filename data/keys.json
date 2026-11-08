@@ -23,6 +23,15 @@
    "iv": "8Yp7tPTCYSrYxH+B",
    "ct": "8bNmmK7nYrwpEUXolXemx9bt+tBX/brwzi2+V9VDe8A7fVwnkFHutBfeSqJd03Ol",
    "createdAt": "2026-11-08T05:01:19.267Z"
+  },
+  {
+   "id": "9d41405c-ea52-437d-bf06-d06d2a8b5f8a",
+   "label": "芝琦",
+   "role": "editor",
+   "salt": "gvj6gnJTAMDaIvxR+bxaVA==",
+   "iv": "h9BQqlMLJQQQbx/G",
+   "ct": "n5yL67Wsasy0L/k9CnI1PSuC4laeB6EwaBEH6ru+g4hGQTTvdk3w+sZuNNhn3imi",
+   "createdAt": "2026-11-08T12:59:34.878Z"
   }
  ]
 }
