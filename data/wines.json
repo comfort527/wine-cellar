@@ -767,17 +767,18 @@
     }
    ],
    "origin": "",
-   "photo": "",
+   "photo": "images/W030-1794142303511.jpg",
    "referencePrice": 1000,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-10-03T03:00:51.054Z",
-   "updatedBy": "z1990729",
+   "updatedAt": "2026-11-08T12:51:48.588Z",
+   "updatedBy": "廖炎鴻",
    "vintage": "2023",
    "volume": "750ml",
    "wineName": "Diamond Collection Black Label Claret",
-   "wineryRegion": "Francis Ford Coppola"
+   "wineryRegion": "Francis Ford Coppola",
+   "thumb": "images/W030-1794142303511-t.jpg"
   },
   "W031": {
    "createdAt": "",
@@ -1580,6 +1581,6 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 23,
- "updatedAt": "2026-11-08T04:43:27.757Z"
+ "rev": 24,
+ "updatedAt": "2026-11-08T12:51:48.588Z"
 }
