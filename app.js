@@ -988,7 +988,8 @@ function renderPicker() {
   const crumb = (step, label, on) => `<button type="button" data-jstep="${step}" class="${on ? 'on' : ''}">${esc(label)}</button>`;
   const sel = f.wineId ? byId(f.wineId) : null;
   $('j_path').innerHTML = [crumb('cab', f.cab || '① 選櫃位', !f.cab), f.cab ? crumb('shelf', f.shelf || '② 選層位', !f.shelf) : '', f.shelf ? crumb('wine', sel ? sel.wineName : '③ 選酒', !f.wineId) : ''].filter(Boolean).join('<span class="sep">›</span>');
-  const card = (attr, title, sub, n) => `<button type="button" class="pcard" ${attr}><span><b>${title}</b>${sub ? `<small>${sub}</small>` : ''}</span><em>${n} 瓶</em></button>`;
+  const thumb = w => { const u = thumbUrl(w); return u ? `<img class="pthumb" src="${esc(u)}" alt="" loading="lazy">` : `<span class="pthumb">${esc(w.vintage || 'NV')}</span>`; };
+  const card = (attr, title, sub, n, w) => `<button type="button" class="pcard ${w ? 'withimg' : ''}" ${attr}>${w ? thumb(w) : ''}<span><b>${title}</b>${sub ? `<small>${sub}</small>` : ''}</span><em>${n} 瓶</em></button>`;
   let html = '';
   if (!f.cab) {
     const m = new Map(); for (const {l} of all) m.set(l.cabinet, (m.get(l.cabinet) || 0) + l.quantity);
@@ -998,10 +999,10 @@ function renderPicker() {
     html = [...m].sort((a, b) => shelfNo(a[0]) - shelfNo(b[0])).map(([sh, n]) => card(`data-jshelf="${esc(sh)}"`, esc(sh), '', n)).join('');
   } else if (!f.wineId) {
     html = all.filter(({l}) => l.cabinet === f.cab && l.shelf === f.shelf).sort((a, b) => a.w.wineName.localeCompare(b.w.wineName, 'en'))
-      .map(({w, l}) => card(`data-jwine="${esc(w.wineId)}"`, esc(w.wineName), esc([w.vintage, w.wineryRegion].filter(Boolean).join(' · ')), l.quantity)).join('');
+      .map(({w, l}) => card(`data-jwine="${esc(w.wineId)}"`, esc(w.wineName), esc([w.vintage, w.wineryRegion].filter(Boolean).join(' · ')), l.quantity, w)).join('');
   } else {
     const l = (sel.locations || []).find(x => x.cabinet === f.cab && x.shelf === f.shelf);
-    html = `<div class="pcard chosen"><span><b>${esc(sel.wineName)}${sel.vintage ? ' <span class="v">' + esc(sel.vintage) + '</span>' : ''}</b><small>${esc(f.cab)} · ${esc(f.shelf)}</small></span><em>${l ? l.quantity : 0} 瓶</em></div>`;
+    html = `<div class="pcard chosen withimg">${thumb(sel)}<span><b>${esc(sel.wineName)}${sel.vintage ? ' <span class="v">' + esc(sel.vintage) + '</span>' : ''}</b><small>${esc(f.cab)} · ${esc(f.shelf)}</small></span><em>${l ? l.quantity : 0} 瓶</em></div>`;
   }
   $('j_pick').innerHTML = html || '<p class="hint">這裡沒有庫存。</p>';
 }
@@ -1033,6 +1034,7 @@ function journalPick(e) {
   else return;
   showErr('journalErr', '');
   syncJournalForm();
+  $('j_path').scrollIntoView({block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
 }
 function startMissing() {
   const f = S.jf; f.miss = true; f.wineId = '';

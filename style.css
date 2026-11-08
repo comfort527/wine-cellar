@@ -490,3 +490,6 @@ dialog.wide{width:min(1020px,96vw)}
 .pcard.chosen em{color:var(--wine)}
 .jmiss{margin-top:10px;color:var(--ext);text-decoration:underline;text-underline-offset:4px}
 .fact .v small{font:500 15px var(--body);color:var(--muted)}
+.pcard.withimg{display:grid;grid-template-columns:56px minmax(0,1fr) auto;align-items:center;gap:14px;padding:10px 14px}
+.pthumb{width:56px;height:74px;max-width:100%;border-radius:8px;object-fit:cover;background:var(--sunk);display:grid;place-items:center;font:600 16px var(--display);color:var(--faint)}
+.jpath{scroll-margin-top:96px}
