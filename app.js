@@ -126,7 +126,7 @@ async function loadKeys() {
 }
 
 /* 寫入：每次都讀最新版本、套用變更、帶 sha 寫回；有人同時修改就自動重試。 */
-async function mutate(fn, message) {
+async function mutate(fn, message, {quiet = false} = {}) {
   if (!S.session) fail('請先登入管理。');
   S.busy++;
   try {
@@ -136,7 +136,7 @@ async function mutate(fn, message) {
       if (S.data && (base.rev || 0) < (S.data.rev || 0)) { await sleep(800 * (i + 1)); continue; }
       const draft = structuredClone(base);
       const result = fn(draft);
-      draft.rev = (base.rev || 0) + 1; draft.updatedAt = now();
+      draft.rev = (base.rev || 0) + 1; if (!quiet) draft.updatedAt = now();
       const title = typeof message === 'function' ? message(result, draft) : message;
       const r = await putFile(CFG.dataPath, jsonBytes(draft), cur?.sha, `${title}\n\n操作者：${S.session.label}`);
       if (r.ok) { S.data = draft; S.sha = r.sha; S.etag = null; S.syncedAt = now(); render(); return result; }
@@ -694,16 +694,15 @@ async function saveStock() {
 /* ---------- 飲用優先 ---------- */
 async function setPriority(id, n) {
   const w = byId(id); if (!w || !canEdit() || S.prioBusy) return;
-  const next = n === prioOf(w) ? 0 : n, who = S.session.label;
+  const next = n === prioOf(w) ? 0 : n;
   S.prioBusy = true; document.querySelectorAll('#drawer [data-prio]').forEach(b => b.disabled = true);
   try {
     await mutate(d => {
       const cur = d.wines[id]; if (!cur) fail('這款酒已不存在。');
       const old = prioOf(cur);
       if (next) cur.priority = next; else delete cur.priority;
-      cur.updatedAt = now(); cur.updatedBy = who;
       return old;
-    }, old => `飲用優先 ${id} ${w.wineName}：${old} → ${next}`);
+    }, old => `飲用優先 ${id} ${w.wineName}：${old} → ${next}`, {quiet: true});
     toast(next ? `「${w.wineName}」設為飲用優先 ${next}。` : `已取消「${w.wineName}」的飲用優先。`);
   } catch (e) { toast(msgOf(e)); }
   finally { S.prioBusy = false; if ($('drawer').open) renderDrawer(); }
@@ -868,6 +867,7 @@ async function loadAudit(wineId, page) {
       if (!r.ok) { authProblem(r); fail('讀取異動紀錄失敗。'); }
       const list = await r.json();
       for (const c of list) {
+        if (/^飲用優先 /.test(c.commit.message)) continue;
         if (wineId && !new RegExp('\\b' + wineId + '\\b').test(c.commit.message)) continue;
         S.audit.push(c);
       }
