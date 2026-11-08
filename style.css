@@ -390,3 +390,5 @@ legend{font-size:20px;color:var(--muted);padding:0 6px}
   .hrow.ho .d{grid-area:d}.hrow.ho .gone{grid-area:gone;justify-self:end}.hrow.ho .q{grid-area:q}.hrow.ho .r{grid-area:r}
 }
 .hist-sum em{font-style:normal;white-space:nowrap;margin-right:16px}
+.pdots.big i,.pdots.big button{display:inline-grid;place-items:center;font:600 19px/1 var(--body);font-variant-numeric:tabular-nums;color:var(--muted);font-style:normal}
+.pdots.big i.on,.pdots.big button.on{color:#fff}
