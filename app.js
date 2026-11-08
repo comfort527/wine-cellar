@@ -23,7 +23,8 @@ const S = {
   sort: 'loc', drawer: null,
   busy: 0, lastPoll: 0, syncedAt: null, rawFallback: false, auditPage: 1, auditWine: '', audit: []
 };
-try { S.view = localStorage.getItem('cellarView') === 'grid' ? 'grid' : 'list'; S.sort = localStorage.getItem('cellarSort') || 'loc'; } catch {}
+S.view = 'grid';
+try { S.view = localStorage.getItem('cellarView') === 'list' ? 'list' : 'grid'; S.sort = localStorage.getItem('cellarSort') || 'loc'; } catch {}
 
 /* ---------- 小工具 ---------- */
 let toastTimer;
