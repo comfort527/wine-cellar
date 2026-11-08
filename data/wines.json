@@ -427,14 +427,14 @@
    "revision": 2,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-11-08T04:42:05.378Z",
+   "updatedAt": "2026-11-08T04:42:11.251Z",
    "updatedBy": "浩銓",
    "vintage": "2019",
    "volume": "750ml",
    "wineName": "Major",
    "wineryRegion": "Château l'Escadre",
    "thumb": "images/W016-1794053494809-t.jpg",
-   "priority": 3
+   "priority": 2
   },
   "W017": {
    "createdAt": "",
@@ -1581,6 +1581,6 @@
    "priority": 1
   }
  },
- "rev": 6,
- "updatedAt": "2026-11-08T04:42:08.225Z"
+ "rev": 7,
+ "updatedAt": "2026-11-08T04:42:11.251Z"
 }
