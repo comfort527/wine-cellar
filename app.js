@@ -827,7 +827,7 @@ async function checkStorage() {
     if (el) {
       el.hidden = false; el.classList.toggle('warn', pct >= .8);
       el.querySelector('.fill').style.width = Math.min(100, pct * 100).toFixed(1) + '%';
-      el.querySelector('.txt').textContent = `儲存空間：已用 ${mb < 10 ? mb.toFixed(1) : Math.round(mb)} MB／建議上限 ${STORAGE_LIMIT_MB} MB${pct >= .8 ? '。空間快滿了，請減少更換照片。' : ''}`;
+      el.querySelector('.txt').textContent = `儲存空間 ${mb < 10 ? mb.toFixed(1) : Math.round(mb)}／${STORAGE_LIMIT_MB} MB${pct >= .8 ? '　快滿了，請少換照片' : ''}`;
     }
     return S.storage;
   } catch { return null; }

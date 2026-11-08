@@ -166,10 +166,6 @@
 
 <dialog id="adminModal" aria-labelledby="adminTitle"><div class="dh"><h2 id="adminTitle">管理</h2><button data-close aria-label="關閉">×</button></div>
 <div class="db">
- <div class="admin-top">
-  <div class="storage" id="storageBar" hidden><div class="track"><div class="fill"></div></div><span class="txt"></span></div>
-  <button class="ghost" id="exportBtn">⇩ 匯出 CSV</button>
- </div>
  <div class="tabs"><button data-tab="audit" class="on">異動紀錄</button><button data-tab="hist">歷史酒單</button><button data-tab="loc">櫃位／層位</button><button data-tab="keys" id="keysTab">裝置密碼</button></div>
  <section id="tab-audit"><p class="hint" style="margin-top:0" id="auditHint">每次異動都是一筆 GitHub commit，由新到舊。</p><div class="audit" id="auditList"></div><button class="small" id="moreAudit" hidden style="margin-top:10px">載入更多</button></section>
  <section id="tab-hist" hidden>
@@ -207,6 +203,10 @@
   <div class="ferr" id="keysErr" hidden></div>
   <p><a id="repoLink" target="_blank" rel="noopener">開啟 GitHub repo</a></p>
  </section>
+ <div class="admin-foot">
+  <div class="storage" id="storageBar" hidden><span class="txt"></span><div class="track"><div class="fill"></div></div></div>
+  <button class="ghost" id="exportBtn">⇩ 匯出 CSV</button>
+ </div>
 </div></dialog>
 
 <div class="toast" id="toast" role="status" hidden></div>

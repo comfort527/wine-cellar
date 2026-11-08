@@ -204,8 +204,8 @@ dialog.small{width:min(580px,94vw)}
 .bul{padding-left:20px;line-height:1.8}
 fieldset{border:1px solid var(--line);border-radius:var(--r-sm);padding:12px 14px;margin:14px 0 0}
 legend{font-size:20px;color:var(--muted);padding:0 6px}
-.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
-.tabs button{border-radius:999px;padding:6px 14px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.tabs button{flex:1 1 0;min-width:0;border-radius:999px;padding:8px 10px;text-align:center;white-space:nowrap}
 .tabs button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .audit{font-size:20px;display:flex;flex-direction:column;gap:6px}
 .audit div{padding:9px 12px;border-radius:var(--r-sm);background:var(--surface-2);overflow-wrap:anywhere}
@@ -342,9 +342,6 @@ legend{font-size:20px;color:var(--muted);padding:0 6px}
   .card .cb .prod{display:none}
   .card .ph{font-size:24px}
 }
-.admin-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-.admin-top .storage{margin-bottom:0}
-.admin-top #exportBtn{margin-left:auto}
 
 /* 飲用優先：4 個點，實心紅點＝優先等級，虛線圈＝未達 */
 .phbox{position:relative;display:block}
@@ -392,3 +389,16 @@ legend{font-size:20px;color:var(--muted);padding:0 6px}
 .hist-sum em{font-style:normal;white-space:nowrap;margin-right:16px}
 .pdots.big i,.pdots.big button{display:inline-grid;place-items:center;font:600 19px/1 var(--body);font-variant-numeric:tabular-nums;color:var(--muted);font-style:normal}
 .pdots.big i.on,.pdots.big button.on{color:#fff}
+
+/* 管理：底部列（儲存空間＋匯出） */
+.admin-foot{display:flex;align-items:center;gap:12px 16px;flex-wrap:wrap;margin-top:24px;padding-top:16px;border-top:1px solid var(--line)}
+.admin-foot .storage{flex:1 1 220px;min-width:0;margin:0;display:flex;flex-direction:column;align-items:stretch;gap:6px}
+.admin-foot .storage .track{flex:none;width:100%;max-width:260px}
+.admin-foot #exportBtn{margin-left:auto}
+@media (max-width:760px){
+  .tabs button{flex:1 1 calc(50% - 4px)}
+  .admin-foot{flex-direction:column;align-items:stretch}
+  .admin-foot .storage{flex:none}
+  .admin-foot .storage .track{max-width:none}
+  .admin-foot #exportBtn{margin-left:0;width:100%}
+}
