@@ -402,3 +402,73 @@ legend{font-size:20px;color:var(--muted);padding:0 6px}
   .admin-foot .storage .track{max-width:none}
   .admin-foot #exportBtn{margin-left:0;width:100%}
 }
+
+/* ---------- 飲酒日誌 ---------- */
+:root{--ext:#9a7426;--star:#d99a14}
+@media (prefers-color-scheme:dark){:root{--ext:#d9b56a;--star:#f2c14e}}
+.jr{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px;align-items:start}
+.mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.mhead h3{font:700 26px var(--serif-tc);letter-spacing:.06em}
+.mhead button{width:52px;height:52px;border-radius:50%;font-size:26px;padding:0;line-height:1}
+.mhead button:disabled{opacity:.3;cursor:default}
+.msum{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.msum span{display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:999px;background:var(--surface-2);font-size:18px}
+.msum b{font:600 24px var(--display);font-variant-numeric:lining-nums}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cal .wd{text-align:center;font-size:16px;color:var(--muted);padding:2px 0}
+.cal .wd.sun{color:var(--bad)}
+.cal .day{aspect-ratio:1/1.05;min-height:0;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:7px 0 0;gap:5px;font:600 22px/1 var(--display);font-variant-numeric:lining-nums;color:var(--ink);background:transparent;border:1px solid transparent}
+.cal .day.blank{visibility:hidden}
+.cal .day.has{background:var(--surface-2)}
+.cal .day.today{border-color:var(--wine)}
+.cal .day.sel{background:var(--wine);color:var(--on-wine)}
+.cal .day:disabled{opacity:.3;cursor:default}
+.cal .dots{display:flex;gap:3px;flex-wrap:wrap;justify-content:center;max-width:92%}
+.cal .dots em{font:normal 600 12px/10px var(--body)}
+.d-c,.d-e{display:inline-block;width:10px;height:10px;border-radius:50%;box-sizing:border-box;flex:none}
+.d-c{background:var(--wine)}
+.d-e{border:2px solid var(--ext)}
+.cal .day.sel .d-c{background:var(--on-wine)}
+.cal .day.sel .d-e{border-color:var(--on-wine)}
+.cal .day.sel em{color:var(--on-wine)}
+.jlegend{display:flex;gap:18px;margin-top:10px;font-size:16px;color:var(--muted)}
+.jlegend i{margin-right:6px;vertical-align:-1px}
+.dayh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;gap:10px}
+.dayh h4{font:700 22px var(--serif-tc);margin:0}
+.entry{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;padding:12px;border:1px solid var(--line);border-radius:14px;margin-bottom:10px;background:var(--surface)}
+.entry.cellar{cursor:pointer}
+.entry.cellar:hover{border-color:var(--faint)}
+.entry .ph{width:64px;height:84px;max-width:100%;border-radius:8px;background:var(--sunk);object-fit:cover;display:grid;place-items:center;font:600 17px var(--display);color:var(--faint)}
+.entry .eb{min-width:0}
+.entry .t{font:600 22px/1.2 var(--display);overflow-wrap:anywhere}
+.entry .t .v{color:var(--brass);font-weight:500}
+.entry .m{font-size:17px;color:var(--muted);margin-top:4px;overflow-wrap:anywhere}
+.entry .note{font-size:17px;margin-top:4px;overflow-wrap:anywhere}
+.entry .erow{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:6px}
+.etools{display:inline-flex;gap:6px}
+.badge{display:inline-block;font:600 14px/1.5 var(--body);padding:1px 10px;border-radius:999px;margin-right:6px;vertical-align:1px}
+.badge.c{background:var(--wine-soft);color:var(--wine)}
+.badge.e{background:color-mix(in srgb,var(--ext) 16%,transparent);color:var(--ext)}
+.addx{width:100%;border:1.5px dashed var(--ext);color:var(--ext);background:transparent;font-weight:700;padding:12px}
+.addx:hover{background:color-mix(in srgb,var(--ext) 8%,transparent);border-color:var(--ext)}
+.empty-day{padding:22px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:14px;margin-bottom:10px}
+.stars{display:inline-flex;gap:0}
+.stars button,.stars i{display:inline-grid;place-items:center;width:34px;height:34px;min-height:0;padding:0;border:0;background:none;font:normal 26px/1 var(--body);color:var(--line)}
+.stars .on{color:var(--star)}
+.stars button:hover{color:var(--star)}
+.stars.big button{width:46px;height:46px;font-size:34px}
+@media (pointer:coarse){.stars button{width:40px;height:40px;min-height:40px}}
+#journalForm .field{margin-top:10px}
+.jsrc label#j_srcCellar span{border-style:dashed}
+@media (max-width:900px){.jr{grid-template-columns:1fr}}
+@media (max-width:760px){.mhead h3{font-size:24px}.cal .day{font-size:20px;padding-top:6px}}
+.cal .day{aspect-ratio:auto;min-height:66px}
+@media (max-width:760px){
+  .cal .day{min-height:58px;gap:4px}
+  .cal .dots{gap:2px}
+  .cal .d-c,.cal .d-e{width:8px;height:8px}
+  .cal .d-e{border-width:1.5px}
+  .msum{gap:6px}
+  .msum span{padding:3px 10px;font-size:16px;gap:4px}
+  .msum b{font-size:20px}
+}

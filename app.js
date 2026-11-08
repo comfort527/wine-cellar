@@ -266,6 +266,7 @@ function render() {
   renderMap(list);
   renderList(list);
   if ($('drawer').open && S.drawer) renderDrawer();
+  if ($('adminModal').open && !$('tab-hist').hidden) renderHistory();
 }
 function renderMap(list) {
   const cabs = new Map();
@@ -459,6 +460,22 @@ function wire() {
   $('shelfChips').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) removeCatalog('shelves', b.dataset.rm); });
   const openHist = e => { const h = e.target.closest('[data-hist]'); if (!h || (e.type === 'keydown' && e.key !== 'Enter')) return; $('adminModal').close(); openDrawer(h.dataset.hist); };
   for (const id of ['histList', 'histGone']) { $(id).addEventListener('click', openHist); $(id).addEventListener('keydown', openHist); }
+  $('jPrev').addEventListener('click', () => shiftMonth(-1));
+  $('jNext').addEventListener('click', () => shiftMonth(1));
+  $('jCal').addEventListener('click', e => { const b = e.target.closest('[data-jday]'); if (b && !b.disabled) { S.jDay = b.dataset.jday; renderJournal(); } });
+  $('jAdd').addEventListener('click', () => openJournal());
+  $('jDayList').addEventListener('click', e => {
+    const r = e.target.closest('[data-rate]'); if (r) { e.stopPropagation(); return setRating(r.dataset.key, Number(r.dataset.rate)); }
+    const ed = e.target.closest('[data-jedit]'); if (ed) return openJournal(ed.dataset.jedit);
+    const dl = e.target.closest('[data-jdel]'); if (dl) return deleteJournal(dl);
+    openHist(e);
+  });
+  $('jDayList').addEventListener('keydown', e => { if (!e.target.closest('button')) openHist(e); });
+  $('journalForm').addEventListener('submit', e => { e.preventDefault(); submit('journalForm', 'journalErr', saveJournal); });
+  document.querySelectorAll('input[name=j_src]').forEach(r => r.addEventListener('change', syncJournalForm));
+  $('j_left').addEventListener('input', syncJournalForm);
+  $('j_stars').addEventListener('click', e => { const b = e.target.closest('[data-jstar]'); if (b) { const n = Number(b.dataset.jstar); S.jRating = S.jRating === n ? 0 : n; syncJournalForm(); } });
+  for (const id of ['j_camera', 'j_gallery']) $(id).addEventListener('change', e => pickPhoto(e.target.files[0], 'j_preview', b => S.jPhoto = b, 'journalErr'));
   $('h_year').addEventListener('change', e => { S.histYear = e.target.value; renderHistory(); });
   $('h_types').addEventListener('click', e => { const b = e.target.closest('[data-htype]'); if (b) { S.histType = b.dataset.htype; renderHistory(); } });
   $('slotList').addEventListener('click', e => { const b = e.target.closest('[data-delslot]'); if (b) deleteSlot(b); });
@@ -486,6 +503,7 @@ function switchTab(name) {
   $('keysTab').hidden = !isAdmin();
   if (name === 'hist' || name === 'loc') renderAdmin();
   if (name === 'keys') renderSlots();
+  if (name === 'audit' && S.auditLoadedFor !== undefined) loadAudit('', 1);
 }
 
 /* ---------- 登入與初始設定 ---------- */
@@ -857,7 +875,165 @@ function renderAdmin() {
   renderHistory();
 }
 const OUT_TYPES = ['自飲', '聚餐', '送禮', '其他'];
+
+/* ---------- 飲酒日誌：日曆＋當天紀錄（酒窖出庫自飲／聚餐／其他＋外來的酒） ---------- */
+const WEEK = '日一二三四五六';
+function journalEntries() {
+  const out = [];
+  for (const w of wines()) for (const o of w.outs || []) {
+    const type = OUT_TYPES.includes(o.type) ? o.type : '其他';
+    if (type === '送禮') continue;
+    out.push({kind: 'cellar', key: `o|${w.wineId}|${o.at || ''}`, wineId: w.wineId, at: o.at || '', date: o.date, name: w.wineName, vintage: w.vintage,
+      qty: Number(o.qty) || 1, type, note: o.reason || '', where: [o.cabinet, o.shelf].filter(Boolean).join(' · '), rating: Number(o.rating) || 0, photo: thumbUrl(w)});
+  }
+  for (const j of S.data?.journal || []) out.push({kind: 'ext', key: `j|${j.id}`, id: j.id, at: j.at || '', date: j.date, name: j.name, vintage: j.vintage,
+    qty: Number(j.qty) || 1, source: j.source, who: j.who || '', note: j.note || '', rating: Number(j.rating) || 0, photo: j.thumb ? fileUrl(j.thumb) : j.photo ? fileUrl(j.photo) : ''});
+  return out;
+}
+const sumQty = list => list.reduce((a, e) => a + e.qty, 0);
+function starsHtml(e) {
+  const ed = canEdit();
+  return `<span class="stars" ${ed ? 'role="group"' : 'role="img"'} aria-label="評分 ${e.rating}／5">${[1, 2, 3, 4, 5].map(i => ed
+    ? `<button type="button" class="${i <= e.rating ? 'on' : ''}" data-rate="${i}" data-key="${esc(e.key)}" aria-label="${i} 顆星">★</button>`
+    : `<i class="${i <= e.rating ? 'on' : ''}">★</i>`).join('')}</span>`;
+}
+function entryHtml(e) {
+  const ph = e.photo ? `<img class="ph" src="${esc(e.photo)}" alt="" loading="lazy">` : `<span class="ph">${esc(e.vintage || 'NV')}</span>`;
+  const meta = e.kind === 'cellar'
+    ? `<span class="badge c">酒窖</span>${esc(e.type)} · ${e.qty} 瓶${e.where ? ' · ' + esc(e.where) : ''}`
+    : `<span class="badge e">外來 · ${esc(e.source)}</span>${e.qty} 瓶${e.who ? ' · ' + esc(e.who) : ''}`;
+  const tools = e.kind === 'ext' && canEdit() ? `<span class="etools"><button type="button" class="small" data-jedit="${esc(e.id)}">編輯</button><button type="button" class="small danger" data-jdel="${esc(e.id)}">刪除</button></span>` : '';
+  const open = e.kind === 'cellar' ? `data-hist="${esc(e.wineId)}" role="button" tabindex="0"` : '';
+  return `<div class="entry ${e.kind}" ${open}>${ph}<div class="eb"><div class="t">${esc(e.name)}${e.vintage ? ` <span class="v">${esc(e.vintage)}</span>` : ''}</div><div class="m">${meta}</div>${e.note ? `<div class="note">${esc(e.note)}</div>` : ''}<div class="erow">${starsHtml(e)}${tools}</div></div></div>`;
+}
+function renderJournal() {
+  if (!$('jCal')) return;
+  const t = today(), all = journalEntries();
+  if (!S.jMonth) S.jMonth = t.slice(0, 7);
+  if (!S.jDay || !S.jDay.startsWith(S.jMonth)) S.jDay = S.jMonth === t.slice(0, 7) ? t : S.jMonth + '-01';
+  const [y, m] = S.jMonth.split('-').map(Number);
+  $('jTitle').textContent = `${y} 年 ${m} 月`;
+  const inMonth = all.filter(e => (e.date || '').startsWith(S.jMonth));
+  $('jSum').innerHTML = `<span>本月 <b>${sumQty(inMonth)}</b> 瓶</span><span><i class="d-c"></i>酒窖 <b>${sumQty(inMonth.filter(e => e.kind === 'cellar'))}</b></span><span><i class="d-e"></i>外來 <b>${sumQty(inMonth.filter(e => e.kind === 'ext'))}</b></span>`;
+  const byDay = {};
+  for (const e of inMonth) (byDay[e.date] = byDay[e.date] || []).push(e);
+  let html = [...WEEK].map((d, i) => `<div class="wd ${i === 0 ? 'sun' : ''}">${d}</div>`).join('');
+  for (let i = 0; i < new Date(y, m - 1, 1).getDay(); i++) html += '<span class="day blank" aria-hidden="true"></span>';
+  for (let d = 1, n = new Date(y, m, 0).getDate(); d <= n; d++) {
+    const key = `${S.jMonth}-${String(d).padStart(2, '0')}`, es = byDay[key] || [];
+    const dots = es.slice(0, 4).map(e => `<i class="${e.kind === 'cellar' ? 'd-c' : 'd-e'}"></i>`).join('') + (es.length > 4 ? '<em>+</em>' : '');
+    html += `<button type="button" class="day ${es.length ? 'has' : ''} ${key === S.jDay ? 'sel' : ''} ${key === t ? 'today' : ''}" data-jday="${key}" ${key > t ? 'disabled' : ''} aria-label="${m} 月 ${d} 日${es.length ? `，${sumQty(es)} 瓶` : ''}" aria-pressed="${key === S.jDay}">${d}<span class="dots">${dots}</span></button>`;
+  }
+  $('jCal').innerHTML = html;
+  $('jNext').disabled = S.jMonth >= t.slice(0, 7);
+  const dd = new Date(S.jDay + 'T00:00:00'), list = (byDay[S.jDay] || []).sort((a, b) => a.at.localeCompare(b.at));
+  $('jDayTitle').textContent = `${dd.getMonth() + 1} 月 ${dd.getDate()} 日（星期${WEEK[dd.getDay()]}）`;
+  $('jDayCount').textContent = list.length ? `${sumQty(list)} 瓶` : '';
+  $('jDayList').innerHTML = list.map(entryHtml).join('') || '<div class="empty-day">這天沒有紀錄。</div>';
+  $('jAdd').hidden = !canEdit() || S.jDay > t;
+}
+function shiftMonth(n) {
+  const [y, m] = S.jMonth.split('-').map(Number), d = new Date(y, m - 1 + n, 1);
+  S.jMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; S.jDay = null; renderJournal();
+}
+async function setRating(key, n) {
+  if (!canEdit() || S.rateBusy) return;
+  const e = journalEntries().find(x => x.key === key); if (!e) return;
+  const next = n === e.rating ? 0 : n;
+  S.rateBusy = true;
+  try {
+    await mutate(d => {
+      const rec = e.kind === 'cellar' ? (d.wines[e.wineId]?.outs || []).find(o => (o.at || '') === e.at) : (d.journal || []).find(j => j.id === e.id);
+      if (!rec) fail('找不到這筆紀錄，請重新整理。');
+      if (next) rec.rating = next; else delete rec.rating;
+    }, `評分 ${e.wineId || ''} ${e.name}：${next} 顆星`, {quiet: true});
+  } catch (err) { toast(msgOf(err)); }
+  finally { S.rateBusy = false; renderJournal(); }
+}
+function openJournal(editId) {
+  if (!canEdit()) return;
+  ensureLists(); S.jEdit = editId || null; S.jPhoto = null;
+  const j = editId ? (S.data.journal || []).find(x => x.id === editId) : null;
+  $('jFormTitle').textContent = j ? '編輯飲酒紀錄' : '記錄喝了什麼';
+  $('j_srcCellar').hidden = !!j;
+  document.querySelectorAll('input[name=j_src]').forEach(r => r.checked = !!j && r.value === j.source);
+  document.querySelectorAll('input[name=j_type]').forEach(r => r.checked = false);
+  $('j_date').value = j?.date || S.jDay || today(); $('j_date').max = today();
+  $('j_name').value = j?.name || ''; $('j_vintage').value = j?.vintage || ''; $('j_qty').value = j?.qty || 1;
+  $('j_who').value = j?.who || ''; $('j_note').value = j?.note || ''; S.jRating = Number(j?.rating) || 0;
+  $('j_left').value = '0'; $('j_cab').value = ''; $('j_shelf').value = '';
+  $('j_preview').hidden = true; $('j_camera').value = ''; $('j_gallery').value = '';
+  syncJournalForm(); showDialog('journalModal');
+}
+function syncJournalForm() {
+  const src = document.querySelector('input[name=j_src]:checked')?.value || '', cellar = src === '酒窖未登錄';
+  $('j_cellar').hidden = !cellar; $('j_whoF').hidden = cellar;
+  $('j_leftLoc').hidden = !cellar || !(Number($('j_left').value) > 0);
+  $('j_srcHint').textContent = cellar ? '酒窖裡本來就有、但沒登錄過的酒：儲存時會補登到酒窖，並記一筆出庫。' : src ? '酒窖裡沒有的酒，不會影響庫存。' : '';
+  document.querySelectorAll('#j_stars [data-jstar]').forEach(b => { const on = Number(b.dataset.jstar) <= S.jRating; b.classList.toggle('on', on); b.setAttribute('aria-pressed', Number(b.dataset.jstar) === S.jRating); });
+}
+async function saveJournal() {
+  const src = document.querySelector('input[name=j_src]:checked')?.value || '';
+  const date = $('j_date').value, name = $('j_name').value.trim(), vintage = $('j_vintage').value.trim(), qty = Number($('j_qty').value);
+  const note = $('j_note').value.trim(), who = $('j_who').value.trim(), rating = S.jRating || 0, me = S.session.label;
+  if (!src) fail('請選擇這瓶酒的來源。');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date))) fail('請填寫日期。');
+  if (date > today()) fail('日期不能晚於今天。');
+  if (!name) fail('請填寫酒名。');
+  if (!Number.isInteger(qty) || qty < 1) fail('瓶數必須是 1 以上的整數。');
+  if (src === '酒窖未登錄') {
+    const type = document.querySelector('input[name=j_type]:checked')?.value || '';
+    const left = Number($('j_left').value || 0), cab = $('j_cab').value.trim(), shelf = $('j_shelf').value.trim();
+    if (!type) fail('請選擇出庫類型：自飲、聚餐或其他。');
+    if (!Number.isInteger(left) || left < 0) fail('剩下的瓶數必須是 0 以上的整數。');
+    if (left > 0 && (!cab || !shelf)) fail('還有剩的話，請填寫存放的櫃位和層位。');
+    let photo = '', thumb = '';
+    if (S.jPhoto) ({photo, thumb} = await uploadPhoto(S.jPhoto, 'new'));
+    await mutate(d => {
+      const n = Object.keys(d.wines).reduce((mx, k) => /^W\d+$/.test(k) ? Math.max(mx, Number(k.slice(1))) : mx, 0) + 1;
+      const id = 'W' + String(n).padStart(3, '0'), t = now();
+      d.wines[id] = {wineName: name, wineryRegion: '', vintage, entryDate: '', volume: '750ml', source: '', referencePrice: null, origin: '', drinkWindow: '', grapeNotes: '飲用時補登',
+        photo, thumb, status: left > 0 ? 'active' : 'archived', locations: left > 0 ? [{cabinet: cab, shelf, quantity: left}] : [],
+        outs: [{date, type, qty, cabinet: left > 0 ? cab : '（補登）', shelf: left > 0 ? shelf : '', reason: note, ...(rating ? {rating} : {}), by: me, at: t}],
+        createdAt: t, createdBy: me, updatedAt: t, updatedBy: me, revision: 1, ...(left > 0 ? {} : {archivedAt: t, archivedBy: me})};
+      if (left > 0) {
+        d.catalog = d.catalog || {cabinets: [], shelves: []};
+        if (!d.catalog.cabinets.includes(cab)) d.catalog.cabinets.push(cab);
+        if (!d.catalog.shelves.includes(shelf)) d.catalog.shelves.push(shelf);
+      }
+      return id;
+    }, id => `補登並出庫 ${id} ${name}（${type}）：喝掉 ${qty} 瓶，剩 ${left} 瓶\n\n日期：${date}${note ? '\n說明：' + note : ''}`);
+    toast(left > 0 ? `已補登「${name}」並記錄出庫，酒窖還有 ${left} 瓶。` : `已補登「${name}」並記錄出庫。`);
+  } else {
+    let photo = '', thumb = '';
+    if (S.jPhoto) ({photo, thumb} = await uploadPhoto(S.jPhoto, 'J'));
+    const editId = S.jEdit;
+    await mutate(d => {
+      d.journal = d.journal || [];
+      const fields = {date, name, vintage, qty, source: src, who, note};
+      if (editId) {
+        const j = d.journal.find(x => x.id === editId); if (!j) fail('這筆紀錄已不存在。');
+        Object.assign(j, fields);
+        if (rating) j.rating = rating; else delete j.rating;
+        if (photo) { j.photo = photo; j.thumb = thumb; }
+      } else d.journal.push({id: crypto.randomUUID(), ...fields, ...(rating ? {rating} : {}), photo, thumb, by: me, at: now()});
+    }, `${editId ? '編輯' : '新增'}飲酒紀錄 ${name}（${src}）\n\n日期：${date}`);
+    toast(editId ? '已更新飲酒紀錄。' : `已記錄「${name}」。`);
+  }
+  S.jMonth = date.slice(0, 7); S.jDay = date;
+  $('journalModal').close(); renderHistory();
+}
+async function deleteJournal(btn) {
+  if (btn.dataset.confirm !== '1') { btn.dataset.confirm = '1'; btn.textContent = '確定刪除？'; setTimeout(() => { if (btn.isConnected) { btn.dataset.confirm = ''; btn.textContent = '刪除'; } }, 4000); return; }
+  const id = btn.dataset.jdel, j = (S.data.journal || []).find(x => x.id === id); if (!j) return;
+  try {
+    await mutate(d => { d.journal = (d.journal || []).filter(x => x.id !== id); }, `刪除飲酒紀錄 ${j.name}\n\n日期：${j.date}`);
+    toast('已刪除這筆飲酒紀錄。');
+  } catch (e) { toast(msgOf(e)); }
+  renderJournal();
+}
 function renderHistory() {
+  renderJournal();
   const all = [];
   for (const w of wines()) for (const o of w.outs || []) all.push({...o, wineId: w.wineId, wineName: w.wineName, vintage: w.vintage, gone: w.status === 'archived'});
   all.sort((a, b) => ((b.date || '') + (b.at || '')).localeCompare((a.date || '') + (a.at || '')));
@@ -882,6 +1058,7 @@ function renderHistory() {
   $('histGone').innerHTML = gone.map(w => `<div class="hrow" data-hist="${esc(w.wineId)}" role="button" tabindex="0"><span><b>${esc(w.wineName)}</b> ${esc(w.vintage || '')} <span class="hint">${esc(w.wineryRegion || '')}</span></span><span class="hint">出清於 ${fmtTime(w.archivedAt)}（${esc(nameOf(w.archivedBy))}）</span></div>`).join('') || '<p class="hint">還沒有出清的酒款。</p>';
 }
 async function loadAudit(wineId, page) {
+  S.auditLoadedFor = wineId;
   S.auditWine = wineId; S.auditPage = page;
   if (page === 1) S.audit = [];
   $('auditHint').textContent = wineId ? `「${byId(wineId)?.wineName || ''}」的異動紀錄，由新到舊。` : '每次異動都是一筆 GitHub commit，由新到舊。';
@@ -894,7 +1071,7 @@ async function loadAudit(wineId, page) {
       if (!r.ok) { authProblem(r); fail('讀取異動紀錄失敗。'); }
       const list = await r.json();
       for (const c of list) {
-        if (/^飲用優先 /.test(c.commit.message)) continue;
+        if (/^(飲用優先|評分) /.test(c.commit.message)) continue;
         if (wineId && !new RegExp('\\b' + wineId + '\\b').test(c.commit.message)) continue;
         S.audit.push(c);
       }
