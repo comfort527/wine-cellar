@@ -366,3 +366,27 @@ legend{font-size:20px;color:var(--muted);padding:0 6px}
 @media (pointer:coarse){.pdots.big button{width:44px;height:44px;min-height:44px}}
 @media (max-width:760px){.phbox .pdots{bottom:7px;gap:4px;padding:4px 6px}.phbox .pdots i{width:12px;height:12px}}
 .row .nm .pdots.sm{display:inline-flex;margin-top:0;vertical-align:.08em}
+
+/* 歷史酒單：所有出庫紀錄 */
+.hist-filter{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.hist-filter select{width:auto}
+.htypes{display:flex;gap:6px;flex-wrap:wrap}
+.htypes button{border-radius:999px;padding:6px 16px}
+.htypes button.on{background:var(--wine);border-color:var(--wine);color:var(--on-wine)}
+.hist-sum{display:flex;flex-direction:column;gap:2px;margin-bottom:10px}
+.hist-sum span{font-size:18px;color:var(--muted)}
+.hist-outs{display:flex;flex-direction:column}
+.hrow.ho{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:4px 14px;align-items:baseline;padding:10px 6px;border-top:1px solid var(--line);border-radius:0;background:transparent}
+.hrow.ho .d{font-size:18px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.hrow.ho .q{font:600 26px/1 var(--display);color:var(--wine);font-variant-numeric:lining-nums tabular-nums}
+.hrow.ho .r{min-width:0}
+.hrow.ho .r b{font-weight:500;overflow-wrap:anywhere}
+.hrow.ho .r .v{color:var(--brass);font-weight:400}
+.hrow.ho .r small{display:block;font-size:17px;color:var(--muted);overflow-wrap:anywhere}
+.hrow.ho .gone{font-size:15px;padding:2px 10px;border-radius:999px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.hist-h{font:700 20px var(--body);letter-spacing:.08em;margin:26px 0 6px}
+@media (max-width:760px){
+  .hrow.ho{grid-template-columns:auto auto minmax(0,1fr);grid-template-areas:"d q gone" "r r r";gap:4px 12px}
+  .hrow.ho .d{grid-area:d}.hrow.ho .gone{grid-area:gone;justify-self:end}.hrow.ho .q{grid-area:q}.hrow.ho .r{grid-area:r}
+}
+.hist-sum em{font-style:normal;white-space:nowrap;margin-right:16px}

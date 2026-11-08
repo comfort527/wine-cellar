@@ -457,7 +457,9 @@ function wire() {
   $('cabChips').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) removeCatalog('cabinets', b.dataset.rm); });
   $('shelfChips').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) removeCatalog('shelves', b.dataset.rm); });
   const openHist = e => { const h = e.target.closest('[data-hist]'); if (!h || (e.type === 'keydown' && e.key !== 'Enter')) return; $('adminModal').close(); openDrawer(h.dataset.hist); };
-  $('histList').addEventListener('click', openHist); $('histList').addEventListener('keydown', openHist);
+  for (const id of ['histList', 'histGone']) { $(id).addEventListener('click', openHist); $(id).addEventListener('keydown', openHist); }
+  $('h_year').addEventListener('change', e => { S.histYear = e.target.value; renderHistory(); });
+  $('h_types').addEventListener('click', e => { const b = e.target.closest('[data-htype]'); if (b) { S.histType = b.dataset.htype; renderHistory(); } });
   $('slotList').addEventListener('click', e => { const b = e.target.closest('[data-delslot]'); if (b) deleteSlot(b); });
 }
 function toLedger() { document.querySelector('.ledger').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'}); }
@@ -851,8 +853,32 @@ function renderAdmin() {
   const chip = n => `<span class="chip">${esc(n)}<button data-rm="${esc(n)}" aria-label="移除 ${esc(n)}">×</button></span>`;
   $('cabChips').innerHTML = cat.cabinets.map(chip).join('') || '<span class="hint">尚未建立。</span>';
   $('shelfChips').innerHTML = cat.shelves.map(chip).join('') || '<span class="hint">尚未建立。</span>';
-  const hist = wines().filter(w => w.status === 'archived').sort((a, b) => (b.archivedAt || '') > (a.archivedAt || '') ? 1 : -1);
-  $('histList').innerHTML = hist.map(w => `<div class="hrow" data-hist="${esc(w.wineId)}" role="button" tabindex="0"><span><b>${esc(w.wineName)}</b> ${esc(w.vintage || '')} <span class="hint">${esc(w.wineryRegion || '')}</span></span><span class="hint">出清於 ${fmtTime(w.archivedAt)}（${esc(nameOf(w.archivedBy))}）</span></div>`).join('') || '<p class="hint">還沒有出清的酒款。</p>';
+  renderHistory();
+}
+const OUT_TYPES = ['自飲', '聚餐', '送禮', '其他'];
+function renderHistory() {
+  const all = [];
+  for (const w of wines()) for (const o of w.outs || []) all.push({...o, wineId: w.wineId, wineName: w.wineName, vintage: w.vintage, gone: w.status === 'archived'});
+  all.sort((a, b) => ((b.date || '') + (b.at || '')).localeCompare((a.date || '') + (a.at || '')));
+  const years = [...new Set(all.map(o => (o.date || '').slice(0, 4)).filter(Boolean))].sort().reverse();
+  if (S.histYear && !years.includes(S.histYear)) S.histYear = '';
+  $('h_year').innerHTML = `<option value="">全部年份</option>` + years.map(y => `<option value="${y}" ${y === S.histYear ? 'selected' : ''}>${y} 年</option>`).join('');
+  document.querySelectorAll('#h_types [data-htype]').forEach(b => b.classList.toggle('on', b.dataset.htype === (S.histType || '')));
+  const typeOf = o => OUT_TYPES.includes(o.type) ? o.type : '其他';
+  const inYear = all.filter(o => !S.histYear || (o.date || '').startsWith(S.histYear));
+  const rows = inYear.filter(o => !S.histType || typeOf(o) === S.histType);
+  const bottles = list => list.reduce((a, o) => a + (Number(o.qty) || 0), 0);
+  const byType = OUT_TYPES.map(t => [t, bottles(inYear.filter(o => typeOf(o) === t))]).filter(([, n]) => n);
+  $('histSum').innerHTML = inYear.length
+    ? `<b>${S.histYear ? S.histYear + ' 年' : '全部'}：出庫 ${inYear.length} 次、${bottles(inYear)} 瓶</b>${byType.length ? `<span>${byType.map(([t, n]) => `<em>${t} ${n} 瓶</em>`).join('')}</span>` : ''}`
+    : '';
+  $('histList').innerHTML = rows.map(o => `<div class="hrow ho" data-hist="${esc(o.wineId)}" role="button" tabindex="0">
+    <span class="d">${fmtDate(o.date)}</span><span class="q">−${o.qty}</span>
+    <span class="r"><b>${esc(o.wineName)}${o.vintage ? ' <span class="v">' + esc(o.vintage) + '</span>' : ''}</b><small>${esc([o.type, o.reason].filter(Boolean).join(' · ') || '—')} · ${esc(o.cabinet)} · ${esc(o.shelf)} · ${esc(nameOf(o.by))}</small></span>
+    ${o.gone ? '<span class="gone">已出清</span>' : ''}</div>`).join('')
+    || `<p class="hint">${all.length ? '沒有符合條件的出庫紀錄。' : '還沒有出庫紀錄。之後每次出庫都會列在這裡。'}</p>`;
+  const gone = wines().filter(w => w.status === 'archived').sort((a, b) => (b.archivedAt || '') > (a.archivedAt || '') ? 1 : -1);
+  $('histGone').innerHTML = gone.map(w => `<div class="hrow" data-hist="${esc(w.wineId)}" role="button" tabindex="0"><span><b>${esc(w.wineName)}</b> ${esc(w.vintage || '')} <span class="hint">${esc(w.wineryRegion || '')}</span></span><span class="hint">出清於 ${fmtTime(w.archivedAt)}（${esc(nameOf(w.archivedBy))}）</span></div>`).join('') || '<p class="hint">還沒有出清的酒款。</p>';
 }
 async function loadAudit(wineId, page) {
   S.auditWine = wineId; S.auditPage = page;
