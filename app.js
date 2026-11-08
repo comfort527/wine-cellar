@@ -293,6 +293,7 @@ function sortWines(rows) {
   const k = S.sort;
   const firstLoc = w => { const l = (w.locations || []).find(x => x.quantity > 0) || {}; return [l.cabinet || '', shelfNo(l.shelf)]; };
   return rows.sort((a, b) => {
+    if (k === 'prio') return prioOf(b) - prioOf(a) || (Number(a.vintage) || 9999) - (Number(b.vintage) || 9999) || a.wineId.localeCompare(b.wineId);
     if (k === 'vintage-desc') { const va = Number(a.vintage) || 0, vb = Number(b.vintage) || 0; return vb - va || a.wineId.localeCompare(b.wineId); }
     if (k === 'vintage') return (Number(a.vintage) || 9999) - (Number(b.vintage) || 9999) || a.wineId.localeCompare(b.wineId);
     if (k === 'qty') return total(b) - total(a) || a.wineId.localeCompare(b.wineId);
@@ -329,13 +330,15 @@ function rowHtml(w) {
   const locs = (w.locations || []).filter(l => l.quantity > 0).map(l => `<span>${esc(l.cabinet)} · ${esc(l.shelf)}${(w.locations || []).filter(x => x.quantity > 0).length > 1 ? ` ×${l.quantity}` : ''}</span>`).join('');
   return `<button class="row" data-open="${esc(w.wineId)}">
    ${vinHtml(w)}
-   <span class="nm"><b>${esc(w.wineName)}</b><span>${esc(w.wineryRegion || '')}${w.wineryRegion && w.origin ? ' · ' : ''}${esc(w.origin || '')}</span></span>
+   <span class="nm"><b>${esc(w.wineName)}${prioOf(w) ? ' ' + pdots(prioOf(w), 'sm') : ''}</b><span>${esc(w.wineryRegion || '')}${w.wineryRegion && w.origin ? ' · ' : ''}${esc(w.origin || '')}</span></span>
    <span class="lc">${locs || '<span>無庫存</span>'}</span>
    <span class="qt">${t}<small>${esc(w.volume || '瓶')}</small></span></button>`;
 }
+const prioOf = w => Math.max(0, Math.min(4, Number(w.priority) || 0));
+const pdots = (n, cls = '') => `<span class="pdots ${cls}" role="img" aria-label="${n ? `飲用優先 ${n}／4` : '未設飲用優先'}">${[1, 2, 3, 4].map(i => `<i class="${i <= n ? 'on' : ''}"></i>`).join('')}</span>`;
 function cardHtml(w) {
   const p = thumbUrl(w);
-  return `<button class="card" data-open="${esc(w.wineId)}">${p ? `<img class="ph" src="${esc(p)}" alt="${esc(w.wineName)}" loading="lazy">` : `<span class="ph">${esc(w.vintage || 'NV')}</span>`}<span class="cb"><b>${esc(w.wineName)}</b><span class="prod">${esc(w.wineryRegion || '')}</span><span>${esc(w.vintage || 'NV')} · ${total(w)} 瓶</span></span></button>`;
+  return `<button class="card" data-open="${esc(w.wineId)}"><span class="phbox ${p ? 'photo' : ''}">${p ? `<img class="ph" src="${esc(p)}" alt="${esc(w.wineName)}" loading="lazy">` : `<span class="ph">${esc(w.vintage || 'NV')}</span>`}${pdots(prioOf(w))}</span><span class="cb"><b>${esc(w.wineName)}</b><span class="prod">${esc(w.wineryRegion || '')}</span><span>${esc(w.vintage || 'NV')} · ${total(w)} 瓶</span></span></button>`;
 }
 
 /* ---------- 詳細資料抽屜 ---------- */
@@ -369,6 +372,7 @@ function renderDrawer() {
     <div class="dw-head"><span class="vin">${esc(w.vintage || 'NV')}</span><h2 id="dwName">${esc(w.wineName)}</h2>${w.wineryRegion ? `<p>${esc(w.wineryRegion)}</p>` : ''}</div>
     ${p ? `<img class="dw-photo" src="${esc(p)}" alt="${esc(w.wineName)} 酒標照片">` : ''}
     <div class="dw-stock"><div class="sum"><span>目前庫存</span><b>${t} <small style="font-size:22px">瓶</small></b></div>${locs || '<div class="dw-loc"><span class="where hint">沒有存放位置</span></div>'}</div>
+    <div class="dw-prio"><span class="lbl">飲用優先</span>${ed ? `<span class="pdots big" role="group" aria-label="設定飲用優先">${[1, 2, 3, 4].map(i => `<button class="${i <= prioOf(w) ? 'on' : ''}" data-prio="${i}" aria-label="優先 ${i}" aria-pressed="${i === prioOf(w)}"></button>`).join('')}</span>` : pdots(prioOf(w), 'big')}<span class="hint">${prioOf(w) ? `${prioOf(w)}／4` : '未設定'}${ed ? '　點第 4 點＝最優先，再點一次取消' : ''}</span></div>
     <div class="dw-act">${ed ? `${archived ? '' : `<button class="primary" data-stockany="${esc(w.wineId)}" ${t ? '' : 'disabled'}>出庫</button><button class="primary" data-moveany="${esc(w.wineId)}" ${t ? '' : 'disabled'}>移動</button>`}<button class="primary" data-edit="${esc(w.wineId)}">編輯</button><button data-photo="${esc(w.wineId)}">${p ? '更換照片' : '加照片'}</button>` : ''}${ed ? `<button data-log="${esc(w.wineId)}">異動紀錄</button>` : ''}</div>
     ${ed ? (archived ? '<p class="hint" style="margin:0">這款酒已全部出庫。要補回庫存，請按「編輯」填入瓶數，它會回到目前酒款。</p>' : '') : '<p class="hint" style="margin:0">登入管理後可以出庫、移動與編輯這款酒。</p>'}
     <dl class="dw-facts">${facts}${w.grapeNotes ? `<div class="wide"><dt>葡萄品種／備註</dt><dd class="note">${esc(w.grapeNotes)}</dd></div>` : ''}</dl>
@@ -427,6 +431,7 @@ function wire() {
     const sa = e.target.closest('[data-stockany]'); if (sa) return openStock(sa.dataset.stockany);
     const mv = e.target.closest('[data-move]'); if (mv) return openMove(mv.dataset.move, mv.dataset.cab, mv.dataset.shelf);
     const ma = e.target.closest('[data-moveany]'); if (ma) return openMove(ma.dataset.moveany);
+    const pr = e.target.closest('[data-prio]'); if (pr) return setPriority(S.drawer, Number(pr.dataset.prio));
     const ed = e.target.closest('[data-edit]'); if (ed) return openWineForm(byId(ed.dataset.edit));
     const ph = e.target.closest('[data-photo]'); if (ph) return openPhoto(byId(ph.dataset.photo));
     const lg = e.target.closest('[data-log]'); if (lg) { showDialog('adminModal'); switchTab('audit'); loadAudit(lg.dataset.log, 1); }
@@ -686,6 +691,24 @@ async function saveStock() {
   toast(res.archived ? `「${res.name}」已全部出庫，移入歷史酒單。` : `${fmtDate(date)} ${type}出庫 ${qty} 瓶，${cabinet} / ${shelf} 剩 ${res.left} 瓶。`);
 }
 
+/* ---------- 飲用優先 ---------- */
+async function setPriority(id, n) {
+  const w = byId(id); if (!w || !canEdit() || S.prioBusy) return;
+  const next = n === prioOf(w) ? 0 : n, who = S.session.label;
+  S.prioBusy = true; document.querySelectorAll('#drawer [data-prio]').forEach(b => b.disabled = true);
+  try {
+    await mutate(d => {
+      const cur = d.wines[id]; if (!cur) fail('這款酒已不存在。');
+      const old = prioOf(cur);
+      if (next) cur.priority = next; else delete cur.priority;
+      cur.updatedAt = now(); cur.updatedBy = who;
+      return old;
+    }, old => `飲用優先 ${id} ${w.wineName}：${old} → ${next}`);
+    toast(next ? `「${w.wineName}」設為飲用優先 ${next}。` : `已取消「${w.wineName}」的飲用優先。`);
+  } catch (e) { toast(msgOf(e)); }
+  finally { S.prioBusy = false; if ($('drawer').open) renderDrawer(); }
+}
+
 /* ---------- 移動位置 ---------- */
 function openMove(id, cab, shelf) {
   const w = byId(id); if (!w) return; S.move = w; ensureLists();
@@ -811,11 +834,11 @@ async function checkStorage() {
 /* ---------- CSV ---------- */
 function exportCsv() {
   const cell = v => { const s = String(v ?? ''); return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
-  const lines = [['資料類型', ...FIELDS.map(f => f[1]), '櫃位', '層位', '瓶數', '最後修改者', '最後修改時間'].join(',')];
+  const lines = [['資料類型', ...FIELDS.map(f => f[1]), '櫃位', '層位', '瓶數', '飲用優先', '最後修改者', '最後修改時間'].join(',')];
   for (const w of wines()) {
     const type = w.status === 'archived' ? '歷史酒單' : '目前酒款';
     const locs = w.locations?.length ? w.locations : [{cabinet: '', shelf: '', quantity: 0}];
-    for (const l of locs) lines.push([type, ...FIELDS.map(f => w[f[0]]), l.cabinet, l.shelf, l.quantity, nameOf(w.updatedBy), w.updatedAt].map(cell).join(','));
+    for (const l of locs) lines.push([type, ...FIELDS.map(f => w[f[0]]), l.cabinet, l.shelf, l.quantity, prioOf(w), nameOf(w.updatedBy), w.updatedAt].map(cell).join(','));
   }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['﻿' + lines.join('\r\n')], {type: 'text/csv;charset=utf-8'}));

@@ -5,6 +5,7 @@
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
   --brass:#8a6a2c; --glass:#2f5443; --dot:#7a1f33; --dot-empty:#d3d9d2;
+  --prio:#c8102e; --prio-empty:#9aa39d;
   --ok:#2d7650; --bad:#a3233b; --bad-soft:#fbe8ec; --warn:#8a6315; --warn-soft:#fbf3df;
   --shadow:0 1px 2px rgba(20,30,25,.06),0 8px 24px rgba(20,30,25,.06);
   --shadow-lg:0 24px 64px rgba(10,16,13,.28);
@@ -19,6 +20,7 @@
   --ink:#ebe7de; --muted:#9da79f; --faint:#6f7a73; --line:#27312c;
   --wine:#c5475f; --wine-2:#e06b80; --on-wine:#ffffff; --wine-soft:#3a1d24;
   --brass:#d3b06a; --glass:#86bba1; --dot:#d4566d; --dot-empty:#2a3530;
+  --prio:#ff5a6e; --prio-empty:#6f7a73;
   --ok:#7fcc9d; --bad:#f08597; --bad-soft:#3d1f26; --warn:#e2bb63; --warn-soft:#352c16;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
   --shadow-lg:0 24px 64px rgba(0,0,0,.55);
@@ -343,3 +345,24 @@ legend{font-size:20px;color:var(--muted);padding:0 6px}
 .admin-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
 .admin-top .storage{margin-bottom:0}
 .admin-top #exportBtn{margin-left:auto}
+
+/* 飲用優先：4 個點，實心紅點＝優先等級，虛線圈＝未達 */
+.phbox{position:relative;display:block}
+.pdots{display:inline-flex;align-items:center;gap:6px;vertical-align:middle}
+.pdots i,.pdots button{display:block;width:14px;height:14px;padding:0;border-radius:50%;border:1.5px dashed var(--prio-empty);background:transparent;box-sizing:border-box}
+.pdots i.on,.pdots button.on{background:var(--prio);border:1.5px solid var(--prio)}
+.phbox .pdots{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);padding:5px 8px;border-radius:999px}
+.phbox.photo .pdots{background:rgba(255,255,255,.88)}
+.phbox.photo .pdots i:not(.on){border-color:#7d8780}
+.pdots.sm{gap:3px;margin-left:4px}
+.pdots.sm i{width:10px;height:10px}
+.dw-prio{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.dw-prio .lbl{font-size:18px;color:var(--muted);letter-spacing:.06em}
+.pdots.big{gap:10px}
+.pdots.big i,.pdots.big button{width:34px;height:34px;border-width:2px;min-height:0}
+.pdots.big button{cursor:pointer}
+.pdots.big button:hover{border-style:solid;border-color:var(--prio)}
+.pdots.big button:disabled{opacity:.6}
+@media (pointer:coarse){.pdots.big button{width:44px;height:44px;min-height:44px}}
+@media (max-width:760px){.phbox .pdots{bottom:7px;gap:4px;padding:4px 6px}.phbox .pdots i{width:12px;height:12px}}
+.row .nm .pdots.sm{display:inline-flex;margin-top:0;vertical-align:.08em}
