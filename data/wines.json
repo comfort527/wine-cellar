@@ -43,7 +43,7 @@
    "volume": "1500ml",
    "wineName": "Rosso di Montepulciano DOC",
    "wineryRegion": "Azienda Agricola Campino delle Querce/Toscana",
-   "thumb": "images/W001-1794230299139-t.jpg"
+   "thumb": "images/W001-1794230299139-q60-t.jpg"
   },
   "W002": {
    "createdAt": "",
@@ -70,7 +70,7 @@
    "volume": "500ml",
    "wineName": "Tokaji Aszú 3 Puttonyos",
    "wineryRegion": "Bodvin",
-   "thumb": "images/W002-1794230932584-t.jpg"
+   "thumb": "images/W002-1794230932584-q60-t.jpg"
   },
   "W003": {
    "createdAt": "",
@@ -227,7 +227,7 @@
    "volume": "750ml",
    "wineName": "Château Duhart-Milon",
    "wineryRegion": "Château Duhart-Milon",
-   "thumb": "images/W008-1794230364125-t.jpg"
+   "thumb": "images/W008-1794230364125-q60-t.jpg"
   },
   "W009": {
    "createdAt": "",
@@ -358,7 +358,7 @@
    "volume": "3000ML",
    "wineName": "Bordeaux 安貝松堡2020紀念珍藏",
    "wineryRegion": "Château le Pin d'Ambert",
-   "thumb": "images/W013-1794230387432-t.jpg"
+   "thumb": "images/W013-1794230387432-q60-t.jpg"
   },
   "W014": {
    "createdAt": "",
@@ -437,7 +437,7 @@
    "volume": "750ml",
    "wineName": "Major",
    "wineryRegion": "Château l'Escadre",
-   "thumb": "images/W016-1794053494809-t.jpg"
+   "thumb": "images/W016-1794053494809-q60-t.jpg"
   },
   "W017": {
    "createdAt": "",
@@ -677,7 +677,7 @@
    "volume": "750ml",
    "wineName": "Lota",
    "wineryRegion": "Cousiño Macul/Maipo Valley Chile",
-   "thumb": "images/W026-1794230227650-t.jpg"
+   "thumb": "images/W026-1794230227650-q60-t.jpg"
   },
   "W027": {
    "createdAt": "",
@@ -782,7 +782,7 @@
    "volume": "750ml",
    "wineName": "Diamond Collection Black Label Claret",
    "wineryRegion": "Francis Ford Coppola",
-   "thumb": "images/W030-1794142303511-t.jpg"
+   "thumb": "images/W030-1794142303511-q60-t.jpg"
   },
   "W031": {
    "createdAt": "",
@@ -861,7 +861,7 @@
    "volume": "750ml",
    "wineName": "Cabernet Sauvignon",
    "wineryRegion": "Jordan/Alexander Valley Sonoma County",
-   "thumb": "images/W033-1794230418696-t.jpg"
+   "thumb": "images/W033-1794230418696-q60-t.jpg"
   },
   "W034": {
    "createdAt": "",
@@ -888,7 +888,7 @@
    "volume": "750ml",
    "wineName": "Cabernet Sauvignon",
    "wineryRegion": "Koenig Vineyards/Columbia Valley",
-   "thumb": "images/W034-1794230442292-t.jpg"
+   "thumb": "images/W034-1794230442292-q60-t.jpg"
   },
   "W035": {
    "createdAt": "",
@@ -1455,15 +1455,15 @@
    "volume": "375ml",
    "wineName": "Vieux Château Certan/Grand vin",
    "wineryRegion": "Vieux Château CertanPOMEROL",
-   "thumb": "images/W059-1794230482071-t.jpg",
+   "thumb": "images/W059-1794230482071-q60-t.jpg",
    "photos": [
     {
      "photo": "images/W059-1794230482071.jpg",
-     "thumb": "images/W059-1794230482071-t.jpg"
+     "thumb": "images/W059-1794230482071-q60-t.jpg"
     },
     {
      "photo": "images/W059-1794231501212.jpg",
-     "thumb": "images/W059-1794231501212-t.jpg"
+     "thumb": "images/W059-1794231501212-q60-t.jpg"
     }
    ]
   },
@@ -1598,6 +1598,6 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 35,
+ "rev": 36,
  "updatedAt": "2026-11-09T13:38:25.875Z"
 }
