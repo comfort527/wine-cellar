@@ -1456,11 +1456,11 @@
    "origin": "",
    "photo": "images/W059-1794230482071.jpg",
    "referencePrice": 7350,
-   "revision": 12,
+   "revision": 13,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-11-09T14:25:57.420Z",
-   "updatedBy": "廖炎鴻",
+   "updatedAt": "2026-11-09T14:29:00.454Z",
+   "updatedBy": "芝琦",
    "vintage": "2001",
    "volume": "375ml",
    "wineName": "Vieux Château Certan/Grand vin",
@@ -1472,12 +1472,12 @@
      "thumb": "images/W059-1794230482071-q60-t.jpg"
     },
     {
-     "photo": "images/W059-1794233497836.jpg",
-     "thumb": "images/W059-1794233497836-t.jpg"
-    },
-    {
      "photo": "images/W059-1794233521392.jpg",
      "thumb": "images/W059-1794233521392-t.jpg"
+    },
+    {
+     "photo": "images/W059-1794233497836.jpg",
+     "thumb": "images/W059-1794233497836-t.jpg"
     }
    ]
   },
@@ -1612,6 +1612,6 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 46,
- "updatedAt": "2026-11-09T14:25:57.420Z"
+ "rev": 47,
+ "updatedAt": "2026-11-09T14:29:00.454Z"
 }
