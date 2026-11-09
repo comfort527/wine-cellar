@@ -526,3 +526,16 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pbtns{flex-direction:column;align-items:stretch;gap:6px}
 .pbtns button{width:100%}
 .pbtns .cover{text-align:center;padding:9px 0;border-radius:8px;background:var(--wine-soft)}
+.pimg{position:relative;display:block}
+.pno{position:absolute;left:8px;top:8px;min-width:30px;padding:3px 10px;border-radius:999px;background:rgba(0,0,0,.6);color:#fff;font:700 16px/1.3 var(--body);text-align:center}
+.ptile:first-child .pno{background:var(--wine)}
+.pmove{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pmove button{width:100%;padding-left:4px;padding-right:4px}
+.pbtns button:disabled{opacity:.35;cursor:default}
+@media (max-width:760px){
+  .pgrid{grid-template-columns:1fr}
+  .ptile{display:grid;grid-template-columns:120px minmax(0,1fr);align-items:stretch}
+  .ptile .pimg img{height:100%;min-height:160px;aspect-ratio:auto}
+  .pbtns{justify-content:center;padding:10px}
+  .pmove button{white-space:nowrap}
+}

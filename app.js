@@ -477,7 +477,7 @@ function wire() {
   $('f_strip').addEventListener('click', e => { const b = e.target.closest('[data-nrm]'); if (b) { S.newPhotos.splice(Number(b.dataset.nrm), 1); renderNewStrip(); } });
   $('p_camera').addEventListener('change', e => addPhotos(e.target.files));
   $('p_gallery').addEventListener('change', e => addPhotos(e.target.files));
-  $('pgrid').addEventListener('click', e => { const c = e.target.closest('[data-pcover]'); if (c) return coverPhoto(c.dataset.pcover); const d = e.target.closest('[data-pdel]'); if (d) return deletePhoto(d); });
+  $('pgrid').addEventListener('click', e => { const mv = e.target.closest('[data-pmove]'); if (mv) return movePhoto(mv.dataset.path, Number(mv.dataset.pmove)); const c = e.target.closest('[data-pcover]'); if (c) return coverPhoto(c.dataset.pcover); const d = e.target.closest('[data-pdel]'); if (d) return deletePhoto(d); });
   $('loginForm').addEventListener('submit', e => { e.preventDefault(); submit('loginForm', 'loginErr', doLogin); });
   $('setupForm').addEventListener('submit', e => { e.preventDefault(); submit('setupForm', 'setupErr', doSetup); });
   $('wineForm').addEventListener('submit', e => { e.preventDefault(); submit('wineForm', 'wineErr', saveWine); });
@@ -872,7 +872,11 @@ function renderPhotoMgr() {
   const w = byId(S.photo); if (!w) return;
   const ps = photosOf(w);
   $('photoWine').textContent = [w.wineName, w.vintage].filter(Boolean).join('　');
-  $('pgrid').innerHTML = ps.map((p, i) => `<div class="ptile"><img src="${esc(fileUrl(p.thumb || p.photo))}" alt="照片 ${i + 1}"><div class="pbtns">${i === 0 ? '<span class="cover">封面</span>' : `<button type="button" class="small" data-pcover="${esc(p.photo)}">設為封面</button>`}<button type="button" class="small danger" data-pdel="${esc(p.photo)}">刪除</button></div></div>`).join('') || '<p class="hint">還沒有照片。</p>';
+  const dis = S.pMoving ? 'disabled' : '';
+  $('pgrid').innerHTML = ps.map((p, i) => `<div class="ptile"><span class="pimg"><img src="${esc(fileUrl(p.thumb || p.photo))}" alt="第 ${i + 1} 張"><span class="pno">${i === 0 ? '1 封面' : i + 1}</span></span><div class="pbtns">
+    ${i === 0 ? '<span class="cover">封面</span>' : `<button type="button" class="small" data-pcover="${esc(p.photo)}" ${dis}>設為封面</button>`}
+    ${ps.length > 1 ? `<span class="pmove"><button type="button" class="small" data-pmove="-1" data-path="${esc(p.photo)}" ${i === 0 ? 'disabled' : dis} aria-label="第 ${i + 1} 張往前移">◀ 往前</button><button type="button" class="small" data-pmove="1" data-path="${esc(p.photo)}" ${i === ps.length - 1 ? 'disabled' : dis} aria-label="第 ${i + 1} 張往後移">往後 ▶</button></span>` : ''}
+    <button type="button" class="small danger" data-pdel="${esc(p.photo)}" ${dis}>刪除</button></div></div>`).join('') || '<p class="hint">還沒有照片。</p>';
   const full = ps.length >= MAX_PHOTOS;
   $('pAdd').hidden = full || !!S.pBusy;
   $('pCount').textContent = S.pBusy ? `上傳中…（${S.pBusy}）` : `${ps.length}／${MAX_PHOTOS} 張${full ? '，已達上限；要換照片請先刪除一張。' : ''}`;
@@ -900,6 +904,20 @@ async function addPhotos(fileList) {
     toast(`已加入 ${done} 張照片。`);
   } catch (e) { showErr('photoErr', msgOf(e)); }
   finally { S.pBusy = null; renderPhotoMgr(); checkStorage(); }
+}
+async function movePhoto(path, dir) {
+  const id = S.photo, w = byId(id), who = S.session.label;
+  if (S.pMoving) return;
+  S.pMoving = true; renderPhotoMgr();
+  try {
+    await mutate(d => {
+      const cur = d.wines[id]; const list = photosOf(cur).slice(); const i = list.findIndex(p => p.photo === path), j = i + dir;
+      if (i < 0) fail('找不到這張照片，請重新整理。');
+      if (j < 0 || j >= list.length) return;
+      [list[i], list[j]] = [list[j], list[i]]; setPhotos(cur, list); cur.updatedAt = now(); cur.updatedBy = who; cur.revision = (cur.revision || 0) + 1;
+    }, `調整照片順序 ${id} ${w.wineName}`);
+  } catch (e) { showErr('photoErr', msgOf(e)); }
+  finally { S.pMoving = false; renderPhotoMgr(); }
 }
 async function coverPhoto(path) {
   const id = S.photo, w = byId(id), who = S.session.label;
