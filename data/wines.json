@@ -877,17 +877,18 @@
     }
    ],
    "origin": "United States",
-   "photo": "",
+   "photo": "images/W034-1794230442292.jpg",
    "referencePrice": 961,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-09-29T14:18:12.743Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-09T13:20:52.803Z",
+   "updatedBy": "芝琦",
    "vintage": "2018",
    "volume": "750ml",
    "wineName": "Cabernet Sauvignon",
-   "wineryRegion": "Koenig Vineyards/Columbia Valley"
+   "wineryRegion": "Koenig Vineyards/Columbia Valley",
+   "thumb": "images/W034-1794230442292-t.jpg"
   },
   "W035": {
    "createdAt": "",
@@ -1586,6 +1587,6 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 29,
- "updatedAt": "2026-11-09T13:20:28.826Z"
+ "rev": 30,
+ "updatedAt": "2026-11-09T13:20:52.803Z"
 }
