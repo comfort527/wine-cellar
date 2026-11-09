@@ -32,17 +32,18 @@
     }
    ],
    "origin": "Italy",
-   "photo": "",
+   "photo": "images/W001-1794230299139.jpg",
    "referencePrice": 1500,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-09-30T08:20:39.014Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-09T13:18:24.141Z",
+   "updatedBy": "芝琦",
    "vintage": "2023",
    "volume": "1500ml",
    "wineName": "Rosso di Montepulciano DOC",
-   "wineryRegion": "Azienda Agricola Campino delle Querce/Toscana"
+   "wineryRegion": "Azienda Agricola Campino delle Querce/Toscana",
+   "thumb": "images/W001-1794230299139-t.jpg"
   },
   "W002": {
    "createdAt": "",
@@ -1582,6 +1583,6 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 25,
- "updatedAt": "2026-11-09T13:17:12.722Z"
+ "rev": 26,
+ "updatedAt": "2026-11-09T13:18:24.141Z"
 }
