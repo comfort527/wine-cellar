@@ -1,4 +1,4 @@
-:root{--ver:"20261109c"}
+:root{--ver:"20261109d"}
 /* 酒窖：冷石灰與酒紅（淺色）／酒瓶玻璃墨綠（深色）。
    版面：頂列 → 總瓶數 → 酒櫃配置圖（每層一排瓶點）→ 帳冊式酒款清單；詳細資料從側邊（手機為底部）滑出。 */
 :root{
@@ -597,3 +597,10 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 @media (max-width:760px){.map{grid-template-columns:1fr}.fridge{--bs:27px}.fr-name{font-size:16px}}
 .map-legend i.lg-r{background:radial-gradient(circle,#0b0305 0 26%,#4a1220 31% 55%,#7a2032 62%,#2b0a10 74%)}
 .map-legend i.lg-w{background:radial-gradient(circle,#0e1306 0 26%,#4c5a1e 31% 55%,#a3ad5c 62%,#2e3510 74%)}
+.pth{position:relative;display:block}
+.pth em{position:absolute;left:4px;bottom:4px;font:600 12px/1.4 var(--body);font-style:normal;color:#fff;background:var(--wine);border-radius:999px;padding:0 6px}
+.pend .pth button{position:absolute;top:4px;right:4px;width:30px;height:30px;min-width:0;min-height:0;padding:0;border-radius:50%;display:grid;place-items:center;font-size:18px;line-height:1;background:rgba(255,255,255,.92);color:#222;border:1px solid rgba(0,0,0,.15);box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.pend-add{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pend-add label{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:var(--r-sm);padding:6px 12px;cursor:pointer;background:var(--surface);font-weight:500}
+.pend-add input{display:none}
+.pend-add .hint{margin:0}

@@ -36,7 +36,7 @@ function fail(m) { const e = new Error(m); e.user = true; throw e; }
 function msgOf(e) { return e?.user ? e.message : '操作未完成，請稍後再試。'; }
 const canEdit = () => !!S.session;
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261109c';
+const APP_VER = '20261109d';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -509,7 +509,15 @@ function wire() {
   });
   $('q_strip').addEventListener('click', e => { const b = e.target.closest('[data-qrm]'); if (b) { S.pendNew.splice(Number(b.dataset.qrm), 1); renderPendStrip(); } });
   $('q_save').addEventListener('click', savePending);
-  $('pendList').addEventListener('click', e => { const ed = e.target.closest('[data-pedit]'); if (ed) return editPending(ed.dataset.pedit); const d = e.target.closest('[data-pdelq]'); if (d) return deletePending(d); });
+  $('pendList').addEventListener('click', e => {
+    const ed = e.target.closest('[data-pedit]'); if (ed) return editPending(ed.dataset.pedit);
+    const d = e.target.closest('[data-pdelq]'); if (d) return deletePending(d);
+    const rm = e.target.closest('[data-pprm]'); if (rm) return removePendPhoto(rm.closest('[data-pid]').dataset.pid, rm.dataset.pprm);
+  });
+  $('pendList').addEventListener('change', e => {
+    const inp = e.target.closest('[data-padd]'); if (!inp) return;
+    const files = [...inp.files]; inp.value = ''; addPendPhotos(inp.closest('[data-pid]').dataset.pid, files);
+  });
   $('p_camera').addEventListener('change', e => addPhotos(e.target.files));
   $('p_gallery').addEventListener('change', e => addPhotos(e.target.files));
   setupPhotoDrag();
@@ -909,11 +917,57 @@ function renderPending() {
   $('factPend').hidden = !S.session;
   $('sumPend').innerHTML = `${n} <small>瓶</small>` + (n ? `<span class="pend-mini">${list.slice(-3).reverse().map(p => `<img src="${esc(fileUrl(p.photos[0]?.thumb || p.photos[0]?.photo || ''))}" alt="">`).join('')}</span>` : '');
   if (!$('pendModal').open) return;
-  $('pendList').innerHTML = n ? list.slice().reverse().map(p => `<article class="pend">
-    <div class="pend-ph">${p.photos.map((ph, i) => `<a href="${esc(fileUrl(ph.photo))}" target="_blank" rel="noopener"><img src="${esc(fileUrl(ph.thumb || ph.photo))}" alt="第 ${i + 1} 張" loading="lazy"></a>`).join('')}</div>
-    <p class="pend-meta">${esc(p.by || '')}・${fmtTime(p.at)}・${p.photos.length} 張</p>
-    <div class="pend-act"><button type="button" class="primary" data-pedit="${esc(p.id)}">編輯並加入酒櫃</button><button type="button" class="danger" data-pdelq="${esc(p.id)}">刪除</button></div>
-  </article>`).join('') : '<p class="hint pend-empty">目前沒有待入櫃的酒。</p>';
+  const html = n ? list.slice().reverse().map(p => {
+    const busy = S.pendAdding === p.id, room = MAX_PHOTOS - p.photos.length, one = p.photos.length < 2;
+    return `<article class="pend" data-pid="${esc(p.id)}">
+    <div class="pend-ph">${p.photos.map((ph, i) => `<span class="pth"><a href="${esc(fileUrl(ph.photo))}" target="_blank" rel="noopener"><img src="${esc(fileUrl(ph.thumb || ph.photo))}" alt="第 ${i + 1} 張" loading="lazy"></a>${i === 0 ? '<em>封面</em>' : ''}${one || busy ? '' : `<button type="button" data-pprm="${esc(ph.photo)}" aria-label="移除第 ${i + 1} 張">×</button>`}</span>`).join('')}</div>
+    <div class="pend-add">${busy ? '<span class="hint">上傳中…</span>' : room > 0 ? `<label>📷 加拍<input type="file" accept="image/*" capture="environment" data-padd></label><label>從相簿加入<input type="file" accept="image/*" multiple data-padd></label>` : ''}<span class="hint">${p.photos.length}／${MAX_PHOTOS} 張</span></div>
+    <p class="pend-meta">${esc(p.by || '')}・${fmtTime(p.at)}</p>
+    <div class="pend-act"><button type="button" class="primary" data-pedit="${esc(p.id)}" ${busy ? 'disabled' : ''}>編輯並加入酒櫃</button><button type="button" class="danger" data-pdelq="${esc(p.id)}" ${busy ? 'disabled' : ''}>刪除</button></div>
+  </article>`;
+  }).join('') : '<p class="hint pend-empty">目前沒有待入櫃的酒。</p>';
+  // 內容沒變就不重畫：避免定時同步把正在開啟的相機／相簿選擇器換掉
+  if (html !== S.pendHtml || !$('pendList').firstChild) { S.pendHtml = html; $('pendList').innerHTML = html; }
+}
+/* 待入櫃的酒之後再補拍第 2、3、4 張 */
+async function addPendPhotos(id, fileList) {
+  const files = [...fileList], item = (S.data?.pending || []).find(x => x.id === id);
+  if (!item || !files.length || S.pendAdding) return;
+  const room = MAX_PHOTOS - item.photos.length, who = S.session.label;
+  showErr('pendErr', files.length > room ? `每瓶最多 ${MAX_PHOTOS} 張，只加入前 ${room} 張。` : '');
+  if (room <= 0) return;
+  S.pendAdding = id; renderPending();
+  const up = [];
+  try {
+    for (const f of files.slice(0, room)) {
+      let ph; try { ph = await compress(f); } catch (err) { showErr('pendErr', err?.user ? err.message : '有一張圖片無法讀取，請換一張。'); continue; }
+      up.push(await uploadPhoto(ph, 'pending'));
+    }
+    if (!up.length) return;
+    const extra = await mutate(d => {
+      const cur = (d.pending || []).find(x => x.id === id); if (!cur) fail('這瓶已被其他人加入酒櫃或刪除。');
+      const fit = up.slice(0, MAX_PHOTOS - cur.photos.length); cur.photos.push(...fit);
+      return up.slice(fit.length);
+    }, `待入櫃：加入照片（${up.length} 張）`);
+    if (extra.length) deleteFiles(extra.flatMap(p => [p.photo, p.thumb]), '待入櫃');
+    toast(`已加入 ${up.length - extra.length} 張照片。`);
+  } catch (e) { showErr('pendErr', msgOf(e)); if (up.length && !(S.data?.pending || []).some(x => x.photos.some(p => p.photo === up[0].photo))) deleteFiles(up.flatMap(p => [p.photo, p.thumb]), '待入櫃'); }
+  finally { S.pendAdding = null; renderPending(); checkStorage(); }
+}
+async function removePendPhoto(id, path) {
+  if (S.pendAdding) return;
+  showErr('pendErr', '');
+  try {
+    const gone = await mutate(d => {
+      const cur = (d.pending || []).find(x => x.id === id); if (!cur) fail('這瓶已不存在。');
+      if (cur.photos.length < 2) fail('至少要留一張照片；整瓶不要請按「刪除」。');
+      const i = cur.photos.findIndex(p => p.photo === path); if (i < 0) fail('這張照片已不存在。');
+      return cur.photos.splice(i, 1)[0];
+    }, '待入櫃：移除一張照片');
+    deleteFiles([gone.photo, gone.thumb], '待入櫃').then(checkStorage);
+    toast('已移除這張照片。');
+  } catch (e) { showErr('pendErr', msgOf(e)); }
+  renderPending();
 }
 async function savePending() {
   if (!S.pendNew.length || S.pendSaving) return;
