@@ -1612,7 +1612,19 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 53,
- "updatedAt": "2026-11-09T15:40:46.241Z",
- "pending": []
+ "rev": 54,
+ "updatedAt": "2026-11-09T15:48:09.459Z",
+ "pending": [
+  {
+   "id": "ef826bd5-b71a-4434-962b-b6f1a746dea4",
+   "photos": [
+    {
+     "photo": "images/pending-1794239285349.jpg",
+     "thumb": "images/pending-1794239285349-t.jpg"
+    }
+   ],
+   "by": "廖炎鴻",
+   "at": "2026-11-09T15:48:09.459Z"
+  }
+ ]
 }
