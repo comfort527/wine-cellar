@@ -491,7 +491,7 @@ function wire() {
   $('p_camera').addEventListener('change', e => addPhotos(e.target.files));
   $('p_gallery').addEventListener('change', e => addPhotos(e.target.files));
   setupPhotoDrag();
-  $('pgrid').addEventListener('click', e => { const mv = e.target.closest('[data-pmove]'); if (mv) return movePhoto(mv.dataset.path, Number(mv.dataset.pmove)); const c = e.target.closest('[data-pcover]'); if (c) return coverPhoto(c.dataset.pcover); const d = e.target.closest('[data-pdel]'); if (d) return deletePhoto(d); });
+  $('pgrid').addEventListener('click', e => { const c = e.target.closest('[data-pcover]'); if (c) return coverPhoto(c.dataset.pcover); const d = e.target.closest('[data-pdel]'); if (d) return deletePhoto(d); });
   $('loginForm').addEventListener('submit', e => { e.preventDefault(); submit('loginForm', 'loginErr', doLogin); });
   $('setupForm').addEventListener('submit', e => { e.preventDefault(); submit('setupForm', 'setupErr', doSetup); });
   $('wineForm').addEventListener('submit', e => { e.preventDefault(); submit('wineForm', 'wineErr', saveWine); });
@@ -939,7 +939,6 @@ function renderPhotoMgr() {
   $('pDragHint').hidden = ps.length < 2;
   $('pgrid').innerHTML = ps.map((p, i) => `<div class="ptile" data-path="${esc(p.photo)}"><span class="pimg"><img src="${esc(fileUrl(p.thumb || p.photo))}" alt="第 ${i + 1} 張" draggable="false"><span class="pno">${i === 0 ? '1 封面' : i + 1}</span></span><div class="pbtns">
     ${i === 0 ? '<span class="cover">封面</span>' : `<button type="button" class="small" data-pcover="${esc(p.photo)}" ${dis}>設為封面</button>`}
-    ${ps.length > 1 ? `<span class="pmove"><button type="button" class="small" data-pmove="-1" data-path="${esc(p.photo)}" ${i === 0 ? 'disabled' : dis} aria-label="第 ${i + 1} 張往前移">◀ 往前</button><button type="button" class="small" data-pmove="1" data-path="${esc(p.photo)}" ${i === ps.length - 1 ? 'disabled' : dis} aria-label="第 ${i + 1} 張往後移">往後 ▶</button></span>` : ''}
     <button type="button" class="small danger" data-pdel="${esc(p.photo)}" ${dis}>刪除</button></div></div>`).join('') || '<p class="hint">還沒有照片。</p>';
   const full = ps.length >= MAX_PHOTOS;
   $('pAdd').hidden = full || !!S.pBusy;
@@ -1029,40 +1028,26 @@ function setupPhotoDrag() {
   window.addEventListener('pointerup', end); window.addEventListener('pointercancel', end);
 }
 async function saveOrder(order) {
-  const id = S.photo, w = byId(id), who = S.session.label;
+  const id = S.photo, w = byId(id);
   S.pMoving = true; renderPhotoMgrButtonsOnly();
   try {
     await mutate(d => {
       const cur = d.wines[id]; const list = photosOf(cur);
       const sorted = order.map(p => list.find(x => x.photo === p)).filter(Boolean).concat(list.filter(x => !order.includes(x.photo)));
-      setPhotos(cur, sorted); cur.updatedAt = now(); cur.updatedBy = who; cur.revision = (cur.revision || 0) + 1;
-    }, `調整照片順序 ${id} ${w.wineName}`);
+      setPhotos(cur, sorted);
+    }, `調整照片順序 ${id} ${w.wineName}`, {quiet: true});
     toast('已更新照片順序。');
   } catch (e) { showErr('photoErr', msgOf(e)); }
   finally { S.pMoving = false; renderPhotoMgr(); }
 }
 function renderPhotoMgrButtonsOnly() { document.querySelectorAll('#pgrid button').forEach(b => b.disabled = true); }
-async function movePhoto(path, dir) {
-  const id = S.photo, w = byId(id), who = S.session.label;
-  if (S.pMoving) return;
-  S.pMoving = true; renderPhotoMgr();
-  try {
-    await mutate(d => {
-      const cur = d.wines[id]; const list = photosOf(cur).slice(); const i = list.findIndex(p => p.photo === path), j = i + dir;
-      if (i < 0) fail('找不到這張照片，請重新整理。');
-      if (j < 0 || j >= list.length) return;
-      [list[i], list[j]] = [list[j], list[i]]; setPhotos(cur, list); cur.updatedAt = now(); cur.updatedBy = who; cur.revision = (cur.revision || 0) + 1;
-    }, `調整照片順序 ${id} ${w.wineName}`);
-  } catch (e) { showErr('photoErr', msgOf(e)); }
-  finally { S.pMoving = false; renderPhotoMgr(); }
-}
 async function coverPhoto(path) {
-  const id = S.photo, w = byId(id), who = S.session.label;
+  const id = S.photo, w = byId(id);
   try {
     await mutate(d => {
       const cur = d.wines[id]; const list = photosOf(cur).slice(); const i = list.findIndex(p => p.photo === path); if (i < 0) fail('找不到這張照片，請重新整理。');
-      list.unshift(...list.splice(i, 1)); setPhotos(cur, list); cur.updatedAt = now(); cur.updatedBy = who; cur.revision = (cur.revision || 0) + 1;
-    }, `更換封面照片 ${id} ${w.wineName}`);
+      list.unshift(...list.splice(i, 1)); setPhotos(cur, list);
+    }, `更換封面照片 ${id} ${w.wineName}`, {quiet: true});
     toast('已設為封面。');
   } catch (e) { showErr('photoErr', msgOf(e)); }
   renderPhotoMgr();
@@ -1401,7 +1386,7 @@ async function loadAudit(wineId, page) {
       if (!r.ok) { authProblem(r); fail('讀取異動紀錄失敗。'); }
       const list = await r.json();
       for (const c of list) {
-        if (/^(飲用優先|評分) /.test(c.commit.message)) continue;
+        if (/^(飲用優先|評分|調整照片順序|更換封面照片) /.test(c.commit.message)) continue;
         if (wineId && !new RegExp('\\b' + wineId + '\\b').test(c.commit.message)) continue;
         S.audit.push(c);
       }
