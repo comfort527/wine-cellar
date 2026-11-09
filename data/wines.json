@@ -1612,8 +1612,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 54,
- "updatedAt": "2026-11-09T15:48:09.459Z",
+ "rev": 55,
+ "updatedAt": "2026-11-09T15:48:52.587Z",
  "pending": [
   {
    "id": "ef826bd5-b71a-4434-962b-b6f1a746dea4",
@@ -1621,6 +1621,14 @@
     {
      "photo": "images/pending-1794239285349.jpg",
      "thumb": "images/pending-1794239285349-t.jpg"
+    },
+    {
+     "photo": "images/pending-1794239324402.jpg",
+     "thumb": "images/pending-1794239324402-t.jpg"
+    },
+    {
+     "photo": "images/pending-1794239328449.jpg",
+     "thumb": "images/pending-1794239328449-t.jpg"
     }
    ],
    "by": "廖炎鴻",
