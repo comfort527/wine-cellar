@@ -437,7 +437,7 @@
    "wineName": "Major",
    "wineryRegion": "Château l'Escadre",
    "thumb": "images/W016-1794053494809-t.jpg",
-   "priority": 4
+   "priority": 1
   },
   "W017": {
    "createdAt": "",
@@ -1588,6 +1588,6 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 31,
+ "rev": 32,
  "updatedAt": "2026-11-09T13:21:27.642Z"
 }
