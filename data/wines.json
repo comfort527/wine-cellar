@@ -663,17 +663,18 @@
     }
    ],
    "origin": "Chile",
-   "photo": "",
+   "photo": "images/W026-1794230227650.jpg",
    "referencePrice": 2500,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-09-29T14:13:04.399Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-09T13:17:12.722Z",
+   "updatedBy": "芝琦",
    "vintage": "2011",
    "volume": "750ml",
    "wineName": "Lota",
-   "wineryRegion": "Cousiño Macul/Maipo Valley Chile"
+   "wineryRegion": "Cousiño Macul/Maipo Valley Chile",
+   "thumb": "images/W026-1794230227650-t.jpg"
   },
   "W027": {
    "createdAt": "",
@@ -1581,6 +1582,6 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 24,
- "updatedAt": "2026-11-08T12:51:48.588Z"
+ "rev": 25,
+ "updatedAt": "2026-11-09T13:17:12.722Z"
 }
