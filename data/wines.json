@@ -215,17 +215,18 @@
     }
    ],
    "origin": "France,Bdx",
-   "photo": "",
+   "photo": "images/W008-1794230364125.jpg",
    "referencePrice": null,
-   "revision": 1,
+   "revision": 2,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-09-29T13:38:10.538Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-09T13:19:32.096Z",
+   "updatedBy": "芝琦",
    "vintage": "2017",
    "volume": "750ml",
    "wineName": "Château Duhart-Milon",
-   "wineryRegion": "Château Duhart-Milon"
+   "wineryRegion": "Château Duhart-Milon",
+   "thumb": "images/W008-1794230364125-t.jpg"
   },
   "W009": {
    "createdAt": "",
@@ -1583,6 +1584,6 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 26,
- "updatedAt": "2026-11-09T13:18:24.141Z"
+ "rev": 27,
+ "updatedAt": "2026-11-09T13:19:32.096Z"
 }
