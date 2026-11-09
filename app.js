@@ -814,7 +814,7 @@ async function saveMove() {
 
 /* ---------- 照片 ---------- */
 /* 照片：大圖壓到 200 KB 以內（長邊 1280→1024→800px、品質 82%→52%），超過 400 KB 拒絕；另存 480px 縮圖給照片模式。 */
-const PHOTO = {target: 200 * 1024, max: 400 * 1024, sizes: [1280, 1024, 800], qualities: [.82, .72, .62, .52], thumb: 480, thumbQ: .60};
+const PHOTO = {target: 200 * 1024, max: 400 * 1024, sizes: [1280, 1024, 800], qualities: [.82, .72, .62, .52], thumb: 480, thumbTarget: 25 * 1024, thumbQs: [.6, .5, .4, .3]};
 const kb = n => Math.round(n / 1024) + ' KB';
 function pickPhoto(file, previewId, set, errId) {
   if (!file) return; showErr(errId, '');
@@ -841,7 +841,10 @@ async function compress(file) {
       if (b.size <= PHOTO.target) { best = b; break search; }
     }
     if (best.size > PHOTO.max) fail(`這張照片壓縮後仍有 ${kb(best.size)}，超過上限 ${kb(PHOTO.max)}，請換一張或裁切後再試。`);
-    return {full: best, thumb: await encode(img, PHOTO.thumb, PHOTO.thumbQ)};
+    // 縮圖也以大小為準（iPhone Safari 的品質參數換算不同，固定品質會偏大）
+    let thumb = null;
+    for (const q of PHOTO.thumbQs) { const t = await encode(img, PHOTO.thumb, q); if (!thumb || t.size < thumb.size) thumb = t; if (t.size <= PHOTO.thumbTarget) { thumb = t; break; } }
+    return {full: best, thumb};
   } finally { URL.revokeObjectURL(img.src); }
 }
 async function uploadPhoto(ph, id) {
