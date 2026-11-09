@@ -20,7 +20,7 @@ const S = {
   data: null, sha: null, etag: null, keys: null, keysSha: null, session: null,
   filter: null, search: '', view: 'list', 
   editing: null, stock: null, photo: null, photoBlob: null, newPhotoBlob: null, localPhotos: new Map(),
-  sort: 'loc', drawer: null,
+  sort: 'loc', drawer: null, newPhotos: [],
   busy: 0, lastPoll: 0, syncedAt: null, rawFallback: false, auditPage: 1, auditWine: '', audit: []
 };
 S.view = 'grid';
@@ -47,6 +47,10 @@ const locText = ls => (ls || []).map(l => `${l.cabinet}/${l.shelf}×${l.quantity
 const fileUrl = path => S.localPhotos.get(path) || `${CFG.rawBase}/${CFG.owner}/${CFG.repo}/${CFG.dataBranch}/${path.split('/').map(encodeURIComponent).join('/')}`;
 const photoUrl = w => w.photo ? fileUrl(w.photo) : '';
 const thumbUrl = w => w.thumb ? fileUrl(w.thumb) : photoUrl(w);
+const MAX_PHOTOS = 4;
+const photosOf = w => Array.isArray(w?.photos) && w.photos.length ? w.photos : (w?.photo ? [{photo: w.photo, thumb: w.thumb || ''}] : []);
+function setPhotos(cur, list) { cur.photos = list; cur.photo = list[0]?.photo || ''; cur.thumb = list[0]?.thumb || ''; }
+const sdots = n => n > 1 ? `<span class="sdots" aria-hidden="true">${Array.from({length: n}, (_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</span>` : '';
 function b64e(bytes) { let s = ''; const b = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes); for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); return btoa(s); }
 function b64d(s) { return Uint8Array.from(atob(String(s).replace(/\s/g, '')), c => c.charCodeAt(0)); }
 
@@ -340,8 +344,12 @@ function rowHtml(w) {
 const prioOf = w => Math.max(0, Math.min(4, Number(w.priority) || 0));
 const pdots = (n, cls = '') => `<span class="pdots ${cls}" role="img" aria-label="${n ? `飲用優先 ${n}／4` : '未設飲用優先'}">${[1, 2, 3, 4].map(i => `<i class="${i <= n ? 'on' : ''}">${cls.includes('num') ? i : ''}</i>`).join('')}</span>`;
 function cardHtml(w) {
-  const p = thumbUrl(w);
-  return `<button class="card" data-open="${esc(w.wineId)}"><span class="phbox ${p ? 'photo' : ''}">${p ? `<img class="ph" src="${esc(p)}" alt="${esc(w.wineName)}" loading="lazy">` : `<span class="ph">${esc(w.vintage || 'NV')}</span>`}${pdots(prioOf(w))}</span><span class="cb"><b>${esc(w.wineName)}</b><span class="prod">${esc(w.wineryRegion || '')}</span><span>${esc(w.vintage || 'NV')} · ${total(w)} 瓶</span></span></button>`;
+  const ps = photosOf(w);
+  let media;
+  if (ps.length > 1) media = `<span class="slides">${ps.map((p, i) => `<img class="ph" src="${esc(fileUrl(p.thumb || p.photo))}" alt="${esc(w.wineName)} ${i + 1}" loading="lazy" draggable="false">`).join('')}</span>${sdots(ps.length)}`;
+  else if (ps.length) media = `<img class="ph" src="${esc(thumbUrl(w))}" alt="${esc(w.wineName)}" loading="lazy">`;
+  else media = `<span class="ph">${esc(w.vintage || 'NV')}</span>`;
+  return `<div class="card" role="button" tabindex="0" data-open="${esc(w.wineId)}"><span class="phbox ${ps.length ? 'photo' : ''}">${media}${pdots(prioOf(w))}</span><span class="cb"><b>${esc(w.wineName)}</b><span class="prod">${esc(w.wineryRegion || '')}</span><span>${esc(w.vintage || 'NV')} · ${total(w)} 瓶</span></span></div>`;
 }
 
 /* ---------- 詳細資料抽屜 ---------- */
@@ -363,25 +371,33 @@ function outsHtml(w) {
     : `<div class="out mv"><span class="d">${fmtDate(e.date)}</span><span class="q">⇄${e.qty}</span><span class="r"><b>${esc(e.from.cabinet)} · ${esc(e.from.shelf)} → ${esc(e.to.cabinet)} · ${esc(e.to.shelf)}</b><small>移動${e.note ? ' · ' + esc(e.note) : ''} · ${esc(nameOf(e.by))}</small></span></div>`;
   return `<section class="dw-outs"><h3>庫存紀錄 <span class="hint">${sumText}</span></h3>${all.map(row).join('')}</section>`;
 }
+function galleryHtml(w) {
+  const ps = photosOf(w); if (!ps.length) return '';
+  const imgs = ps.map((p, i) => `<img src="${esc(fileUrl(p.photo))}" alt="${esc(w.wineName)} 照片 ${i + 1}／${ps.length}" ${i ? 'loading="lazy"' : ''} draggable="false">`).join('');
+  return `<div class="gal"><div class="slides">${imgs}</div>${ps.length > 1 ? `<button type="button" class="gnav prev" data-gnav="-1" aria-label="上一張">‹</button><button type="button" class="gnav next" data-gnav="1" aria-label="下一張">›</button>${sdots(ps.length)}` : ''}</div>`;
+}
 function renderDrawer() {
   const w = byId(S.drawer); if (!w) { closeDrawer(); return; }
   const p = photoUrl(w), ed = canEdit(), t = total(w), archived = w.status === 'archived';
   const facts = [['wineryRegion', '酒莊／產區'], ['origin', '產地'], ['volume', '容量'], ['source', '來源'], ['referencePrice', '參考價格'], ['entryDate', '入庫日期'], ['drinkWindow', '適飲期']]
     .map(([k, l]) => `<div><dt>${l}</dt><dd>${k === 'referencePrice' ? fmtPrice(w[k]) : esc(w[k] || '—')}</dd></div>`).join('');
   const locs = (w.locations || []).map(l => `<div class="dw-loc"><span class="where">${esc(l.cabinet)} <small>· ${esc(l.shelf)}</small></span><span class="n">${l.quantity}</span></div>`).join('');
+  const prevSl = $('drawerBody').querySelector('.slides'), keep = S.drawerShown === S.drawer && prevSl ? prevSl.scrollLeft : 0;
+  S.drawerShown = S.drawer;
   $('drawerBody').innerHTML = `
    <div class="dw-top"><span class="id">${archived ? '已出清' : esc(w.volume || '')}</span><button class="x" data-dwclose aria-label="關閉">×</button></div>
    <div class="dw">
     <div class="dw-head"><span class="vin">${esc(w.vintage || 'NV')}</span><h2 id="dwName">${esc(w.wineName)}</h2>${w.wineryRegion ? `<p>${esc(w.wineryRegion)}</p>` : ''}</div>
-    ${p ? `<img class="dw-photo" src="${esc(p)}" alt="${esc(w.wineName)} 酒標照片">` : ''}
+    ${galleryHtml(w)}
     <div class="dw-stock"><div class="sum"><span>目前庫存</span><b>${t} <small style="font-size:22px">瓶</small></b></div>${locs || '<div class="dw-loc"><span class="where hint">沒有存放位置</span></div>'}</div>
     <div class="dw-prio"><span class="lbl">飲用優先</span>${ed ? `<span class="pdots big" role="group" aria-label="設定飲用優先">${[1, 2, 3, 4].map(i => `<button class="${i <= prioOf(w) ? 'on' : ''}" data-prio="${i}" aria-label="優先 ${i}" aria-pressed="${i === prioOf(w)}">${i}</button>`).join('')}</span>` : pdots(prioOf(w), 'big num')}<span class="hint">${prioOf(w) ? `${prioOf(w)}／4` : '未設定'}${ed ? '　點數字設定等級，4 最優先；再點一次取消' : ''}</span></div>
-    <div class="dw-act">${ed ? `${archived ? '' : `<button class="primary" data-stockany="${esc(w.wineId)}" ${t ? '' : 'disabled'}>出庫</button><button class="primary" data-moveany="${esc(w.wineId)}" ${t ? '' : 'disabled'}>移動</button>`}<button class="primary" data-edit="${esc(w.wineId)}">編輯</button><button data-photo="${esc(w.wineId)}">${p ? '更換照片' : '加照片'}</button>` : ''}${ed ? `<button data-log="${esc(w.wineId)}">異動紀錄</button>` : ''}</div>
+    <div class="dw-act">${ed ? `${archived ? '' : `<button class="primary" data-stockany="${esc(w.wineId)}" ${t ? '' : 'disabled'}>出庫</button><button class="primary" data-moveany="${esc(w.wineId)}" ${t ? '' : 'disabled'}>移動</button>`}<button class="primary" data-edit="${esc(w.wineId)}">編輯</button><button data-photo="${esc(w.wineId)}">照片（${photosOf(w).length}/${MAX_PHOTOS}）</button>` : ''}${ed ? `<button data-log="${esc(w.wineId)}">異動紀錄</button>` : ''}</div>
     ${ed ? (archived ? '<p class="hint" style="margin:0">這款酒已全部出庫。要補回庫存，請按「編輯」填入瓶數，它會回到目前酒款。</p>' : '') : '<p class="hint" style="margin:0">登入管理後可以出庫、移動與編輯這款酒。</p>'}
     <dl class="dw-facts">${facts}${w.grapeNotes ? `<div class="wide"><dt>葡萄品種／備註</dt><dd class="note">${esc(w.grapeNotes)}</dd></div>` : ''}</dl>
     ${outsHtml(w)}
     <div class="dw-meta">${w.createdAt ? `建立 ${fmtTime(w.createdAt)}（${esc(nameOf(w.createdBy))}）<br>` : ''}最後修改 ${fmtTime(w.updatedAt)}（${esc(nameOf(w.updatedBy))}）${archived ? `<br>出清 ${fmtTime(w.archivedAt)}（${esc(nameOf(w.archivedBy))}）` : ''}</div>
    </div>`;
+  if (keep) { const sl = $('drawerBody').querySelector('.slides'); if (sl) { sl.scrollLeft = keep; sl.dispatchEvent(new Event('scroll')); } }
 }
 
 /* ---------- 事件 ---------- */
@@ -426,6 +442,13 @@ function wire() {
     const o = e.target.closest('[data-open]'); if (!o) return;
     openDrawer(o.dataset.open);
   });
+  $('list').addEventListener('keydown', e => { const o = e.target.closest('div[data-open]'); if (o && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openDrawer(o.dataset.open); } });
+  // 照片輪播：捲動時更新小圓點
+  document.addEventListener('scroll', e => {
+    const sl = e.target; if (!sl.classList || !sl.classList.contains('slides')) return;
+    const i = Math.round(sl.scrollLeft / Math.max(1, sl.clientWidth));
+    sl.parentElement.querySelectorAll('.sdots i').forEach((d, k) => d.classList.toggle('on', k === i));
+  }, true);
   const dw = $('drawer');
   dw.addEventListener('close', () => { S.drawer = null; if (/^#[WH]\d+$/.test(location.hash)) history.replaceState(null, '', location.pathname + location.search); });
   dw.addEventListener('click', e => {
@@ -437,6 +460,7 @@ function wire() {
     const ma = e.target.closest('[data-moveany]'); if (ma) return openMove(ma.dataset.moveany);
     const pr = e.target.closest('[data-prio]'); if (pr) return setPriority(S.drawer, Number(pr.dataset.prio));
     const ed = e.target.closest('[data-edit]'); if (ed) return openWineForm(byId(ed.dataset.edit));
+    const gn = e.target.closest('[data-gnav]'); if (gn) { const sl = gn.parentElement.querySelector('.slides'); sl.scrollBy({left: Number(gn.dataset.gnav) * sl.clientWidth, behavior: 'smooth'}); return; }
     const ph = e.target.closest('[data-photo]'); if (ph) return openPhoto(byId(ph.dataset.photo));
     const lg = e.target.closest('[data-log]'); if (lg) { showDialog('adminModal'); switchTab('audit'); loadAudit(lg.dataset.log, 1); }
   });
@@ -444,15 +468,22 @@ function wire() {
   $('f_sourceChoice').addEventListener('change', e => { $('f_sourceOther').hidden = e.target.value !== '__other__'; });
   $('addLoc').addEventListener('click', () => addLocRow());
   $('locInputs').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) b.closest('.loc-ed').remove(); });
-  for (const id of ['f_camera', 'f_gallery']) $(id).addEventListener('change', e => pickPhoto(e.target.files[0], 'f_preview', b => S.newPhotoBlob = b, 'wineErr'));
-  for (const id of ['p_camera', 'p_gallery']) $(id).addEventListener('change', e => pickPhoto(e.target.files[0], 'p_preview', b => { S.photoBlob = b; $('photoSave').disabled = !b; }, 'photoErr'));
+  for (const id of ['f_camera', 'f_gallery']) $(id).addEventListener('change', async e => {
+    const files = [...e.target.files].slice(0, MAX_PHOTOS - S.newPhotos.length); e.target.value = '';
+    showErr('wineErr', '');
+    for (const f of files) { try { S.newPhotos.push(await compress(f)); } catch (err) { showErr('wineErr', err?.user ? err.message : '有一張圖片無法讀取，請換一張。'); } }
+    renderNewStrip();
+  });
+  $('f_strip').addEventListener('click', e => { const b = e.target.closest('[data-nrm]'); if (b) { S.newPhotos.splice(Number(b.dataset.nrm), 1); renderNewStrip(); } });
+  $('p_camera').addEventListener('change', e => addPhotos(e.target.files));
+  $('p_gallery').addEventListener('change', e => addPhotos(e.target.files));
+  $('pgrid').addEventListener('click', e => { const c = e.target.closest('[data-pcover]'); if (c) return coverPhoto(c.dataset.pcover); const d = e.target.closest('[data-pdel]'); if (d) return deletePhoto(d); });
   $('loginForm').addEventListener('submit', e => { e.preventDefault(); submit('loginForm', 'loginErr', doLogin); });
   $('setupForm').addEventListener('submit', e => { e.preventDefault(); submit('setupForm', 'setupErr', doSetup); });
   $('wineForm').addEventListener('submit', e => { e.preventDefault(); submit('wineForm', 'wineErr', saveWine); });
   $('stockForm').addEventListener('submit', e => { e.preventDefault(); submit('stockForm', 'stockErr', saveStock); });
   $('moveForm').addEventListener('submit', e => { e.preventDefault(); submit('moveForm', 'moveErr', saveMove); });
   document.querySelectorAll('input[name=s_type]').forEach(r => r.addEventListener('change', () => { $('s_reasonLbl').textContent = r.value === '其他' ? '說明 *' : '說明（選填）'; }));
-  $('photoForm').addEventListener('submit', e => { e.preventDefault(); submit('photoForm', 'photoErr', savePhoto); });
   $('locForm').addEventListener('submit', e => { e.preventDefault(); submit('locForm', 'locErr', saveCatalog); });
   $('slotForm').addEventListener('submit', e => { e.preventDefault(); submit('slotForm', 'keysErr', addSlot); });
   $('tokenForm').addEventListener('submit', e => { e.preventDefault(); submit('tokenForm', 'keysErr', changeToken); });
@@ -499,7 +530,7 @@ async function submit(formId, errId, fn) {
   const form = $(formId); if (form.dataset.busy) return; form.dataset.busy = '1';
   const btns = [...form.querySelectorAll('button')]; btns.forEach(b => b.disabled = true); showErr(errId, '');
   try { await fn(); } catch (e) { showErr(errId, msgOf(e)); if (!e.user) console.error(e); }
-  finally { delete form.dataset.busy; btns.forEach(b => b.disabled = false); if (formId === 'photoForm') $('photoSave').disabled = !S.photoBlob; }
+  finally { delete form.dataset.busy; btns.forEach(b => b.disabled = false); }
 }
 function switchTab(name) {
   document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
@@ -616,15 +647,21 @@ function setChoice(selId, otherId, value, fallback) {
   const std = [...sel.options].some(o => o.value === v && o.value !== '__other__');
   sel.value = std ? v : '__other__'; $(otherId).hidden = std; $(otherId).value = std ? '' : v;
 }
+function renderNewStrip() {
+  const el = $('f_strip'); if (!el) return;
+  el.innerHTML = (S.newPhotos || []).map((ph, i) => `<span class="nthumb"><img src="${URL.createObjectURL(ph.thumb)}" alt="照片 ${i + 1}">${i === 0 ? '<em>封面</em>' : ''}<button type="button" data-nrm="${i}" aria-label="移除這張">×</button></span>`).join('');
+  const full = (S.newPhotos || []).length >= MAX_PHOTOS;
+  document.querySelectorAll('#newPhotoField .photo-in label').forEach(l => l.hidden = full);
+}
 function openWineForm(w) {
-  S.editing = w; S.newPhotoBlob = null; ensureLists();
+  S.editing = w; S.newPhotos = []; renderNewStrip(); ensureLists();
   $('wineTitle').textContent = w ? '編輯酒款' : '新增紅酒';
   for (const [k] of FIELDS) { const el = $('f_' + k); if (el) el.value = w?.[k] ?? ''; }
   setChoice('f_volumeChoice', 'f_volumeOther', w?.volume, '750ml');
   setChoice('f_sourceChoice', 'f_sourceOther', w?.source, '');
   $('locInputs').replaceChildren(); (w?.locations?.length ? w.locations : [{cabinet: '', shelf: '', quantity: 1}]).forEach(addLocRow);
   $('locHint').hidden = !w; $('locLbl').textContent = w ? '存放位置與瓶數' : '存放位置與初始瓶數';
-  $('newPhotoField').hidden = !!w; $('f_preview').hidden = true; $('f_camera').value = ''; $('f_gallery').value = '';
+  $('newPhotoField').hidden = !!w; $('f_camera').value = ''; $('f_gallery').value = '';
   showDialog('wineModal');
 }
 function readWineForm() {
@@ -665,12 +702,13 @@ async function saveWine() {
     }, changes => `編輯 ${id} ${r.wineName}${changes.length ? '' : '（無變更）'}${changes.length ? '\n\n' + changes.join('\n') : ''}`);
     $('wineModal').close(); toast('已更新「' + r.wineName + '」。');
   } else {
-    let photo = '', thumb = '';
-    if (S.newPhotoBlob) ({photo, thumb} = await uploadPhoto(S.newPhotoBlob, 'new'));
+    const photos = [];
+    for (const ph of S.newPhotos) photos.push(await uploadPhoto(ph, 'new'));
+    const photo = photos[0]?.photo || '', thumb = photos[0]?.thumb || '';
     const id = await mutate(d => {
       const n = Object.keys(d.wines).reduce((m, k) => /^W\d+$/.test(k) ? Math.max(m, Number(k.slice(1))) : m, 0) + 1;
       const wid = 'W' + String(n).padStart(3, '0'), t = now();
-      d.wines[wid] = {...r, photo, thumb, status: total(r) > 0 ? 'active' : 'archived', createdAt: t, createdBy: who, updatedAt: t, updatedBy: who, revision: 1};
+      d.wines[wid] = {...r, photo, thumb, photos, status: total(r) > 0 ? 'active' : 'archived', createdAt: t, createdBy: who, updatedAt: t, updatedBy: who, revision: 1};
       return wid;
     }, wid => `新增 ${wid} ${r.wineName}\n\n位置：${locText(r.locations)}`);
     $('wineModal').close(); openDrawer(id); toast('已新增「' + r.wineName + '」。');
@@ -776,7 +814,7 @@ async function saveMove() {
 
 /* ---------- 照片 ---------- */
 /* 照片：大圖壓到 200 KB 以內（長邊 1280→1024→800px、品質 82%→52%），超過 400 KB 拒絕；另存 480px 縮圖給照片模式。 */
-const PHOTO = {target: 200 * 1024, max: 400 * 1024, sizes: [1280, 1024, 800], qualities: [.82, .72, .62, .52], thumb: 480, thumbQ: .74};
+const PHOTO = {target: 200 * 1024, max: 400 * 1024, sizes: [1280, 1024, 800], qualities: [.82, .72, .62, .52], thumb: 480, thumbQ: .60};
 const kb = n => Math.round(n / 1024) + ' KB';
 function pickPhoto(file, previewId, set, errId) {
   if (!file) return; showErr(errId, '');
@@ -826,17 +864,64 @@ async function deleteFiles(paths, id) {
     } catch {}
   }
 }
-function openPhoto(w) { if (!w) return; S.photo = w; S.photoBlob = null; $('photoWine').textContent = [w.wineName, w.vintage].filter(Boolean).join('　'); $('p_preview').hidden = true; $('p_camera').value = ''; $('p_gallery').value = ''; $('photoSave').disabled = true; showDialog('photoModal'); }
-async function savePhoto() {
-  if (!S.photoBlob) fail('請先選擇照片。');
-  const id = S.photo.wineId, up = await uploadPhoto(S.photoBlob, id), who = S.session.label;
-  const old = await mutate(d => {
-    const cur = d.wines[id]; if (!cur) fail('這款酒已不存在。');
-    const prev = [cur.photo, cur.thumb];
-    cur.photo = up.photo; cur.thumb = up.thumb; cur.updatedAt = now(); cur.updatedBy = who; cur.revision = (cur.revision || 0) + 1; return prev;
-  }, prev => `${prev[0] ? '更換' : '新增'}照片 ${id} ${S.photo.wineName}`);
-  $('photoModal').close(); toast(`照片已儲存（${kb(S.photoBlob.full.size)}）。`);
-  deleteFiles(old, id).then(checkStorage);
+function openPhoto(w) { if (!w) return; S.photo = w.wineId; showErr('photoErr', ''); renderPhotoMgr(); showDialog('photoModal'); }
+function renderPhotoMgr() {
+  const w = byId(S.photo); if (!w) return;
+  const ps = photosOf(w);
+  $('photoWine').textContent = [w.wineName, w.vintage].filter(Boolean).join('　');
+  $('pgrid').innerHTML = ps.map((p, i) => `<div class="ptile"><img src="${esc(fileUrl(p.thumb || p.photo))}" alt="照片 ${i + 1}"><div class="pbtns">${i === 0 ? '<span class="cover">封面</span>' : `<button type="button" class="small" data-pcover="${esc(p.photo)}">設為封面</button>`}<button type="button" class="small danger" data-pdel="${esc(p.photo)}">刪除</button></div></div>`).join('') || '<p class="hint">還沒有照片。</p>';
+  const full = ps.length >= MAX_PHOTOS;
+  $('pAdd').hidden = full || !!S.pBusy;
+  $('pCount').textContent = S.pBusy ? `上傳中…（${S.pBusy}）` : `${ps.length}／${MAX_PHOTOS} 張${full ? '，已達上限；要換照片請先刪除一張。' : ''}`;
+}
+async function addPhotos(fileList) {
+  const id = S.photo, w = byId(id); if (!w || S.pBusy) return;
+  const picked = [...fileList], room = MAX_PHOTOS - photosOf(w).length, files = picked.slice(0, room), who = S.session.label;
+  $('p_camera').value = ''; $('p_gallery').value = '';
+  if (!files.length) return;
+  showErr('photoErr', picked.length > room ? `最多 ${MAX_PHOTOS} 張，只加入前 ${room} 張。` : '');
+  let done = 0;
+  try {
+    for (const f of files) {
+      S.pBusy = `${done + 1}/${files.length}`; renderPhotoMgr();
+      const up = await uploadPhoto(await compress(f), id);
+      await mutate(d => {
+        const cur = d.wines[id]; if (!cur) fail('這款酒已不存在。');
+        const list = photosOf(cur).slice(); if (list.length >= MAX_PHOTOS) fail(`最多 ${MAX_PHOTOS} 張照片。`);
+        list.push({photo: up.photo, thumb: up.thumb}); setPhotos(cur, list);
+        cur.updatedAt = now(); cur.updatedBy = who; cur.revision = (cur.revision || 0) + 1;
+        return list.length;
+      }, n => `新增照片 ${id} ${w.wineName}（${n}/${MAX_PHOTOS}）`);
+      done++;
+    }
+    toast(`已加入 ${done} 張照片。`);
+  } catch (e) { showErr('photoErr', msgOf(e)); }
+  finally { S.pBusy = null; renderPhotoMgr(); checkStorage(); }
+}
+async function coverPhoto(path) {
+  const id = S.photo, w = byId(id), who = S.session.label;
+  try {
+    await mutate(d => {
+      const cur = d.wines[id]; const list = photosOf(cur).slice(); const i = list.findIndex(p => p.photo === path); if (i < 0) fail('找不到這張照片，請重新整理。');
+      list.unshift(...list.splice(i, 1)); setPhotos(cur, list); cur.updatedAt = now(); cur.updatedBy = who; cur.revision = (cur.revision || 0) + 1;
+    }, `更換封面照片 ${id} ${w.wineName}`);
+    toast('已設為封面。');
+  } catch (e) { showErr('photoErr', msgOf(e)); }
+  renderPhotoMgr();
+}
+async function deletePhoto(btn) {
+  if (btn.dataset.confirm !== '1') { btn.dataset.confirm = '1'; btn.textContent = '確定刪除？'; setTimeout(() => { if (btn.isConnected) { btn.dataset.confirm = ''; btn.textContent = '刪除'; } }, 4000); return; }
+  const id = S.photo, w = byId(id), path = btn.dataset.pdel, who = S.session.label;
+  try {
+    const gone = await mutate(d => {
+      const cur = d.wines[id]; const list = photosOf(cur).slice(); const i = list.findIndex(p => p.photo === path); if (i < 0) fail('這張照片已不存在。');
+      const [rm] = list.splice(i, 1); setPhotos(cur, list); cur.updatedAt = now(); cur.updatedBy = who; cur.revision = (cur.revision || 0) + 1;
+      return rm;
+    }, `刪除照片 ${id} ${w.wineName}`);
+    toast('已刪除照片。');
+    deleteFiles([gone.photo, gone.thumb], id).then(checkStorage);
+  } catch (e) { showErr('photoErr', msgOf(e)); }
+  renderPhotoMgr();
 }
 
 /* ---------- 儲存空間 ---------- */

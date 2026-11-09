@@ -130,7 +130,7 @@
   <div class="field"><label for="f_drinkWindow">適飲期</label><input id="f_drinkWindow" maxlength="200" placeholder="例如 2026–2035"></div>
   <div class="field span"><label for="f_grapeNotes">葡萄品種／備註</label><textarea id="f_grapeNotes" maxlength="2000"></textarea></div>
   <div class="field span"><span class="lbl" id="locLbl">存放位置與瓶數</span><div id="locInputs"></div><div><button type="button" class="small" id="addLoc">＋ 新增位置</button></div><p class="hint" id="locHint" hidden>要扣除瓶數請用「出庫」，才會留下原因；這裡的瓶數調整會記為「資料修正」。</p></div>
-  <div class="field span" id="newPhotoField"><span class="lbl">酒款照片</span><div class="photo-in"><label>📷 拍照<input type="file" id="f_camera" accept="image/*" capture="environment"></label><label>從相簿選擇<input type="file" id="f_gallery" accept="image/*"></label></div><img class="prev" id="f_preview" alt="待上傳照片" hidden><span class="hint">照片會自動壓縮到 200 KB 以內，另存一張小縮圖。</span></div>
+  <div class="field span" id="newPhotoField"><span class="lbl">酒款照片（最多 4 張）</span><div class="photo-in"><label>📷 拍照<input type="file" id="f_camera" accept="image/*" capture="environment"></label><label>從相簿選擇（可多選）<input type="file" id="f_gallery" accept="image/*" multiple></label></div><div class="pstrip" id="f_strip"></div><span class="hint">照片會自動壓縮到 200 KB 以內，另存一張小縮圖。第一張是封面。</span></div>
  </div>
  <div class="ferr" id="wineErr" hidden></div>
  <div class="dact"><button type="button" data-close>取消</button><button type="submit" class="primary">儲存資料</button></div>
@@ -214,15 +214,16 @@
  <div class="dact"><button type="button" data-close>取消</button><button type="submit" class="primary" id="j_save">儲存</button></div>
 </form></dialog>
 
-<dialog class="small" id="photoModal" aria-labelledby="photoTitle"><div class="dh"><h2 id="photoTitle">補上／更換照片</h2><button data-close aria-label="關閉">×</button></div>
-<form class="db" id="photoForm" novalidate>
+<dialog class="small" id="photoModal" aria-labelledby="photoTitle"><div class="dh"><h2 id="photoTitle">照片</h2><button data-close aria-label="關閉">×</button></div>
+<div class="db">
  <p id="photoWine" class="strong"></p>
- <div class="photo-in"><label>📷 拍照<input type="file" id="p_camera" accept="image/*" capture="environment"></label><label>從相簿選擇<input type="file" id="p_gallery" accept="image/*"></label></div>
- <img class="prev" id="p_preview" alt="待上傳照片" hidden style="margin-top:12px">
- <p class="hint">照片會自動壓縮到 200 KB 以內；換新照片時舊的會刪除。</p>
+ <p class="hint" style="margin-top:0">每瓶最多 4 張。第一張是封面，照片模式、選酒和日誌都顯示封面。照片會自動壓縮到 200 KB 以內。</p>
+ <div class="pgrid" id="pgrid"></div>
+ <div class="photo-in" id="pAdd" style="margin-top:12px"><label>📷 拍照<input type="file" id="p_camera" accept="image/*" capture="environment"></label><label>從相簿選擇（可多選）<input type="file" id="p_gallery" accept="image/*" multiple></label></div>
+ <p class="hint" id="pCount"></p>
  <div class="ferr" id="photoErr" hidden></div>
- <div class="dact"><button type="button" data-close>取消</button><button type="submit" class="primary" id="photoSave" disabled>儲存照片</button></div>
-</form></dialog>
+ <div class="dact"><button type="button" class="primary" data-close>完成</button></div>
+</div></dialog>
 
 
 <dialog id="adminModal" aria-labelledby="adminTitle"><div class="dh"><h2 id="adminTitle">管理</h2><button data-close aria-label="關閉">×</button></div>

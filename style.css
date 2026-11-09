@@ -493,3 +493,36 @@ dialog.wide{width:min(1020px,96vw)}
 .pcard.withimg{display:grid;grid-template-columns:56px minmax(0,1fr) auto;align-items:center;gap:14px;padding:10px 14px}
 .pthumb{width:56px;height:74px;max-width:100%;border-radius:8px;object-fit:cover;background:var(--sunk);display:grid;place-items:center;font:600 16px var(--display);color:var(--faint)}
 .jpath{scroll-margin-top:96px}
+
+/* ---------- 多張照片：輪播、管理 ---------- */
+div.card{border:1px solid var(--line);cursor:pointer}
+div.card:hover{border-color:var(--faint)}
+div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
+.slides{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.slides::-webkit-scrollbar{display:none}
+.slides>img{flex:0 0 100%;width:100%;scroll-snap-align:center;scroll-snap-stop:always;user-select:none;-webkit-user-drag:none}
+.card .slides{aspect-ratio:3/4}
+.card .slides>img{aspect-ratio:3/4;height:100%;object-fit:cover;background:var(--sunk)}
+.sdots{position:absolute;left:50%;top:8px;transform:translateX(-50%);display:flex;gap:5px;padding:4px 7px;border-radius:999px;background:rgba(0,0,0,.35);pointer-events:none}
+.sdots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.55)}
+.sdots i.on{background:#fff}
+.gal{position:relative;border-radius:var(--r-sm);overflow:hidden;background:var(--sunk)}
+.gal .slides>img{height:380px;max-height:56vh;object-fit:contain;background:var(--sunk)}
+.gal .sdots{top:auto;bottom:10px}
+.gal .sdots i{width:9px;height:9px}
+.gnav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;min-height:0;padding:0;border-radius:50%;border:0;background:rgba(255,255,255,.85);color:#222;font-size:28px;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.gnav.prev{left:10px}.gnav.next{right:10px}
+@media (pointer:coarse){.gnav{display:none}}
+.pgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ptile{border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden;background:var(--surface)}
+.ptile img{width:100%;aspect-ratio:3/4;object-fit:cover;background:var(--sunk)}
+.pbtns{display:flex;gap:6px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:8px}
+.pbtns .cover{font:600 15px var(--body);color:var(--wine);padding:4px 8px}
+.pstrip{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.nthumb{position:relative;width:72px}
+.nthumb img{width:72px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.nthumb em{position:absolute;left:4px;bottom:4px;font:normal 600 12px var(--body);color:#fff;background:var(--wine);padding:1px 6px;border-radius:999px}
+.nthumb button{position:absolute;top:-6px;right:-6px;width:28px;height:28px;min-height:0;padding:0;border-radius:50%;font-size:18px;line-height:1;background:var(--surface)}
+.pbtns{flex-direction:column;align-items:stretch;gap:6px}
+.pbtns button{width:100%}
+.pbtns .cover{text-align:center;padding:9px 0;border-radius:8px;background:var(--wine-soft)}
