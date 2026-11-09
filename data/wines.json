@@ -346,17 +346,18 @@
     }
    ],
    "origin": "France",
-   "photo": "",
+   "photo": "images/W013-1794230387432.jpg",
    "referencePrice": null,
-   "revision": 2,
+   "revision": 3,
    "source": "*",
    "status": "active",
-   "updatedAt": "2026-11-07T14:20:31.629Z",
-   "updatedBy": "廖炎鴻",
+   "updatedAt": "2026-11-09T13:19:58.473Z",
+   "updatedBy": "芝琦",
    "vintage": "2017",
    "volume": "3000ML",
    "wineName": "Bordeaux 安貝松堡2020紀念珍藏",
-   "wineryRegion": "Château le Pin d'Ambert"
+   "wineryRegion": "Château le Pin d'Ambert",
+   "thumb": "images/W013-1794230387432-t.jpg"
   },
   "W014": {
    "createdAt": "",
@@ -1584,6 +1585,6 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 27,
- "updatedAt": "2026-11-09T13:19:32.096Z"
+ "rev": 28,
+ "updatedAt": "2026-11-09T13:19:58.473Z"
 }
