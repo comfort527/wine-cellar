@@ -285,15 +285,14 @@ function renderMap(list) {
     const sum = [...sh.values()].reduce((a, s) => a + s.red + s.white, 0);
     const on = S.filter?.cabinet === cab;
     const shelves = [...sh].sort((a, b) => shelfNo(a[0]) - shelfNo(b[0])).map(([name, s]) => {
-      const n = s.red + s.white, cap = 28, red = Math.min(s.red, cap), white = Math.min(s.white, cap - red);
-      const dots = '<i></i>'.repeat(red) + '<i class="w"></i>'.repeat(white) + (n > cap ? `<em>+${n - cap}</em>` : '');
+      const n = s.red + s.white, cap = 45, red = Math.min(s.red, cap), white = Math.min(s.white, cap - red);
       const sel = on && S.filter.shelf === name;
-      return `<button class="shelf ${sel ? 'on' : ''} ${n ? '' : 'zero'}" data-cab="${esc(cab)}" data-shelf="${esc(name)}" aria-pressed="${sel}" aria-label="${esc(cab)} ${esc(name)}：${n} 瓶，${s.wines} 款"><span class="no">${shelfNo(name) < 999 ? shelfNo(name) : esc(name)}</span><span class="dots">${dots}</span><span class="c">${n}</span></button>`;
+      return `<button class="fr-shelf ${sel ? 'on' : ''} ${n ? '' : 'zero'}" data-cab="${esc(cab)}" data-shelf="${esc(name)}" aria-pressed="${sel}" aria-label="${esc(cab)} ${esc(name)}：${n} 瓶，${s.wines} 款"><span class="fr-btl">${'<i></i>'.repeat(red)}${'<i class="w"></i>'.repeat(white)}</span><span class="fr-rail"><b>${shelfNo(name) < 999 ? shelfNo(name) : esc(name)}</b><em>${n} 瓶</em></span></button>`;
     }).join('');
-    return `<div class="cab ${on && !S.filter.shelf ? 'on' : ''}"><button class="cab-h" data-cab="${esc(cab)}" aria-pressed="${on && !S.filter.shelf}"><b>${esc(cab)}</b><span>${sum} 瓶 · ${sh.size} 層</span></button>${shelves}</div>`;
+    return `<div class="fridge ${on && !S.filter.shelf ? 'on' : ''}"><button class="fr-top" data-cab="${esc(cab)}" aria-pressed="${on && !S.filter.shelf}" aria-label="${esc(cab)}：${sum} 瓶，${sh.size} 層"><span class="fr-name">${esc(cab)}</span><span class="fr-led">${sum}</span><span class="fr-sub">${sh.size} 層</span></button><div class="fr-door"><div class="fr-in">${shelves}</div></div><span class="fr-feet"></span></div>`;
   }).join('');
   $('map').innerHTML = html ? html + '' : '<p class="hint">還沒有存放位置。</p>';
-  if (html && !$('mapLegend')) $('map').insertAdjacentHTML('afterend', '<div class="map-legend" id="mapLegend"><span><i style="background:var(--dot)"></i>紅酒</span><span><i style="background:var(--glass)"></i>白酒</span></div>');
+  if (html && !$('mapLegend')) $('map').insertAdjacentHTML('afterend', '<div class="map-legend" id="mapLegend"><span><i class="lg-r"></i>紅酒</span><span><i class="lg-w"></i>白酒</span></div>');
 }
 function sortWines(rows) {
   const k = S.sort;

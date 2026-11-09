@@ -559,3 +559,38 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-act .primary{flex:1 1 auto}
 .pend-empty{grid-column:1/-1;margin:0}
 @media (max-width:760px){.pend-list{grid-template-columns:1fr}}
+
+/* 酒櫃外觀（仿實體酒櫃） */
+.map{grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),420px));gap:28px;justify-content:start}
+.fridge{--bs:22px;--gap:3px;position:relative;padding-bottom:10px}
+.fr-top{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;width:100%;height:52px;padding:0 16px;background:linear-gradient(#1b1b1b,#070707);border-radius:10px 10px 0 0;color:#e9e6e1}
+.fr-name{font:600 17px/1.2 var(--body);letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fr-led{font:600 21px/1 ui-monospace,Menlo,Consolas,monospace;color:#7dff9b;text-shadow:0 0 6px rgba(125,255,155,.6);background:#020302;border:1px solid #2a2a2a;border-radius:4px;padding:5px 9px;min-width:3.2ch;text-align:center}
+.fr-sub{justify-self:end;font:500 15px var(--body);color:#9a968f}
+.fridge.on .fr-top,.fr-top:focus-visible{box-shadow:inset 0 0 0 2px #ffcf8a}
+.fr-door{position:relative;background:#0a0a0a;padding:12px 12px 14px;border-radius:0 0 10px 10px;box-shadow:0 16px 30px -12px rgba(0,0,0,.45)}
+.fr-door::before{content:"";position:absolute;left:-7px;top:46px;width:9px;height:150px;max-height:40%;background:linear-gradient(90deg,#000,#2a2a2a 45%,#050505);border-radius:4px;box-shadow:1px 0 2px rgba(0,0,0,.6)}
+.fr-in{position:relative;border:3px solid #1c1c1c;border-radius:3px;padding:10px 12px 0;overflow:hidden;
+  background:radial-gradient(ellipse 28% 70px at 30% 0,rgba(255,214,160,.28),transparent),radial-gradient(ellipse 28% 70px at 70% 0,rgba(255,214,160,.28),transparent),
+  radial-gradient(circle,rgba(0,0,0,.35) 1.3px,transparent 1.8px) 0 0/9px 9px,linear-gradient(#34302c,#262320)}
+.fr-in::after{content:"";position:absolute;right:3px;top:6px;bottom:6px;width:3px;border-radius:2px;background:linear-gradient(#ffd79a,#ffb85c 50%,#ffd79a);box-shadow:0 0 8px 2px rgba(255,190,100,.55)}
+.fr-in::before{content:"";position:absolute;inset:0;background:linear-gradient(112deg,rgba(255,255,255,.07),transparent 38%);pointer-events:none;z-index:2}
+.fr-shelf{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;width:100%;padding-top:10px;position:relative;border-radius:4px}
+.fr-btl{display:flex;flex-wrap:wrap-reverse;align-content:flex-start;justify-content:center;gap:var(--gap);height:calc(var(--bs) * 3 + var(--gap) * 2);overflow:hidden;padding:0 8px 0 4px}
+.fr-btl i{flex:none;width:var(--bs);height:var(--bs);border-radius:50%;
+  background:radial-gradient(circle at 36% 32%,rgba(255,255,255,.4) 0 7%,transparent 13%),radial-gradient(circle,#0b0305 0 26%,#4a1220 31% 55%,#7a2032 62%,#2b0a10 74%);
+  box-shadow:0 1px 2px rgba(0,0,0,.7)}
+.fr-btl i.w{background:radial-gradient(circle at 36% 32%,rgba(255,255,255,.45) 0 7%,transparent 13%),radial-gradient(circle,#0e1306 0 26%,#4c5a1e 31% 55%,#a3ad5c 62%,#2e3510 74%)}
+.fr-rail{display:flex;justify-content:space-between;align-items:center;height:26px;margin:2px -12px 0;padding:0 14px;
+  background:linear-gradient(#f0c99a,#d7a26b 55%,#b98351);box-shadow:0 -4px 0 #6b4a2f,0 3px 4px rgba(0,0,0,.5);color:#4a2f18;font:600 15px var(--body)}
+.fr-rail b{font:700 16px var(--body)}
+.fr-rail em{font-style:normal}
+.fr-shelf:hover .fr-btl{filter:brightness(1.15)}
+.fr-shelf.on{box-shadow:inset 0 0 0 2px #ffcf8a,0 0 18px rgba(255,200,120,.35)}
+.fr-shelf.on .fr-rail{background:linear-gradient(#ffe1b5,#f0b878 55%,#d09358)}
+.fr-shelf.zero .fr-btl{opacity:.5}
+.fr-shelf:focus-visible{box-shadow:inset 0 0 0 2px #fff}
+.fr-feet{position:absolute;bottom:0;left:22px;right:22px;height:10px;background:radial-gradient(circle at 10px 0,#111 0 9px,transparent 10px) left/30px 10px no-repeat,radial-gradient(circle at 20px 0,#111 0 9px,transparent 10px) right/30px 10px no-repeat}
+@media (max-width:760px){.map{grid-template-columns:1fr}.fridge{--bs:19px}.fr-name{font-size:16px}}
+.map-legend i.lg-r{background:radial-gradient(circle,#0b0305 0 26%,#4a1220 31% 55%,#7a2032 62%,#2b0a10 74%)}
+.map-legend i.lg-w{background:radial-gradient(circle,#0e1306 0 26%,#4c5a1e 31% 55%,#a3ad5c 62%,#2e3510 74%)}
