@@ -285,14 +285,29 @@ function renderMap(list) {
     const sum = [...sh.values()].reduce((a, s) => a + s.red + s.white, 0);
     const on = S.filter?.cabinet === cab;
     const shelves = [...sh].sort((a, b) => shelfNo(a[0]) - shelfNo(b[0])).map(([name, s]) => {
-      const n = s.red + s.white, cap = 45, red = Math.min(s.red, cap), white = Math.min(s.white, cap - red);
+      const n = s.red + s.white;
       const sel = on && S.filter.shelf === name;
-      return `<button class="fr-shelf ${sel ? 'on' : ''} ${n ? '' : 'zero'}" data-cab="${esc(cab)}" data-shelf="${esc(name)}" aria-pressed="${sel}" aria-label="${esc(cab)} ${esc(name)}：${n} 瓶，${s.wines} 款"><span class="fr-btl">${'<i></i>'.repeat(red)}${'<i class="w"></i>'.repeat(white)}</span><span class="fr-rail"><b>${shelfNo(name) < 999 ? shelfNo(name) : esc(name)}</b><em>${n} 瓶</em></span></button>`;
+      return `<button class="fr-shelf ${sel ? 'on' : ''} ${n ? '' : 'zero'}" data-cab="${esc(cab)}" data-shelf="${esc(name)}" aria-pressed="${sel}" aria-label="${esc(cab)} ${esc(name)}：${n} 瓶，${s.wines} 款"><span class="fr-btl" data-r="${s.red}" data-w="${s.white}"></span><span class="fr-rail"><b>${shelfNo(name) < 999 ? shelfNo(name) : esc(name)}</b><em>${n} 瓶</em></span></button>`;
     }).join('');
     return `<div class="fridge ${on && !S.filter.shelf ? 'on' : ''}"><button class="fr-top" data-cab="${esc(cab)}" aria-pressed="${on && !S.filter.shelf}" aria-label="${esc(cab)}：${sum} 瓶，${sh.size} 層"><span class="fr-name">${esc(cab)}</span><span class="fr-led">${sum}</span><span class="fr-sub">${sh.size} 層</span></button><div class="fr-door"><div class="fr-in">${shelves}</div></div><span class="fr-feet"></span></div>`;
   }).join('');
   $('map').innerHTML = html ? html + '' : '<p class="hint">還沒有存放位置。</p>';
+  fillBottles();
   if (html && !$('mapLegend')) $('map').insertAdjacentHTML('afterend', '<div class="map-legend" id="mapLegend"><span><i class="lg-r"></i>紅酒</span><span><i class="lg-w"></i>白酒</span></div>');
+}
+/* 每層最多畫兩排：下排排滿，上排少一瓶、疊在兩瓶之間；放不下的以「+n」表示，紅白依比例 */
+function fillBottles() {
+  for (const el of document.querySelectorAll('#map .fr-btl')) {
+    const red = Number(el.dataset.r) || 0, white = Number(el.dataset.w) || 0, n = red + white, cs = getComputedStyle(el);
+    const bs = parseFloat(cs.getPropertyValue('--bs')) || 30, gap = parseFloat(cs.getPropertyValue('--gap')) || 3;
+    const width = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const perRow = Math.max(1, Math.floor((width + gap) / (bs + gap))), cap = perRow * 2 - 1;
+    const show = n > cap ? cap - 1 : n;   // 放不下時，最後一格改放「+n」
+    let wh = white, r = red;
+    if (n > cap) { wh = white ? Math.min(white, Math.max(1, Math.round(show * white / n))) : 0; r = show - wh; }
+    const key = `${r}|${wh}|${n}`; if (el.dataset.k === key) continue; el.dataset.k = key;
+    el.innerHTML = '<i></i>'.repeat(r) + '<i class="w"></i>'.repeat(wh) + (n > show ? `<b class="fr-more" title="還有 ${n - show} 瓶">+${n - show}</b>` : '');
+  }
 }
 function sortWines(rows) {
   const k = S.sort;
@@ -430,6 +445,7 @@ function wire() {
   $('adminBtn').addEventListener('click', () => { showDialog('adminModal'); switchTab('audit'); checkStorage(); });
   $('factPend').addEventListener('click', () => { showDialog('pendModal'); showErr('pendErr', ''); renderPendStrip(); renderPending(); });
   $('exportBtn').addEventListener('click', exportCsv);
+  let fbRaf = 0; window.addEventListener('resize', () => { cancelAnimationFrame(fbRaf); fbRaf = requestAnimationFrame(fillBottles); });
   $('map').addEventListener('click', e => {
     const b = e.target.closest('[data-cab]'); if (!b) return;
     const next = {cabinet: b.dataset.cab, shelf: b.dataset.shelf || ''};
