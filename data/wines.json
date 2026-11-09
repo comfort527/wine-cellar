@@ -850,17 +850,18 @@
     }
    ],
    "origin": "United States",
-   "photo": "",
+   "photo": "images/W033-1794230418696.jpg",
    "referencePrice": 1950,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-09-29T14:17:06.679Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-09T13:20:28.826Z",
+   "updatedBy": "芝琦",
    "vintage": "2018",
    "volume": "750ml",
    "wineName": "Cabernet Sauvignon",
-   "wineryRegion": "Jordan/Alexander Valley Sonoma County"
+   "wineryRegion": "Jordan/Alexander Valley Sonoma County",
+   "thumb": "images/W033-1794230418696-t.jpg"
   },
   "W034": {
    "createdAt": "",
@@ -1585,6 +1586,6 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 28,
- "updatedAt": "2026-11-09T13:19:58.473Z"
+ "rev": 29,
+ "updatedAt": "2026-11-09T13:20:28.826Z"
 }
