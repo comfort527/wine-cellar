@@ -20,7 +20,7 @@ const S = {
   data: null, sha: null, etag: null, keys: null, keysSha: null, session: null,
   filter: null, search: '', view: 'list', 
   editing: null, stock: null, photo: null, photoBlob: null, newPhotoBlob: null, localPhotos: new Map(),
-  sort: 'loc', drawer: null, newPhotos: [],
+  sort: 'loc', drawer: null, newPhotos: [], pendKeep: [], pendNew: [],
   busy: 0, lastPoll: 0, syncedAt: null, rawFallback: false, auditPage: 1, auditWine: '', audit: []
 };
 S.view = 'grid';
@@ -272,6 +272,7 @@ function render() {
   renderList(list);
   if ($('drawer').open && S.drawer) renderDrawer();
   if ($('journalView').open || ($('adminModal').open && !$('tab-outs').hidden)) renderHistory();
+  renderPending();
 }
 function renderMap(list) {
   const cabs = new Map();
@@ -429,7 +430,7 @@ function wire() {
   $('logoutBtn').addEventListener('click', () => logout());
   $('addBtn').addEventListener('click', () => openWineForm(null));
   $('fab').addEventListener('click', () => openWineForm(null));
-  $('adminBtn').addEventListener('click', () => { showDialog('adminModal'); switchTab('audit'); loadAudit('', 1); checkStorage(); });
+  $('adminBtn').addEventListener('click', () => { showDialog('adminModal'); switchTab('pend'); checkStorage(); });
   $('exportBtn').addEventListener('click', exportCsv);
   $('map').addEventListener('click', e => {
     const b = e.target.closest('[data-cab]'); if (!b) return;
@@ -462,21 +463,34 @@ function wire() {
     const ed = e.target.closest('[data-edit]'); if (ed) return openWineForm(byId(ed.dataset.edit));
     const gn = e.target.closest('[data-gnav]'); if (gn) { const sl = gn.parentElement.querySelector('.slides'); sl.scrollBy({left: Number(gn.dataset.gnav) * sl.clientWidth, behavior: 'smooth'}); return; }
     const ph = e.target.closest('[data-photo]'); if (ph) return openPhoto(byId(ph.dataset.photo));
-    const lg = e.target.closest('[data-log]'); if (lg) { showDialog('adminModal'); switchTab('audit'); loadAudit(lg.dataset.log, 1); }
+    const lg = e.target.closest('[data-log]'); if (lg) { showDialog('adminModal'); switchTab('audit', true); loadAudit(lg.dataset.log, 1); }
   });
   $('f_volumeChoice').addEventListener('change', e => { $('f_volumeOther').hidden = e.target.value !== '__other__'; });
   $('f_sourceChoice').addEventListener('change', e => { $('f_sourceOther').hidden = e.target.value !== '__other__'; });
   $('addLoc').addEventListener('click', () => addLocRow());
   $('locInputs').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) b.closest('.loc-ed').remove(); });
   for (const id of ['f_camera', 'f_gallery']) $(id).addEventListener('change', async e => {
-    const files = [...e.target.files].slice(0, MAX_PHOTOS - S.newPhotos.length); e.target.value = '';
+    const files = [...e.target.files].slice(0, MAX_PHOTOS - S.pendKeep.length - S.newPhotos.length); e.target.value = '';
     showErr('wineErr', '');
     for (const f of files) { try { S.newPhotos.push(await compress(f)); } catch (err) { showErr('wineErr', err?.user ? err.message : '有一張圖片無法讀取，請換一張。'); } }
     renderNewStrip();
   });
-  $('f_strip').addEventListener('click', e => { const b = e.target.closest('[data-nrm]'); if (b) { S.newPhotos.splice(Number(b.dataset.nrm), 1); renderNewStrip(); } });
+  $('f_strip').addEventListener('click', e => {
+    const b = e.target.closest('[data-nrm]'); if (b) { S.newPhotos.splice(Number(b.dataset.nrm), 1); renderNewStrip(); }
+    const k = e.target.closest('[data-krm]'); if (k) { S.pendKeep.splice(Number(k.dataset.krm), 1); renderNewStrip(); }
+  });
+  for (const id of ['q_camera', 'q_gallery']) $(id).addEventListener('change', async e => {
+    const files = [...e.target.files], room = MAX_PHOTOS - S.pendNew.length; e.target.value = '';
+    showErr('pendErr', files.length > room ? `每瓶最多 ${MAX_PHOTOS} 張，只加入前 ${room} 張。` : '');
+    for (const f of files.slice(0, room)) { try { S.pendNew.push(await compress(f)); renderPendStrip(); } catch (err) { showErr('pendErr', err?.user ? err.message : '有一張圖片無法讀取，請換一張。'); } }
+    renderPendStrip();
+  });
+  $('q_strip').addEventListener('click', e => { const b = e.target.closest('[data-qrm]'); if (b) { S.pendNew.splice(Number(b.dataset.qrm), 1); renderPendStrip(); } });
+  $('q_save').addEventListener('click', savePending);
+  $('pendList').addEventListener('click', e => { const ed = e.target.closest('[data-pedit]'); if (ed) return editPending(ed.dataset.pedit); const d = e.target.closest('[data-pdelq]'); if (d) return deletePending(d); });
   $('p_camera').addEventListener('change', e => addPhotos(e.target.files));
   $('p_gallery').addEventListener('change', e => addPhotos(e.target.files));
+  setupPhotoDrag();
   $('pgrid').addEventListener('click', e => { const mv = e.target.closest('[data-pmove]'); if (mv) return movePhoto(mv.dataset.path, Number(mv.dataset.pmove)); const c = e.target.closest('[data-pcover]'); if (c) return coverPhoto(c.dataset.pcover); const d = e.target.closest('[data-pdel]'); if (d) return deletePhoto(d); });
   $('loginForm').addEventListener('submit', e => { e.preventDefault(); submit('loginForm', 'loginErr', doLogin); });
   $('setupForm').addEventListener('submit', e => { e.preventDefault(); submit('setupForm', 'setupErr', doSetup); });
@@ -532,14 +546,15 @@ async function submit(formId, errId, fn) {
   try { await fn(); } catch (e) { showErr(errId, msgOf(e)); if (!e.user) console.error(e); }
   finally { delete form.dataset.busy; btns.forEach(b => b.disabled = false); }
 }
-function switchTab(name) {
+function switchTab(name, noLoad) {
   document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
-  for (const t of ['audit', 'outs', 'loc', 'keys']) $('tab-' + t).hidden = t !== name;
+  for (const t of ['pend', 'audit', 'outs', 'loc', 'keys']) $('tab-' + t).hidden = t !== name;
   $('keysTab').hidden = !isAdmin();
   if (name === 'loc') renderAdmin();
   if (name === 'outs') renderHistory();
   if (name === 'keys') renderSlots();
-  if (name === 'audit' && S.auditLoadedFor !== undefined) loadAudit('', 1);
+  if (name === 'audit' && !noLoad) loadAudit('', 1);
+  if (name === 'pend') { renderPendStrip(); renderPending(); }
 }
 
 /* ---------- 登入與初始設定 ---------- */
@@ -649,13 +664,15 @@ function setChoice(selId, otherId, value, fallback) {
 }
 function renderNewStrip() {
   const el = $('f_strip'); if (!el) return;
-  el.innerHTML = (S.newPhotos || []).map((ph, i) => `<span class="nthumb"><img src="${URL.createObjectURL(ph.thumb)}" alt="照片 ${i + 1}">${i === 0 ? '<em>封面</em>' : ''}<button type="button" data-nrm="${i}" aria-label="移除這張">×</button></span>`).join('');
-  const full = (S.newPhotos || []).length >= MAX_PHOTOS;
+  const keep = S.pendKeep || [], n = keep.length;
+  el.innerHTML = keep.map((ph, i) => `<span class="nthumb"><img src="${esc(fileUrl(ph.thumb || ph.photo))}" alt="照片 ${i + 1}">${i === 0 ? '<em>封面</em>' : ''}<button type="button" data-krm="${i}" aria-label="移除這張">×</button></span>`).join('')
+    + (S.newPhotos || []).map((ph, i) => `<span class="nthumb"><img src="${URL.createObjectURL(ph.thumb)}" alt="照片 ${n + i + 1}">${n + i === 0 ? '<em>封面</em>' : ''}<button type="button" data-nrm="${i}" aria-label="移除這張">×</button></span>`).join('');
+  const full = n + (S.newPhotos || []).length >= MAX_PHOTOS;
   document.querySelectorAll('#newPhotoField .photo-in label').forEach(l => l.hidden = full);
 }
-function openWineForm(w) {
-  S.editing = w; S.newPhotos = []; renderNewStrip(); ensureLists();
-  $('wineTitle').textContent = w ? '編輯酒款' : '新增紅酒';
+function openWineForm(w, pend) {
+  S.editing = w; S.fromPend = !w && pend || null; S.pendKeep = S.fromPend ? S.fromPend.photos.slice() : []; S.newPhotos = []; renderNewStrip(); ensureLists();
+  $('wineTitle').textContent = w ? '編輯酒款' : S.fromPend ? '補資料並加入酒櫃' : '新增紅酒';
   for (const [k] of FIELDS) { const el = $('f_' + k); if (el) el.value = w?.[k] ?? ''; }
   setChoice('f_volumeChoice', 'f_volumeOther', w?.volume, '750ml');
   setChoice('f_sourceChoice', 'f_sourceOther', w?.source, '');
@@ -702,15 +719,18 @@ async function saveWine() {
     }, changes => `編輯 ${id} ${r.wineName}${changes.length ? '' : '（無變更）'}${changes.length ? '\n\n' + changes.join('\n') : ''}`);
     $('wineModal').close(); toast('已更新「' + r.wineName + '」。');
   } else {
-    const photos = [];
+    const src = S.fromPend, photos = S.pendKeep.slice();
     for (const ph of S.newPhotos) photos.push(await uploadPhoto(ph, 'new'));
     const photo = photos[0]?.photo || '', thumb = photos[0]?.thumb || '';
     const id = await mutate(d => {
+      if (src) { const i = (d.pending || []).findIndex(x => x.id === src.id); if (i < 0) fail('這筆等待編輯已被其他人加入或刪除，請關閉後重新整理。'); d.pending.splice(i, 1); }
       const n = Object.keys(d.wines).reduce((m, k) => /^W\d+$/.test(k) ? Math.max(m, Number(k.slice(1))) : m, 0) + 1;
       const wid = 'W' + String(n).padStart(3, '0'), t = now();
       d.wines[wid] = {...r, photo, thumb, photos, status: total(r) > 0 ? 'active' : 'archived', createdAt: t, createdBy: who, updatedAt: t, updatedBy: who, revision: 1};
       return wid;
-    }, wid => `新增 ${wid} ${r.wineName}\n\n位置：${locText(r.locations)}`);
+    }, wid => `新增 ${wid} ${r.wineName}${src ? '（由等待編輯加入）' : ''}\n\n位置：${locText(r.locations)}`);
+    S.fromPend = null; S.pendKeep = [];
+    if (src) { const kept = new Set(photos.map(p => p.photo)), drop = src.photos.filter(p => !kept.has(p.photo)); if (drop.length) deleteFiles(drop.flatMap(p => [p.photo, p.thumb]), id).then(checkStorage); }
     $('wineModal').close(); openDrawer(id); toast('已新增「' + r.wineName + '」。');
   }
 }
@@ -856,6 +876,49 @@ async function uploadPhoto(ph, id) {
   if (thumb.ok) S.localPhotos.set(`${base}-t.jpg`, URL.createObjectURL(ph.thumb));
   return {photo: `${base}.jpg`, thumb: thumb.ok ? `${base}-t.jpg` : ''};
 }
+/* ---------- 等待編輯：先拍照，資料之後補 ---------- */
+function renderPendStrip() {
+  const n = S.pendNew.length;
+  $('q_strip').innerHTML = S.pendNew.map((ph, i) => `<span class="nthumb"><img src="${URL.createObjectURL(ph.thumb)}" alt="照片 ${i + 1}">${i === 0 ? '<em>封面</em>' : ''}<button type="button" data-qrm="${i}" aria-label="移除這張">×</button></span>`).join('');
+  $('q_add').querySelectorAll('label').forEach(l => l.hidden = n >= MAX_PHOTOS);
+  $('q_save').hidden = !n; $('q_save').textContent = S.pendSaving ? '上傳中…' : `存入等待編輯（${n} 張）`;
+}
+function renderPending() {
+  const list = S.data?.pending || [], n = list.length;
+  $('pendBadge').hidden = !n || !S.session; $('pendBadge').textContent = n;
+  $('pendN').hidden = !n; $('pendN').textContent = n;
+  if (!$('adminModal').open || $('tab-pend').hidden) return;
+  $('pendList').innerHTML = n ? list.slice().reverse().map(p => `<article class="pend">
+    <div class="pend-ph">${p.photos.map((ph, i) => `<a href="${esc(fileUrl(ph.photo))}" target="_blank" rel="noopener"><img src="${esc(fileUrl(ph.thumb || ph.photo))}" alt="第 ${i + 1} 張" loading="lazy"></a>`).join('')}</div>
+    <p class="pend-meta">${esc(p.by || '')}・${fmtTime(p.at)}・${p.photos.length} 張</p>
+    <div class="pend-act"><button type="button" class="primary" data-pedit="${esc(p.id)}">編輯並加入酒櫃</button><button type="button" class="danger" data-pdelq="${esc(p.id)}">刪除</button></div>
+  </article>`).join('') : '<p class="hint pend-empty">目前沒有等待編輯的酒。</p>';
+}
+async function savePending() {
+  if (!S.pendNew.length || S.pendSaving) return;
+  const who = S.session.label; S.pendSaving = true; $('q_save').disabled = true; renderPendStrip(); showErr('pendErr', '');
+  try {
+    const photos = [];
+    for (const ph of S.pendNew) photos.push(await uploadPhoto(ph, 'pending'));
+    await mutate(d => { d.pending = d.pending || []; d.pending.push({id: crypto.randomUUID(), photos, by: who, at: now()}); }, `等待編輯：新增一瓶（${photos.length} 張照片）`);
+    S.pendNew = []; toast('已存入等待編輯，之後再補資料。');
+  } catch (e) { showErr('pendErr', msgOf(e)); }
+  finally { S.pendSaving = false; $('q_save').disabled = false; renderPendStrip(); renderPending(); checkStorage(); }
+}
+function editPending(id) {
+  const p = (S.data?.pending || []).find(x => x.id === id); if (!p) return;
+  $('adminModal').close(); openWineForm(null, p);
+}
+async function deletePending(btn) {
+  if (btn.dataset.confirm !== '1') { btn.dataset.confirm = '1'; btn.textContent = '確定刪除？'; setTimeout(() => { if (btn.isConnected) { btn.dataset.confirm = ''; btn.textContent = '刪除'; } }, 4000); return; }
+  const id = btn.dataset.pdelq; btn.disabled = true; showErr('pendErr', '');
+  try {
+    const gone = await mutate(d => { const i = (d.pending || []).findIndex(x => x.id === id); if (i < 0) fail('這筆已不存在。'); return d.pending.splice(i, 1)[0]; }, g => `刪除等待編輯（${g.photos.length} 張照片）`);
+    toast('已刪除。');
+    deleteFiles(gone.photos.flatMap(p => [p.photo, p.thumb]), '等待編輯').then(checkStorage);
+  } catch (e) { showErr('pendErr', msgOf(e)); }
+  renderPending();
+}
 /* 換照片後刪掉舊檔（git 歷史仍保留，但資料夾保持整齊）。失敗不影響使用。 */
 async function deleteFiles(paths, id) {
   for (const path of paths.filter(Boolean)) {
@@ -873,7 +936,8 @@ function renderPhotoMgr() {
   const ps = photosOf(w);
   $('photoWine').textContent = [w.wineName, w.vintage].filter(Boolean).join('　');
   const dis = S.pMoving ? 'disabled' : '';
-  $('pgrid').innerHTML = ps.map((p, i) => `<div class="ptile"><span class="pimg"><img src="${esc(fileUrl(p.thumb || p.photo))}" alt="第 ${i + 1} 張"><span class="pno">${i === 0 ? '1 封面' : i + 1}</span></span><div class="pbtns">
+  $('pDragHint').hidden = ps.length < 2;
+  $('pgrid').innerHTML = ps.map((p, i) => `<div class="ptile" data-path="${esc(p.photo)}"><span class="pimg"><img src="${esc(fileUrl(p.thumb || p.photo))}" alt="第 ${i + 1} 張" draggable="false"><span class="pno">${i === 0 ? '1 封面' : i + 1}</span></span><div class="pbtns">
     ${i === 0 ? '<span class="cover">封面</span>' : `<button type="button" class="small" data-pcover="${esc(p.photo)}" ${dis}>設為封面</button>`}
     ${ps.length > 1 ? `<span class="pmove"><button type="button" class="small" data-pmove="-1" data-path="${esc(p.photo)}" ${i === 0 ? 'disabled' : dis} aria-label="第 ${i + 1} 張往前移">◀ 往前</button><button type="button" class="small" data-pmove="1" data-path="${esc(p.photo)}" ${i === ps.length - 1 ? 'disabled' : dis} aria-label="第 ${i + 1} 張往後移">往後 ▶</button></span>` : ''}
     <button type="button" class="small danger" data-pdel="${esc(p.photo)}" ${dis}>刪除</button></div></div>`).join('') || '<p class="hint">還沒有照片。</p>';
@@ -905,6 +969,79 @@ async function addPhotos(fileList) {
   } catch (e) { showErr('photoErr', msgOf(e)); }
   finally { S.pBusy = null; renderPhotoMgr(); checkStorage(); }
 }
+/* 長按（手機）或按住（滑鼠）照片拖動排序 */
+function setupPhotoDrag() {
+  const grid = $('pgrid'), dlg = $('photoModal'), tiles = () => [...grid.querySelectorAll('.ptile')];
+  let st = null, raf = 0;
+  const renumber = () => tiles().forEach((t, i) => { const n = t.querySelector('.pno'); if (n) n.textContent = i === 0 ? '1 封面' : i + 1; });
+  const cancel = () => { if (st) clearTimeout(st.timer); st = null; };
+  function begin(x, y) {
+    if (!st || st.active) return;
+    st.active = true;
+    const r = st.tile.getBoundingClientRect();
+    st.dx = x - r.left; st.dy = y - r.top;
+    const g = st.tile.cloneNode(true); g.classList.add('pghost'); g.style.width = r.width + 'px'; g.style.height = r.height + 'px';
+    dlg.append(g); st.ghost = g; st.tile.classList.add('pdragging'); grid.classList.add('sorting');
+    place(x, y); navigator.vibrate?.(15);
+  }
+  function place(x, y) { st.x = x; st.y = y; st.ghost.style.transform = `translate(${x - st.dx}px, ${y - st.dy}px)`; }
+  function autoScroll() {
+    if (!st?.active) return;
+    const r = dlg.getBoundingClientRect(), edge = 70;
+    if (st.y < r.top + edge) dlg.scrollTop -= 12; else if (st.y > r.bottom - edge) dlg.scrollTop += 12;
+    over(st.x, st.y); raf = requestAnimationFrame(autoScroll);
+  }
+  function over(x, y) {
+    const el = document.elementFromPoint(x, y)?.closest('#pgrid .ptile');
+    if (!el || el === st.tile) return;
+    const ts = tiles(), from = ts.indexOf(st.tile), to = ts.indexOf(el);
+    grid.insertBefore(st.tile, from < to ? el.nextSibling : el); renumber();
+  }
+  grid.addEventListener('contextmenu', e => { if (e.target.closest('.pimg')) e.preventDefault(); });
+  grid.addEventListener('pointerdown', e => {
+    const img = e.target.closest('.pimg');
+    if (!img || e.button > 0 || S.pMoving || S.pBusy || !canEdit() || tiles().length < 2) return;
+    st = {tile: img.closest('.ptile'), x0: e.clientX, y0: e.clientY, active: false, mouse: e.pointerType === 'mouse', start: tiles().map(t => t.dataset.path)};
+    if (st.mouse) e.preventDefault();
+    else st.timer = setTimeout(() => { begin(st.x0, st.y0); raf = requestAnimationFrame(autoScroll); }, 450);
+  });
+  grid.addEventListener('touchmove', e => { if (st?.active) e.preventDefault(); }, {passive: false});
+  window.addEventListener('pointermove', e => {
+    if (!st) return;
+    const dist = Math.hypot(e.clientX - st.x0, e.clientY - st.y0);
+    if (!st.active) {
+      if (st.mouse && dist > 6) { begin(e.clientX, e.clientY); raf = requestAnimationFrame(autoScroll); }
+      else if (!st.mouse && dist > 10) cancel();   // 手指一開始就移動：當成捲動
+      return;
+    }
+    e.preventDefault(); place(e.clientX, e.clientY); over(e.clientX, e.clientY);
+  }, {passive: false});
+  const end = () => {
+    if (!st) return;
+    clearTimeout(st.timer); cancelAnimationFrame(raf);
+    if (st.active) {
+      st.ghost.remove(); st.tile.classList.remove('pdragging'); grid.classList.remove('sorting');
+      const order = tiles().map(t => t.dataset.path);
+      if (order.join('|') !== st.start.join('|')) saveOrder(order);
+    }
+    st = null;
+  };
+  window.addEventListener('pointerup', end); window.addEventListener('pointercancel', end);
+}
+async function saveOrder(order) {
+  const id = S.photo, w = byId(id), who = S.session.label;
+  S.pMoving = true; renderPhotoMgrButtonsOnly();
+  try {
+    await mutate(d => {
+      const cur = d.wines[id]; const list = photosOf(cur);
+      const sorted = order.map(p => list.find(x => x.photo === p)).filter(Boolean).concat(list.filter(x => !order.includes(x.photo)));
+      setPhotos(cur, sorted); cur.updatedAt = now(); cur.updatedBy = who; cur.revision = (cur.revision || 0) + 1;
+    }, `調整照片順序 ${id} ${w.wineName}`);
+    toast('已更新照片順序。');
+  } catch (e) { showErr('photoErr', msgOf(e)); }
+  finally { S.pMoving = false; renderPhotoMgr(); }
+}
+function renderPhotoMgrButtonsOnly() { document.querySelectorAll('#pgrid button').forEach(b => b.disabled = true); }
 async function movePhoto(path, dir) {
   const id = S.photo, w = byId(id), who = S.session.label;
   if (S.pMoving) return;

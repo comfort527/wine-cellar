@@ -539,3 +539,25 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
   .pbtns{justify-content:center;padding:10px}
   .pmove button{white-space:nowrap}
 }
+/* 拖動排序 */
+.pimg{cursor:grab;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.pimg img{pointer-events:none;-webkit-user-drag:none}
+.sorting .pimg{cursor:grabbing}
+.ptile.pdragging{opacity:.25;outline:2px dashed var(--wine);outline-offset:-2px}
+.pghost{position:fixed;left:0;top:0;z-index:50;pointer-events:none;box-shadow:0 18px 40px rgba(0,0,0,.35);border-radius:var(--r-sm);transform-origin:center;opacity:.95;margin:0}
+
+/* 等待編輯 */
+.nbadge{display:inline-block;min-width:1.5em;margin-left:6px;padding:0 6px;border-radius:999px;background:var(--wine);color:#fff;font:600 .75em/1.5 var(--body);text-align:center;vertical-align:.1em}
+.pend-new{border:1px dashed var(--line);border-radius:var(--r-sm);padding:14px;margin-bottom:18px;display:grid;gap:10px;justify-items:start}
+.pend-new .pstrip{margin-top:0}
+.pend-new .pstrip:empty{display:none}
+.pend-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.pend{border:1px solid var(--line);border-radius:var(--r-sm);padding:12px;background:var(--surface);display:grid;gap:10px;align-content:start}
+.pend-ph{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.pend-ph img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block}
+.pend-meta{margin:0;color:var(--muted);font-size:.85em}
+.pend-act{display:flex;gap:8px;flex-wrap:wrap}
+.pend-act .primary{flex:1 1 auto}
+.pend-empty{grid-column:1/-1;margin:0}
+@media (max-width:760px){.pend-list{grid-template-columns:1fr}}
+.tabs button.on .nbadge{background:var(--bg);color:var(--ink)}
