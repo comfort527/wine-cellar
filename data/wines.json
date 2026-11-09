@@ -59,17 +59,18 @@
     }
    ],
    "origin": "Hungary",
-   "photo": "",
+   "photo": "images/W002-1794230932584.jpg",
    "referencePrice": 720,
-   "revision": 1,
+   "revision": 2,
    "source": "",
    "status": "active",
-   "updatedAt": "2026-10-03T02:56:27.294Z",
-   "updatedBy": "z1990729",
+   "updatedAt": "2026-11-09T13:29:01.554Z",
+   "updatedBy": "芝琦",
    "vintage": "2006",
    "volume": "500ml",
    "wineName": "Tokaji Aszú 3 Puttonyos",
-   "wineryRegion": "Bodvin"
+   "wineryRegion": "Bodvin",
+   "thumb": "images/W002-1794230932584-t.jpg"
   },
   "W003": {
    "createdAt": "",
@@ -1587,6 +1588,6 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 33,
- "updatedAt": "2026-11-09T13:21:27.642Z"
+ "rev": 34,
+ "updatedAt": "2026-11-09T13:29:01.554Z"
 }
