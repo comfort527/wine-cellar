@@ -1454,26 +1454,26 @@
     }
    ],
    "origin": "",
-   "photo": "images/W059-1794230482071.jpg",
+   "photo": "images/W059-1794233497836.jpg",
    "referencePrice": 7350,
-   "revision": 16,
+   "revision": 17,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-11-09T14:50:35.781Z",
+   "updatedAt": "2026-11-09T14:51:33.504Z",
    "updatedBy": "廖炎鴻",
    "vintage": "2001",
    "volume": "375ml",
    "wineName": "Vieux Château Certan/Grand vin",
    "wineryRegion": "Vieux Château CertanPOMEROL",
-   "thumb": "images/W059-1794230482071-q60-t.jpg",
+   "thumb": "images/W059-1794233497836-t.jpg",
    "photos": [
-    {
-     "photo": "images/W059-1794230482071.jpg",
-     "thumb": "images/W059-1794230482071-q60-t.jpg"
-    },
     {
      "photo": "images/W059-1794233497836.jpg",
      "thumb": "images/W059-1794233497836-t.jpg"
+    },
+    {
+     "photo": "images/W059-1794230482071.jpg",
+     "thumb": "images/W059-1794230482071-q60-t.jpg"
     },
     {
      "photo": "images/W059-1794233521392.jpg",
@@ -1612,6 +1612,6 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 50,
- "updatedAt": "2026-11-09T14:50:35.781Z"
+ "rev": 51,
+ "updatedAt": "2026-11-09T14:51:33.504Z"
 }
