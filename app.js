@@ -266,8 +266,6 @@ function render() {
   const origins = new Set(list.map(countryOf).filter(o => o !== '未填產地'));
   if (S.data) { const ym = today().slice(0, 7); $('sumJournal').innerHTML = `${sumQty(journalEntries().filter(e => (e.date || '').startsWith(ym)))} <small>瓶／本月</small>`; }
   $('sumOrigins').textContent = origins.size ? origins.size + ' 國' : '—';
-  const last = S.data?.updatedAt || wines().reduce((m, w) => w.updatedAt > m ? w.updatedAt : m, '');
-  $('lastMod').innerHTML = last ? `${new Date(last).toLocaleDateString('zh-TW', {month: 'numeric', day: 'numeric'})} <small>${new Date(last).toLocaleTimeString('zh-TW', {hour12: false, hour: '2-digit', minute: '2-digit'})}</small>` : '—';
   renderMap(list);
   renderList(list);
   if ($('drawer').open && S.drawer) renderDrawer();
@@ -430,7 +428,8 @@ function wire() {
   $('logoutBtn').addEventListener('click', () => logout());
   $('addBtn').addEventListener('click', () => openWineForm(null));
   $('fab').addEventListener('click', () => openWineForm(null));
-  $('adminBtn').addEventListener('click', () => { showDialog('adminModal'); switchTab('pend'); checkStorage(); });
+  $('adminBtn').addEventListener('click', () => { showDialog('adminModal'); switchTab('audit'); checkStorage(); });
+  $('factPend').addEventListener('click', () => { showDialog('pendModal'); showErr('pendErr', ''); renderPendStrip(); renderPending(); });
   $('exportBtn').addEventListener('click', exportCsv);
   $('map').addEventListener('click', e => {
     const b = e.target.closest('[data-cab]'); if (!b) return;
@@ -548,13 +547,12 @@ async function submit(formId, errId, fn) {
 }
 function switchTab(name, noLoad) {
   document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
-  for (const t of ['pend', 'audit', 'outs', 'loc', 'keys']) $('tab-' + t).hidden = t !== name;
+  for (const t of ['audit', 'outs', 'loc', 'keys']) $('tab-' + t).hidden = t !== name;
   $('keysTab').hidden = !isAdmin();
   if (name === 'loc') renderAdmin();
   if (name === 'outs') renderHistory();
   if (name === 'keys') renderSlots();
   if (name === 'audit' && !noLoad) loadAudit('', 1);
-  if (name === 'pend') { renderPendStrip(); renderPending(); }
 }
 
 /* ---------- 登入與初始設定 ---------- */
@@ -723,12 +721,12 @@ async function saveWine() {
     for (const ph of S.newPhotos) photos.push(await uploadPhoto(ph, 'new'));
     const photo = photos[0]?.photo || '', thumb = photos[0]?.thumb || '';
     const id = await mutate(d => {
-      if (src) { const i = (d.pending || []).findIndex(x => x.id === src.id); if (i < 0) fail('這筆等待編輯已被其他人加入或刪除，請關閉後重新整理。'); d.pending.splice(i, 1); }
+      if (src) { const i = (d.pending || []).findIndex(x => x.id === src.id); if (i < 0) fail('這瓶已被其他人加入酒櫃或刪除，請關閉後重新整理。'); d.pending.splice(i, 1); }
       const n = Object.keys(d.wines).reduce((m, k) => /^W\d+$/.test(k) ? Math.max(m, Number(k.slice(1))) : m, 0) + 1;
       const wid = 'W' + String(n).padStart(3, '0'), t = now();
       d.wines[wid] = {...r, photo, thumb, photos, status: total(r) > 0 ? 'active' : 'archived', createdAt: t, createdBy: who, updatedAt: t, updatedBy: who, revision: 1};
       return wid;
-    }, wid => `新增 ${wid} ${r.wineName}${src ? '（由等待編輯加入）' : ''}\n\n位置：${locText(r.locations)}`);
+    }, wid => `新增 ${wid} ${r.wineName}${src ? '（由待入櫃加入）' : ''}\n\n位置：${locText(r.locations)}`);
     S.fromPend = null; S.pendKeep = [];
     if (src) { const kept = new Set(photos.map(p => p.photo)), drop = src.photos.filter(p => !kept.has(p.photo)); if (drop.length) deleteFiles(drop.flatMap(p => [p.photo, p.thumb]), id).then(checkStorage); }
     $('wineModal').close(); openDrawer(id); toast('已新增「' + r.wineName + '」。');
@@ -876,23 +874,23 @@ async function uploadPhoto(ph, id) {
   if (thumb.ok) S.localPhotos.set(`${base}-t.jpg`, URL.createObjectURL(ph.thumb));
   return {photo: `${base}.jpg`, thumb: thumb.ok ? `${base}-t.jpg` : ''};
 }
-/* ---------- 等待編輯：先拍照，資料之後補 ---------- */
+/* ---------- 待入櫃：先拍照，資料之後補 ---------- */
 function renderPendStrip() {
   const n = S.pendNew.length;
   $('q_strip').innerHTML = S.pendNew.map((ph, i) => `<span class="nthumb"><img src="${URL.createObjectURL(ph.thumb)}" alt="照片 ${i + 1}">${i === 0 ? '<em>封面</em>' : ''}<button type="button" data-qrm="${i}" aria-label="移除這張">×</button></span>`).join('');
   $('q_add').querySelectorAll('label').forEach(l => l.hidden = n >= MAX_PHOTOS);
-  $('q_save').hidden = !n; $('q_save').textContent = S.pendSaving ? '上傳中…' : `存入等待編輯（${n} 張）`;
+  $('q_save').hidden = !n; $('q_save').textContent = S.pendSaving ? '上傳中…' : `存入待入櫃（${n} 張）`;
 }
 function renderPending() {
   const list = S.data?.pending || [], n = list.length;
-  $('pendBadge').hidden = !n || !S.session; $('pendBadge').textContent = n;
-  $('pendN').hidden = !n; $('pendN').textContent = n;
-  if (!$('adminModal').open || $('tab-pend').hidden) return;
+  $('factPend').hidden = !S.session;
+  $('sumPend').innerHTML = `${n} <small>瓶</small>` + (n ? `<span class="pend-mini">${list.slice(-3).reverse().map(p => `<img src="${esc(fileUrl(p.photos[0]?.thumb || p.photos[0]?.photo || ''))}" alt="">`).join('')}</span>` : '');
+  if (!$('pendModal').open) return;
   $('pendList').innerHTML = n ? list.slice().reverse().map(p => `<article class="pend">
     <div class="pend-ph">${p.photos.map((ph, i) => `<a href="${esc(fileUrl(ph.photo))}" target="_blank" rel="noopener"><img src="${esc(fileUrl(ph.thumb || ph.photo))}" alt="第 ${i + 1} 張" loading="lazy"></a>`).join('')}</div>
     <p class="pend-meta">${esc(p.by || '')}・${fmtTime(p.at)}・${p.photos.length} 張</p>
     <div class="pend-act"><button type="button" class="primary" data-pedit="${esc(p.id)}">編輯並加入酒櫃</button><button type="button" class="danger" data-pdelq="${esc(p.id)}">刪除</button></div>
-  </article>`).join('') : '<p class="hint pend-empty">目前沒有等待編輯的酒。</p>';
+  </article>`).join('') : '<p class="hint pend-empty">目前沒有待入櫃的酒。</p>';
 }
 async function savePending() {
   if (!S.pendNew.length || S.pendSaving) return;
@@ -900,22 +898,22 @@ async function savePending() {
   try {
     const photos = [];
     for (const ph of S.pendNew) photos.push(await uploadPhoto(ph, 'pending'));
-    await mutate(d => { d.pending = d.pending || []; d.pending.push({id: crypto.randomUUID(), photos, by: who, at: now()}); }, `等待編輯：新增一瓶（${photos.length} 張照片）`);
-    S.pendNew = []; toast('已存入等待編輯，之後再補資料。');
+    await mutate(d => { d.pending = d.pending || []; d.pending.push({id: crypto.randomUUID(), photos, by: who, at: now()}); }, `待入櫃：新增一瓶（${photos.length} 張照片）`);
+    S.pendNew = []; toast('已存入待入櫃，之後再補資料。');
   } catch (e) { showErr('pendErr', msgOf(e)); }
   finally { S.pendSaving = false; $('q_save').disabled = false; renderPendStrip(); renderPending(); checkStorage(); }
 }
 function editPending(id) {
   const p = (S.data?.pending || []).find(x => x.id === id); if (!p) return;
-  $('adminModal').close(); openWineForm(null, p);
+  $('pendModal').close(); openWineForm(null, p);
 }
 async function deletePending(btn) {
   if (btn.dataset.confirm !== '1') { btn.dataset.confirm = '1'; btn.textContent = '確定刪除？'; setTimeout(() => { if (btn.isConnected) { btn.dataset.confirm = ''; btn.textContent = '刪除'; } }, 4000); return; }
   const id = btn.dataset.pdelq; btn.disabled = true; showErr('pendErr', '');
   try {
-    const gone = await mutate(d => { const i = (d.pending || []).findIndex(x => x.id === id); if (i < 0) fail('這筆已不存在。'); return d.pending.splice(i, 1)[0]; }, g => `刪除等待編輯（${g.photos.length} 張照片）`);
+    const gone = await mutate(d => { const i = (d.pending || []).findIndex(x => x.id === id); if (i < 0) fail('這筆已不存在。'); return d.pending.splice(i, 1)[0]; }, g => `刪除待入櫃（${g.photos.length} 張照片）`);
     toast('已刪除。');
-    deleteFiles(gone.photos.flatMap(p => [p.photo, p.thumb]), '等待編輯').then(checkStorage);
+    deleteFiles(gone.photos.flatMap(p => [p.photo, p.thumb]), '待入櫃').then(checkStorage);
   } catch (e) { showErr('pendErr', msgOf(e)); }
   renderPending();
 }

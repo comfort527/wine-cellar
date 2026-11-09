@@ -37,7 +37,7 @@
   <div class="who">
    <span class="pill" id="whoPill">訪客</span>
    <button class="ghost" id="loginBtn">管理登入</button>
-   <button class="ghost" id="adminBtn" hidden>管理<span class="nbadge" id="pendBadge" hidden></span></button>
+   <button class="ghost" id="adminBtn" hidden>管理</button>
    <button class="ghost" id="logoutBtn" hidden>登出</button>
   </div>
  </div>
@@ -52,7 +52,7 @@
    <button class="fact" id="factWines" aria-label="顯示全部酒款"><span class="k">酒款</span><span class="v" id="sumWines">—</span></button>
    <button class="fact" id="factOrigins" aria-label="依產地查看"><span class="k">產地</span><span class="v" id="sumOrigins">—</span></button>
    <button class="fact" id="factJournal" aria-label="打開飲酒日誌"><span class="k">飲酒日誌</span><span class="v" id="sumJournal">—</span></button>
-   <div class="fact static"><span class="k">最後異動</span><span class="v" id="lastMod">—</span></div>
+   <button class="fact" id="factPend" hidden aria-label="打開待入櫃"><span class="k">待入櫃</span><span class="v" id="sumPend">—</span></button>
   </div>
  </section>
 
@@ -232,20 +232,23 @@
 </div></dialog>
 
 
-<dialog id="adminModal" aria-labelledby="adminTitle"><div class="dh"><h2 id="adminTitle">管理</h2><button data-close aria-label="關閉">×</button></div>
+<dialog id="pendModal" aria-labelledby="pendTitle"><div class="dh"><h2 id="pendTitle">待入櫃</h2><button data-close aria-label="關閉">×</button></div>
 <div class="db">
- <div class="tabs"><button data-tab="pend" class="on">等待編輯<span class="nbadge" id="pendN" hidden></span></button><button data-tab="audit">異動紀錄</button><button data-tab="outs">出庫紀錄</button><button data-tab="loc">櫃位／層位</button><button data-tab="keys" id="keysTab">裝置密碼</button></div>
- <section id="tab-pend">
-  <p class="hint" style="margin-top:0">先拍下酒標存起來（每瓶 1–4 張），資料之後再補。取得完整資料後按「編輯並加入酒櫃」，填好就會成為正式酒款。</p>
+  <p class="hint" style="margin-top:0">先拍下酒標存起來（每瓶 1–4 張），資料之後再補。取得完整資料後按「編輯並加入酒櫃」，填好酒名與位置就會成為正式酒款。</p>
   <div class="pend-new">
    <div class="photo-in" id="q_add"><label>📷 拍照<input type="file" id="q_camera" accept="image/*" capture="environment"></label><label>從相簿選擇（可多選）<input type="file" id="q_gallery" accept="image/*" multiple></label></div>
    <div class="pstrip" id="q_strip"></div>
    <div class="ferr" id="pendErr" hidden></div>
-   <button type="button" class="primary" id="q_save" hidden>存入等待編輯</button>
+   <button type="button" class="primary" id="q_save" hidden>存入待入櫃</button>
   </div>
   <div class="pend-list" id="pendList"></div>
- </section>
- <section id="tab-audit" hidden><p class="hint" style="margin-top:0" id="auditHint">每次異動都是一筆 GitHub commit，由新到舊。</p><div class="audit" id="auditList"></div><button class="small" id="moreAudit" hidden style="margin-top:10px">載入更多</button></section>
+ <div class="dact"><button type="button" class="primary" data-close>完成</button></div>
+</div></dialog>
+
+<dialog id="adminModal" aria-labelledby="adminTitle"><div class="dh"><h2 id="adminTitle">管理</h2><button data-close aria-label="關閉">×</button></div>
+<div class="db">
+ <div class="tabs"><button data-tab="audit" class="on">異動紀錄</button><button data-tab="outs">出庫紀錄</button><button data-tab="loc">櫃位／層位</button><button data-tab="keys" id="keysTab">裝置密碼</button></div>
+ <section id="tab-audit"><p class="hint" style="margin-top:0" id="auditHint">每次異動都是一筆 GitHub commit，由新到舊。</p><div class="audit" id="auditList"></div><button class="small" id="moreAudit" hidden style="margin-top:10px">載入更多</button></section>
  <section id="tab-outs" hidden>
   <p class="hint" style="margin-top:0">每一次出庫（含送禮）都記在這裡，由新到舊。點一筆可以查看那款酒。</p>
   <div class="hist-filter">

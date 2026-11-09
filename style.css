@@ -543,8 +543,10 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .ptile.pdragging{opacity:.25;outline:2px dashed var(--wine);outline-offset:-2px}
 .pghost{position:fixed;left:0;top:0;z-index:50;pointer-events:none;box-shadow:0 18px 40px rgba(0,0,0,.35);border-radius:var(--r-sm);transform-origin:center;opacity:.95;margin:0}
 
-/* 等待編輯 */
-.nbadge{display:inline-block;min-width:1.5em;margin-left:6px;padding:0 6px;border-radius:999px;background:var(--wine);color:#fff;font:600 .75em/1.5 var(--body);text-align:center;vertical-align:.1em}
+/* 待入櫃 */
+.pend-mini{display:inline-flex;margin-left:10px;vertical-align:middle}
+.pend-mini img{width:26px;height:34px;object-fit:cover;border-radius:5px;border:2px solid var(--surface);margin-left:-8px;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.pend-mini img:first-child{margin-left:0}
 .pend-new{border:1px dashed var(--line);border-radius:var(--r-sm);padding:14px;margin-bottom:18px;display:grid;gap:10px;justify-items:start}
 .pend-new .pstrip{margin-top:0}
 .pend-new .pstrip:empty{display:none}
@@ -557,4 +559,3 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-act .primary{flex:1 1 auto}
 .pend-empty{grid-column:1/-1;margin:0}
 @media (max-width:760px){.pend-list{grid-template-columns:1fr}}
-.tabs button.on .nbadge{background:var(--bg);color:var(--ink)}
