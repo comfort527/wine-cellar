@@ -260,17 +260,24 @@
     }
    ],
    "origin": "France",
-   "photo": "",
+   "photo": "images/W009-1794321221654.jpg",
    "referencePrice": 2666,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-09-29T13:37:53.478Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-10T14:33:49.237Z",
+   "updatedBy": "芝琦",
    "vintage": "2017",
    "volume": "750ml",
    "wineName": "Saint-Julien (Grand Cru Classé)",
-   "wineryRegion": "Château Gruaud Larose"
+   "wineryRegion": "Château Gruaud Larose",
+   "photos": [
+    {
+     "photo": "images/W009-1794321221654.jpg",
+     "thumb": "images/W009-1794321221654-t.jpg"
+    }
+   ],
+   "thumb": "images/W009-1794321221654-t.jpg"
   },
   "W010": {
    "createdAt": "",
@@ -1687,7 +1694,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 73,
- "updatedAt": "2026-11-10T14:33:02.602Z",
+ "rev": 74,
+ "updatedAt": "2026-11-10T14:33:49.237Z",
  "pending": []
 }
