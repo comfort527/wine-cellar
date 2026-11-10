@@ -1229,10 +1229,10 @@
    "origin": "South Africa",
    "photo": "images/W049-1794286963760.jpg",
    "referencePrice": 1830,
-   "revision": 2,
+   "revision": 3,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-11-10T05:02:58.231Z",
+   "updatedAt": "2026-11-10T05:03:15.500Z",
    "updatedBy": "芝琦",
    "vintage": "2020",
    "volume": "750ml",
@@ -1242,6 +1242,10 @@
     {
      "photo": "images/W049-1794286963760.jpg",
      "thumb": "images/W049-1794286963760-t.jpg"
+    },
+    {
+     "photo": "images/W049-1794286986951.jpg",
+     "thumb": "images/W049-1794286986951-t.jpg"
     }
    ],
    "thumb": "images/W049-1794286963760-t.jpg"
@@ -1626,7 +1630,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 60,
- "updatedAt": "2026-11-10T05:02:58.231Z",
+ "rev": 61,
+ "updatedAt": "2026-11-10T05:03:15.500Z",
  "pending": []
 }
