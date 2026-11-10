@@ -523,17 +523,24 @@
     }
    ],
    "origin": "France",
-   "photo": "",
+   "photo": "images/W018-1794321449373.jpg",
    "referencePrice": 1960,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-09-29T14:07:58.119Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-10T14:37:35.504Z",
+   "updatedBy": "芝琦",
    "vintage": "2012",
    "volume": "750ml",
    "wineName": "Margaux",
-   "wineryRegion": "Château Rauzan-Gassies"
+   "wineryRegion": "Château Rauzan-Gassies",
+   "photos": [
+    {
+     "photo": "images/W018-1794321449373.jpg",
+     "thumb": "images/W018-1794321449373-t.jpg"
+    }
+   ],
+   "thumb": "images/W018-1794321449373-t.jpg"
   },
   "W019": {
    "createdAt": "",
@@ -1735,7 +1742,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 82,
- "updatedAt": "2026-11-10T14:37:11.439Z",
+ "rev": 83,
+ "updatedAt": "2026-11-10T14:37:35.504Z",
  "pending": []
 }
