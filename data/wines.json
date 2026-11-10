@@ -639,17 +639,24 @@
     }
    ],
    "origin": "Australia",
-   "photo": "",
+   "photo": "images/W022-1794321425033.jpg",
    "referencePrice": 2520,
-   "revision": 1,
+   "revision": 2,
    "source": "",
    "status": "active",
-   "updatedAt": "2026-09-29T14:10:28.674Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-10T14:37:11.439Z",
+   "updatedBy": "芝琦",
    "vintage": "2015",
    "volume": "750ml",
    "wineName": "Blewitt Springs Grenache",
-   "wineryRegion": "Clarendon Hills"
+   "wineryRegion": "Clarendon Hills",
+   "photos": [
+    {
+     "photo": "images/W022-1794321425033.jpg",
+     "thumb": "images/W022-1794321425033-t.jpg"
+    }
+   ],
+   "thumb": "images/W022-1794321425033-t.jpg"
   },
   "W023": {
    "createdAt": "",
@@ -1728,7 +1735,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 81,
- "updatedAt": "2026-11-10T14:36:45.983Z",
+ "rev": 82,
+ "updatedAt": "2026-11-10T14:37:11.439Z",
  "pending": []
 }
