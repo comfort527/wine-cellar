@@ -1286,17 +1286,17 @@
    "locations": [
     {
      "cabinet": "8樓右LB櫃",
-     "quantity": 1,
-     "shelf": "第4層"
+     "shelf": "第6層",
+     "quantity": 1
     }
    ],
    "origin": "Spain",
    "photo": "images/W051-1794288064125.jpg",
    "referencePrice": 7560,
-   "revision": 2,
+   "revision": 3,
    "source": "",
    "status": "active",
-   "updatedAt": "2026-11-10T05:21:10.438Z",
+   "updatedAt": "2026-11-10T05:21:55.380Z",
    "updatedBy": "芝琦",
    "vintage": "2003",
    "volume": "1500ml",
@@ -1308,7 +1308,8 @@
      "thumb": "images/W051-1794288064125-t.jpg"
     }
    ],
-   "thumb": "images/W051-1794288064125-t.jpg"
+   "thumb": "images/W051-1794288064125-t.jpg",
+   "color": "red"
   },
   "W052": {
    "createdAt": "",
@@ -1679,7 +1680,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 71,
- "updatedAt": "2026-11-10T05:21:10.438Z",
+ "rev": 72,
+ "updatedAt": "2026-11-10T05:21:55.381Z",
  "pending": []
 }
