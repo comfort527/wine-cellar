@@ -36,7 +36,7 @@ function fail(m) { const e = new Error(m); e.user = true; throw e; }
 function msgOf(e) { return e?.user ? e.message : '操作未完成，請稍後再試。'; }
 const canEdit = () => !!S.session;
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261110h';
+const APP_VER = '20261110i';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -355,14 +355,20 @@ function renderList(list) {
   else empty.innerHTML = '<h3>沒有符合的酒款</h3><p>換個關鍵字，或按「顯示全部」。</p>';
 }
 function vinHtml(w) { const v = String(w.vintage || '').trim(); return /^\d{4}$/.test(v) ? `<span class="vin">${v}</span>` : `<span class="vin nv">${esc(v || 'NV')}</span>`; }
+/* 篩選某櫃／某層時，卡片與清單顯示「這層／這櫃」的瓶數，總數另外標示 */
+function hereQty(w) {
+  const f = S.filter; if (!f?.cabinet) return null;
+  return (w.locations || []).filter(l => l.quantity > 0 && l.cabinet === f.cabinet && (!f.shelf || l.shelf === f.shelf)).reduce((a, l) => a + l.quantity, 0);
+}
+const hereWord = () => S.filter?.shelf ? '這層' : '這櫃';
 function rowHtml(w) {
-  const t = total(w);
+  const t = total(w), h = hereQty(w), part = h !== null && h !== t;
   const locs = (w.locations || []).filter(l => l.quantity > 0).map(l => `<span>${esc(l.cabinet)} · ${esc(l.shelf)}${(w.locations || []).filter(x => x.quantity > 0).length > 1 ? ` ×${l.quantity}` : ''}</span>`).join('');
   return `<button class="row" data-open="${esc(w.wineId)}">
    ${vinHtml(w)}
    <span class="nm"><b>${esc(w.wineName)}${prioOf(w) ? ' ' + pdots(prioOf(w), 'sm') : ''}</b><span>${esc(w.wineryRegion || '')}${w.wineryRegion && w.origin ? ' · ' : ''}${esc(w.origin || '')}</span></span>
    <span class="lc">${locs || '<span>無庫存</span>'}</span>
-   <span class="qt">${t}<small>${esc(w.volume || '瓶')}</small></span></button>`;
+   <span class="qt">${part ? h : t}<small>${part ? `${hereWord()}・全部共 ${t} 瓶` : esc(w.volume || '瓶')}</small></span></button>`;
 }
 const prioOf = w => Math.max(0, Math.min(4, Number(w.priority) || 0));
 const pdots = (n, cls = '') => `<span class="pdots ${cls}" role="img" aria-label="${n ? `飲用優先 ${n}／4` : '未設飲用優先'}">${[1, 2, 3, 4].map(i => `<i class="${i <= n ? 'on' : ''}">${cls.includes('num') ? i : ''}</i>`).join('')}</span>`;
@@ -372,7 +378,7 @@ function cardHtml(w) {
   if (ps.length > 1) media = `<span class="slides">${ps.map((p, i) => `<img class="ph" src="${esc(fileUrl(p.thumb || p.photo))}" alt="${esc(w.wineName)} ${i + 1}" loading="lazy" draggable="false">`).join('')}</span>${sdots(ps.length)}`;
   else if (ps.length) media = `<img class="ph" src="${esc(thumbUrl(w))}" alt="${esc(w.wineName)}" loading="lazy">`;
   else media = `<span class="ph">${esc(w.vintage || 'NV')}</span>`;
-  return `<div class="card ${isWhite(w) ? 'white' : 'red'}" role="button" tabindex="0" data-open="${esc(w.wineId)}"><span class="phbox ${ps.length ? 'photo' : ''}">${media}${pdots(prioOf(w))}</span><span class="cb"><b>${esc(w.wineName)}</b><span class="prod">${esc(w.wineryRegion || '')}</span><span>${esc(w.vintage || 'NV')} · ${total(w)} 瓶</span></span></div>`;
+  return `<div class="card ${isWhite(w) ? 'white' : 'red'}" role="button" tabindex="0" data-open="${esc(w.wineId)}"><span class="phbox ${ps.length ? 'photo' : ''}">${media}${pdots(prioOf(w))}</span><span class="cb"><b>${esc(w.wineName)}</b><span class="prod">${esc(w.wineryRegion || '')}</span>${(() => { const t = total(w), h = hereQty(w); return h !== null && h !== t ? `<span class="here">${hereWord()} <strong class="hn">${h}</strong> 瓶</span><span class="tot">${esc(w.vintage || 'NV')}・共 ${t} 瓶</span>` : `<span>${esc(w.vintage || 'NV')} · ${t} 瓶</span>`; })()}</span></div>`;
 }
 
 /* ---------- 詳細資料抽屜 ---------- */
@@ -404,7 +410,7 @@ function renderDrawer() {
   const p = photoUrl(w), ed = canEdit(), t = total(w), archived = w.status === 'archived';
   const facts = `<div><dt>紅酒／白酒</dt><dd>${colorName(w)}</dd></div>` + [['wineryRegion', '酒莊／產區'], ['origin', '產地'], ['volume', '容量'], ['source', '來源'], ['referencePrice', '參考價格'], ['entryDate', '入庫日期'], ['drinkWindow', '適飲期']]
     .map(([k, l]) => `<div><dt>${l}</dt><dd>${k === 'referencePrice' ? fmtPrice(w[k]) : esc(w[k] || '—')}</dd></div>`).join('');
-  const locs = (w.locations || []).map(l => `<div class="dw-loc"><span class="where">${esc(l.cabinet)} <small>· ${esc(l.shelf)}</small></span><span class="n">${l.quantity}</span></div>`).join('');
+  const locs = (w.locations || []).map(l => `<div class="dw-loc ${S.filter?.cabinet === l.cabinet && (!S.filter.shelf || S.filter.shelf === l.shelf) ? 'here' : ''}"><span class="where">${esc(l.cabinet)} <small>· ${esc(l.shelf)}</small></span><span class="n">${l.quantity}</span></div>`).join('');
   const prevSl = $('drawerBody').querySelector('.slides'), keep = S.drawerShown === S.drawer && prevSl ? prevSl.scrollLeft : 0;
   S.drawerShown = S.drawer;
   $('drawerBody').innerHTML = `
