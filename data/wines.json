@@ -762,17 +762,24 @@
     }
    ],
    "origin": "Italy",
-   "photo": "",
+   "photo": "images/W029-1794287528467.jpg",
    "referencePrice": 1750,
-   "revision": 1,
+   "revision": 2,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-09-29T14:14:30.129Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-10T05:12:23.226Z",
+   "updatedBy": "芝琦",
    "vintage": "NV",
    "volume": "750ml",
    "wineName": "Edizione CINQUE AUTOCTONI(混血王子)",
-   "wineryRegion": "Fantini"
+   "wineryRegion": "Fantini",
+   "photos": [
+    {
+     "photo": "images/W029-1794287528467.jpg",
+     "thumb": "images/W029-1794287528467-t.jpg"
+    }
+   ],
+   "thumb": "images/W029-1794287528467-t.jpg"
   },
   "W030": {
    "createdAt": "",
@@ -1637,7 +1644,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 62,
- "updatedAt": "2026-11-10T05:04:01.424Z",
+ "rev": 63,
+ "updatedAt": "2026-11-10T05:12:23.226Z",
  "pending": []
 }
