@@ -756,17 +756,24 @@
     }
    ],
    "origin": "France",
-   "photo": "",
+   "photo": "images/W027-1794321398267.jpg",
    "referencePrice": 1792,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-09-29T14:13:48.236Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-10T14:36:45.983Z",
+   "updatedBy": "芝琦",
    "vintage": "2014",
    "volume": "750ml",
    "wineName": "Gevrey-Chambertin Les Marchais/Pinot Noir",
-   "wineryRegion": "Domaine Faiveley"
+   "wineryRegion": "Domaine Faiveley",
+   "photos": [
+    {
+     "photo": "images/W027-1794321398267.jpg",
+     "thumb": "images/W027-1794321398267-t.jpg"
+    }
+   ],
+   "thumb": "images/W027-1794321398267-t.jpg"
   },
   "W028": {
    "createdAt": "",
@@ -1721,7 +1728,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 80,
- "updatedAt": "2026-11-10T14:36:25.072Z",
+ "rev": 81,
+ "updatedAt": "2026-11-10T14:36:45.983Z",
  "pending": []
 }
