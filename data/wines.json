@@ -845,17 +845,22 @@
    "locations": [
     {
      "cabinet": "8樓右LB櫃",
-     "quantity": 3,
-     "shelf": "第4層"
+     "shelf": "第4層",
+     "quantity": 3
+    },
+    {
+     "cabinet": "8樓右LB櫃",
+     "shelf": "第2層",
+     "quantity": 3
     }
    ],
    "origin": "Italy",
    "photo": "images/W029-1794287528467.jpg",
    "referencePrice": 1750,
-   "revision": 2,
+   "revision": 3,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-11-10T05:12:23.226Z",
+   "updatedAt": "2026-11-10T14:50:56.471Z",
    "updatedBy": "芝琦",
    "vintage": "NV",
    "volume": "750ml",
@@ -867,7 +872,8 @@
      "thumb": "images/W029-1794287528467-t.jpg"
     }
    ],
-   "thumb": "images/W029-1794287528467-t.jpg"
+   "thumb": "images/W029-1794287528467-t.jpg",
+   "color": "red"
   },
   "W030": {
    "createdAt": "",
@@ -1763,7 +1769,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 88,
- "updatedAt": "2026-11-10T14:48:03.232Z",
+ "rev": 89,
+ "updatedAt": "2026-11-10T14:50:56.471Z",
  "pending": []
 }
