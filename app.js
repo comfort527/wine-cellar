@@ -36,7 +36,7 @@ function fail(m) { const e = new Error(m); e.user = true; throw e; }
 function msgOf(e) { return e?.user ? e.message : '操作未完成，請稍後再試。'; }
 const canEdit = () => !!S.session;
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261109d';
+const APP_VER = '20261110a';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -356,7 +356,7 @@ function vinHtml(w) { const v = String(w.vintage || '').trim(); return /^\d{4}$/
 function rowHtml(w) {
   const t = total(w);
   const locs = (w.locations || []).filter(l => l.quantity > 0).map(l => `<span>${esc(l.cabinet)} · ${esc(l.shelf)}${(w.locations || []).filter(x => x.quantity > 0).length > 1 ? ` ×${l.quantity}` : ''}</span>`).join('');
-  return `<button class="row" data-open="${esc(w.wineId)}">
+  return `<button class="row ${isWhite(w) ? 'white' : 'red'}" data-open="${esc(w.wineId)}">
    ${vinHtml(w)}
    <span class="nm"><b>${esc(w.wineName)}${prioOf(w) ? ' ' + pdots(prioOf(w), 'sm') : ''}</b><span>${esc(w.wineryRegion || '')}${w.wineryRegion && w.origin ? ' · ' : ''}${esc(w.origin || '')}</span></span>
    <span class="lc">${locs || '<span>無庫存</span>'}</span>
@@ -370,7 +370,7 @@ function cardHtml(w) {
   if (ps.length > 1) media = `<span class="slides">${ps.map((p, i) => `<img class="ph" src="${esc(fileUrl(p.thumb || p.photo))}" alt="${esc(w.wineName)} ${i + 1}" loading="lazy" draggable="false">`).join('')}</span>${sdots(ps.length)}`;
   else if (ps.length) media = `<img class="ph" src="${esc(thumbUrl(w))}" alt="${esc(w.wineName)}" loading="lazy">`;
   else media = `<span class="ph">${esc(w.vintage || 'NV')}</span>`;
-  return `<div class="card" role="button" tabindex="0" data-open="${esc(w.wineId)}"><span class="phbox ${ps.length ? 'photo' : ''}">${media}${pdots(prioOf(w))}</span><span class="cb"><b>${esc(w.wineName)}</b><span class="prod">${esc(w.wineryRegion || '')}</span><span>${esc(w.vintage || 'NV')} · ${total(w)} 瓶</span></span></div>`;
+  return `<div class="card ${isWhite(w) ? 'white' : 'red'}" role="button" tabindex="0" data-open="${esc(w.wineId)}"><span class="phbox ${ps.length ? 'photo' : ''}">${media}${pdots(prioOf(w))}</span><span class="cb"><b>${esc(w.wineName)}</b><span class="prod">${esc(w.wineryRegion || '')}</span><span>${esc(w.vintage || 'NV')} · ${total(w)} 瓶</span></span></div>`;
 }
 
 /* ---------- 詳細資料抽屜 ---------- */

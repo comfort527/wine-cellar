@@ -1,4 +1,4 @@
-:root{--ver:"20261109d"}
+:root{--ver:"20261110a"}
 /* 酒窖：冷石灰與酒紅（淺色）／酒瓶玻璃墨綠（深色）。
    版面：頂列 → 總瓶數 → 酒櫃配置圖（每層一排瓶點）→ 帳冊式酒款清單；詳細資料從側邊（手機為底部）滑出。 */
 :root{
@@ -604,3 +604,15 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add label{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:var(--r-sm);padding:6px 12px;cursor:pointer;background:var(--surface);font-weight:500}
 .pend-add input{display:none}
 .pend-add .hint{margin:0}
+
+/* 紅酒紅色陰影框、白酒綠色陰影框 */
+:root{--frame-red:#b3263f;--frame-white:#3e9a5c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--frame-red:#e0566f;--frame-white:#6cc38a}}
+:root[data-theme="dark"]{--frame-red:#e0566f;--frame-white:#6cc38a}
+div.card.red{border-color:color-mix(in srgb,var(--frame-red) 60%,transparent);box-shadow:0 0 0 1px color-mix(in srgb,var(--frame-red) 45%,transparent),0 6px 18px -4px color-mix(in srgb,var(--frame-red) 45%,transparent)}
+div.card.white{border-color:color-mix(in srgb,var(--frame-white) 60%,transparent);box-shadow:0 0 0 1px color-mix(in srgb,var(--frame-white) 45%,transparent),0 6px 18px -4px color-mix(in srgb,var(--frame-white) 45%,transparent)}
+div.card.red:hover{box-shadow:0 0 0 2px color-mix(in srgb,var(--frame-red) 60%,transparent),0 10px 24px -4px color-mix(in srgb,var(--frame-red) 55%,transparent)}
+div.card.white:hover{box-shadow:0 0 0 2px color-mix(in srgb,var(--frame-white) 60%,transparent),0 10px 24px -4px color-mix(in srgb,var(--frame-white) 55%,transparent)}
+.row.red .vin{box-shadow:0 0 0 2px color-mix(in srgb,var(--frame-red) 65%,transparent),0 3px 10px -2px color-mix(in srgb,var(--frame-red) 55%,transparent)}
+.row.white .vin{box-shadow:0 0 0 2px color-mix(in srgb,var(--frame-white) 65%,transparent),0 3px 10px -2px color-mix(in srgb,var(--frame-white) 55%,transparent)}
+.row.red .vin,.row.white .vin{justify-self:start;padding:6px 8px;border-radius:10px;background:var(--surface)}
