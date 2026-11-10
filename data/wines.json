@@ -1227,17 +1227,24 @@
     }
    ],
    "origin": "South Africa",
-   "photo": "",
+   "photo": "images/W049-1794286963760.jpg",
    "referencePrice": 1830,
-   "revision": 1,
+   "revision": 2,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-09-30T04:38:06.763Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-10T05:02:58.231Z",
+   "updatedBy": "芝琦",
    "vintage": "2020",
    "volume": "750ml",
    "wineName": "Rhodium",
-   "wineryRegion": "Oldenburg Vineyards"
+   "wineryRegion": "Oldenburg Vineyards",
+   "photos": [
+    {
+     "photo": "images/W049-1794286963760.jpg",
+     "thumb": "images/W049-1794286963760-t.jpg"
+    }
+   ],
+   "thumb": "images/W049-1794286963760-t.jpg"
   },
   "W051": {
    "createdAt": "",
@@ -1619,7 +1626,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 59,
- "updatedAt": "2026-11-10T05:02:11.572Z",
+ "rev": 60,
+ "updatedAt": "2026-11-10T05:02:58.231Z",
  "pending": []
 }
