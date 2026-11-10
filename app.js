@@ -36,7 +36,7 @@ function fail(m) { const e = new Error(m); e.user = true; throw e; }
 function msgOf(e) { return e?.user ? e.message : '操作未完成，請稍後再試。'; }
 const canEdit = () => !!S.session;
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261110k';
+const APP_VER = '20261110l';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -298,14 +298,19 @@ function renderMap(list) {
     const shelves = [...sh].sort((a, b) => shelfNo(a[0]) - shelfNo(b[0])).map(([name, s]) => {
       const n = s.red + s.white;
       const sel = on && S.filter.shelf === name;
-      return `<button class="fr-shelf ${sel ? 'on' : ''} ${n ? '' : 'zero'}" data-cab="${esc(cab)}" data-shelf="${esc(name)}" aria-pressed="${sel}" aria-label="${esc(cab)} ${esc(name)}：${n} 瓶，${s.wines} 款"><span class="fr-btl" data-r="${s.red}" data-w="${s.white}"></span><span class="fr-rail"><b>${shelfNo(name) < 999 ? shelfNo(name) : esc(name)}</b><em>${n} 瓶</em></span></button>`;
+      return `<button class="fr-shelf ${sel ? 'on' : ''} ${n ? '' : 'zero'}" data-cab="${esc(cab)}" data-shelf="${esc(name)}" aria-pressed="${sel}" aria-label="${esc(cab)} ${esc(name)}：${n} 瓶，${s.wines} 款"><span class="fr-btl" data-r="${s.red}" data-w="${s.white}"></span><span class="fr-rail"><b>${shelfNo(name) < 999 ? shelfNo(name) : esc(name)}</b><em>${n} 瓶${(f => f === null ? '' : f ? ` <span class="cap-pill ok">可再放 ${f}</span>` : ' <span class="cap-pill full">已滿</span>')(freeAt(cab, name, n))}</em></span></button>`;
     }).join('');
-    return `<div class="fridge ${on && !S.filter.shelf ? 'on' : ''}"><button class="fr-top" data-cab="${esc(cab)}" aria-pressed="${on && !S.filter.shelf}" aria-label="${esc(cab)}：${sum} 瓶，${sh.size} 層"><span class="fr-name">${esc(cab)}</span><span class="fr-led">${sum}</span><span class="fr-sub">${sh.size} 層</span></button><div class="fr-door"><div class="fr-in">${shelves}</div></div><span class="fr-feet"></span></div>`;
+    const frees = [...sh].map(([nm, x]) => freeAt(cab, nm, x.red + x.white)).filter(f => f !== null), freeSum = frees.reduce((a, f) => a + f, 0);
+    return `<div class="fridge ${on && !S.filter.shelf ? 'on' : ''}"><button class="fr-top" data-cab="${esc(cab)}" aria-pressed="${on && !S.filter.shelf}" aria-label="${esc(cab)}：${sum} 瓶，${sh.size} 層${frees.length ? `，空位 ${freeSum}` : ''}"><span class="fr-name">${esc(cab)}</span><span class="fr-led">${sum}</span><span class="fr-sub">${frees.length ? `<span class="cap-top ${freeSum ? '' : 'full'}">${freeSum ? `空位 <b>${freeSum}</b>` : '已滿'}</span>` : `${sh.size} 層`}</span></button><div class="fr-door"><div class="fr-in">${shelves}</div></div><span class="fr-feet"></span></div>`;
   }).join('');
   $('map').innerHTML = html ? html + '' : '<p class="hint">還沒有存放位置。</p>';
   fillBottles();
   if (html && !$('mapLegend')) $('map').insertAdjacentHTML('afterend', '<div class="map-legend" id="mapLegend"><span><i class="lg-r"></i>紅酒</span><span><i class="lg-w"></i>白酒</span></div>');
 }
+/* ---------- 各層容量：存「現有＋還可放」，空位＝容量−目前瓶數，出入庫後自動更新 ---------- */
+const capOf = (cab, sh) => { const v = S.data?.capacity?.[cab]?.[sh]; return Number.isFinite(v) ? v : null; };
+function qtyAt(cab, sh) { let n = 0; for (const w of active()) for (const l of w.locations || []) if (l.cabinet === cab && l.shelf === sh) n += l.quantity || 0; return n; }
+const freeAt = (cab, sh, n) => { const c = capOf(cab, sh); return c === null ? null : Math.max(0, c - n); };
 /* 每層最多畫兩排：下排排滿，上排少一瓶、疊在兩瓶之間；放不下的以「+n」表示，紅白依比例 */
 function fillBottles() {
   for (const el of document.querySelectorAll('#map .fr-btl')) {
@@ -545,6 +550,7 @@ function wire() {
   $('moveForm').addEventListener('submit', e => { e.preventDefault(); submit('moveForm', 'moveErr', saveMove); });
   document.querySelectorAll('input[name=s_type]').forEach(r => r.addEventListener('change', () => { $('s_reasonLbl').textContent = r.value === '其他' ? '說明 *' : '說明（選填）'; }));
   $('locForm').addEventListener('submit', e => { e.preventDefault(); submit('locForm', 'locErr', saveCatalog); });
+  $('capForm').addEventListener('submit', e => { e.preventDefault(); submit('capForm', 'capErr', saveCapacity); });
   $('slotForm').addEventListener('submit', e => { e.preventDefault(); submit('slotForm', 'keysErr', addSlot); });
   $('tokenForm').addEventListener('submit', e => { e.preventDefault(); submit('tokenForm', 'keysErr', changeToken); });
   $('moreAudit').addEventListener('click', () => loadAudit(S.auditWine, S.auditPage + 1));
@@ -1390,7 +1396,38 @@ function exportCsv() {
 }
 
 /* ---------- 管理 ---------- */
+function renderCapForm() {
+  const cabs = locOptions('cabinets').map(cab => {
+    const shs = new Set(shelvesOf(cab)); for (const sh of Object.keys(S.data?.capacity?.[cab] || {})) shs.add(sh);
+    return [cab, [...shs].sort(byShelf)];
+  }).filter(([, shs]) => shs.length);
+  $('capList').innerHTML = cabs.map(([cab, shs]) => {
+    const tot = shs.reduce((a, sh) => a + (freeAt(cab, sh, qtyAt(cab, sh)) ?? 0), 0), any = shs.some(sh => capOf(cab, sh) !== null);
+    return `<div class="capcab"><div class="capcab-h">${esc(cab)}<span>${any ? `共可再放 ${tot} 瓶` : '尚未填寫'}</span></div>${shs.map(sh => {
+      const n = qtyAt(cab, sh), f = freeAt(cab, sh, n);
+      return `<div class="caprow"><span class="cl"><b>${esc(sh)}</b><small>現有 ${n} 瓶</small></span><label class="cf">還可放 <input type="number" min="0" max="999" step="1" inputmode="numeric" data-capcab="${esc(cab)}" data-capsh="${esc(sh)}" value="${f ?? ''}" placeholder="—"> 瓶</label></div>`;
+    }).join('')}</div>`;
+  }).join('') || '<p class="hint">還沒有存放位置。</p>';
+}
+async function saveCapacity() {
+  const rows = [...document.querySelectorAll('#capList [data-capcab]')].map(i => ({cab: i.dataset.capcab, sh: i.dataset.capsh, v: i.value.trim()}));
+  for (const r of rows) if (r.v !== '' && (!/^\d+$/.test(r.v) || Number(r.v) > 999)) fail(`${r.cab} ${r.sh}：還可放的瓶數要是 0 以上的整數。`);
+  const changes = await mutate(d => {
+    d.capacity = d.capacity || {}; const out = [];
+    const cnt = (cab, sh) => { let n = 0; for (const w of Object.values(d.wines)) if (w.status !== 'archived') for (const l of w.locations || []) if (l.cabinet === cab && l.shelf === sh) n += l.quantity || 0; return n; };
+    for (const r of rows) {
+      const old = d.capacity[r.cab]?.[r.sh];
+      if (r.v === '') { if (old !== undefined) { delete d.capacity[r.cab][r.sh]; out.push(`${r.cab} ${r.sh}：不顯示空位`); } continue; }
+      const cap = cnt(r.cab, r.sh) + Number(r.v);
+      if (old !== cap) { (d.capacity[r.cab] = d.capacity[r.cab] || {})[r.sh] = cap; out.push(`${r.cab} ${r.sh}：還可放 ${r.v} 瓶（容量 ${cap}）`); }
+    }
+    for (const c of Object.keys(d.capacity)) if (!Object.keys(d.capacity[c]).length) delete d.capacity[c];
+    return out;
+  }, out => `設定各層空位${out.length ? '' : '（無變更）'}${out.length ? '\n\n' + out.join('\n') : ''}`);
+  renderCapForm(); toast(changes.length ? `已更新 ${changes.length} 層的空位。` : '沒有變更。');
+}
 function renderAdmin() {
+  renderCapForm();
   const cat = S.data?.catalog || {cabinets: [], shelves: []};
   const chip = n => `<span class="chip">${esc(n)}<button data-rm="${esc(n)}" aria-label="移除 ${esc(n)}">×</button></span>`;
   $('cabChips').innerHTML = cat.cabinets.map(chip).join('') || '<span class="hint">尚未建立。</span>';

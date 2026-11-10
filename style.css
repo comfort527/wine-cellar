@@ -1,4 +1,4 @@
-:root{--ver:"20261110k"}
+:root{--ver:"20261110l"}
 /* 酒窖：冷石灰與酒紅（淺色）／酒瓶玻璃墨綠（深色）。
    版面：頂列 → 總瓶數 → 酒櫃配置圖（每層一排瓶點）→ 帳冊式酒款清單；詳細資料從側邊（手機為底部）滑出。 */
 :root{
@@ -645,3 +645,18 @@ fieldset.colorpick{display:flex;flex-direction:row;flex-wrap:wrap;align-items:ce
 .dw-loc.here{background:var(--wine-soft)}
 .dw-loc.here .where::after{content:"目前篩選";margin-left:8px;font-size:13px;color:var(--wine);border:1px solid currentColor;border-radius:999px;padding:0 6px;vertical-align:2px}
 .ai-left{font-size:.85em;color:var(--muted)}
+
+/* 各層空位 */
+.cap-pill{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;font:700 13px/1.5 var(--body);vertical-align:1px}
+.cap-pill.ok{background:#2f7a45;color:#fff}
+.cap-pill.full{background:#9b2335;color:#fff}
+.cap-top{color:#7dff9b;white-space:nowrap}.cap-top b{font-size:17px}
+.cap-top.full{color:#ff8c9c}
+.capform{margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.capcab{border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden;margin-bottom:12px;background:var(--surface)}
+.capcab-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;background:var(--surface-2);font-weight:600}
+.capcab-h span{font-weight:500;color:var(--muted);font-size:.85em}
+.caprow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:8px 14px;border-top:1px solid var(--line)}
+.caprow .cl b{display:block;font-weight:600}.caprow .cl small{color:var(--muted);font-size:.8em;white-space:nowrap}
+.caprow .cf{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.caprow input{width:3.4em;text-align:center;padding:6px}

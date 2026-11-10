@@ -24,7 +24,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261110k" id="mainCss">
+<link rel="stylesheet" href="style.css?v=20261110l" id="mainCss">
 </head>
 <body>
 <header class="bar">
@@ -268,7 +268,13 @@
   <div class="hist" id="histGone"></div>
  </section>
  <section id="tab-loc" hidden>
-  <p class="hint" style="margin-top:0">新增酒款時可從這裡的清單選擇，也可以直接輸入新的名稱。</p>
+  <form id="capForm" class="capform" novalidate>
+   <p class="hint" style="margin-top:0"><b>各層還可放幾瓶</b>：看著酒櫃數空位，填好後按「儲存空位」。之後出庫、入庫、移動，空位會自動更新。留空的層不顯示空位。</p>
+   <div id="capList"></div>
+   <div class="ferr" id="capErr" hidden></div>
+   <div class="ai-acts"><button type="submit" class="primary">儲存空位</button></div>
+  </form>
+  <p class="hint">櫃位、層位的名稱清單：新增或編輯酒款、移動位置時從這裡選擇，要新的名稱請在下方新增。</p>
   <p class="hint">櫃位</p><div class="chips" id="cabChips"></div>
   <p class="hint">層位</p><div class="chips" id="shelfChips"></div>
   <form class="inline" id="locForm" novalidate><div class="field"><label for="l_type">類型</label><select id="l_type"><option value="cabinets">櫃位</option><option value="shelves">層位</option></select></div><div class="field"><label for="l_name">名稱</label><input id="l_name" maxlength="80" placeholder="例如 A櫃、第 2 層"></div><button class="primary" type="submit">新增</button></form>
@@ -308,7 +314,7 @@
 
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="config.js?v=20261110k"></script>
-<script src="app.js?v=20261110k"></script>
+<script src="config.js?v=20261110l"></script>
+<script src="app.js?v=20261110l"></script>
 </body>
 </html>
