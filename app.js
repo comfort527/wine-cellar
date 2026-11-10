@@ -36,7 +36,7 @@ function fail(m) { const e = new Error(m); e.user = true; throw e; }
 function msgOf(e) { return e?.user ? e.message : '操作未完成，請稍後再試。'; }
 const canEdit = () => !!S.session;
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261110g';
+const APP_VER = '20261110h';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -1617,6 +1617,12 @@ function renderHistory() {
   const gone = wines().filter(w => w.status === 'archived').sort((a, b) => (b.archivedAt || '') > (a.archivedAt || '') ? 1 : -1);
   $('histGone').innerHTML = gone.map(w => `<div class="hrow" data-hist="${esc(w.wineId)}" role="button" tabindex="0"><span><b>${esc(w.wineName)}</b> ${esc(w.vintage || '')} <span class="hint">${esc(w.wineryRegion || '')}</span></span><span class="hint">出清於 ${fmtTime(w.archivedAt)}（${esc(nameOf(w.archivedBy))}）</span></div>`).join('') || '<p class="hint">還沒有出清的酒款。</p>';
 }
+/* 指定不顯示在異動紀錄的 commit（2026/11/9 測試待入櫃的 7 筆）。資料與 git 歷史都不受影響 */
+const HIDDEN_AUDIT = new Set([
+  '3ae55159de6a6c6a54213dfe3839442ec2403c1c', 'ca6ae983dab79f213631e5cc9fbb86431db97dcb', 'fb96f4b05855427310356af794b4e7c2651261b3',
+  '47b8dcbea26af0ec7d39669cc0a81b0010f97781', '2baadb54eccd3cbb3ecc0d1cd90291c13f93fd3f', '778bab6f35b900e8bbeebf92a03c0a7d659dff90',
+  '0884154c4c8311188772164f21f21e90b6b0e79a',
+]);
 async function loadAudit(wineId, page) {
   S.auditLoadedFor = wineId;
   S.auditWine = wineId; S.auditPage = page;
@@ -1631,7 +1637,7 @@ async function loadAudit(wineId, page) {
       if (!r.ok) { authProblem(r); fail('讀取異動紀錄失敗。'); }
       const list = await r.json();
       for (const c of list) {
-        if (/^(飲用優先|評分|調整照片順序|更換封面照片) /.test(c.commit.message)) continue;
+        if (/^(飲用優先|評分|調整照片順序|更換封面照片) /.test(c.commit.message) || HIDDEN_AUDIT.has(c.sha)) continue;
         if (wineId && !new RegExp('\\b' + wineId + '\\b').test(c.commit.message)) continue;
         S.audit.push(c);
       }
