@@ -330,17 +330,24 @@
     }
    ],
    "origin": "France",
-   "photo": "",
+   "photo": "images/W011-1794321309459.jpg",
    "referencePrice": 2337,
-   "revision": 1,
+   "revision": 2,
    "source": "",
    "status": "active",
-   "updatedAt": "2026-09-29T13:39:38.104Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-10T14:35:15.444Z",
+   "updatedBy": "芝琦",
    "vintage": "2008",
    "volume": "750ml",
    "wineName": "Saint-Julien (Grand Cru Classé)/Merlot",
-   "wineryRegion": "Château Lagrange"
+   "wineryRegion": "Château Lagrange",
+   "photos": [
+    {
+     "photo": "images/W011-1794321309459.jpg",
+     "thumb": "images/W011-1794321309459-t.jpg"
+    }
+   ],
+   "thumb": "images/W011-1794321309459-t.jpg"
   },
   "W012": {
    "createdAt": "",
@@ -1705,7 +1712,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 76,
- "updatedAt": "2026-11-10T14:34:34.436Z",
+ "rev": 77,
+ "updatedAt": "2026-11-10T14:35:15.444Z",
  "pending": []
 }
