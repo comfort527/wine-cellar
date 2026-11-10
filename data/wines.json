@@ -679,17 +679,24 @@
     }
    ],
    "origin": "France",
-   "photo": "",
+   "photo": "images/W023-1794321488959.jpg",
    "referencePrice": 1366,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-09-29T14:11:01.574Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-10T14:38:15.219Z",
+   "updatedBy": "芝琦",
    "vintage": "2014",
    "volume": "750ml",
    "wineName": "Margaux",
-   "wineryRegion": "Clos de Bigos"
+   "wineryRegion": "Clos de Bigos",
+   "photos": [
+    {
+     "photo": "images/W023-1794321488959.jpg",
+     "thumb": "images/W023-1794321488959-t.jpg"
+    }
+   ],
+   "thumb": "images/W023-1794321488959-t.jpg"
   },
   "W024": {
    "createdAt": "",
@@ -1742,7 +1749,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 83,
- "updatedAt": "2026-11-10T14:37:35.504Z",
+ "rev": 84,
+ "updatedAt": "2026-11-10T14:38:15.219Z",
  "pending": []
 }
