@@ -1291,17 +1291,24 @@
     }
    ],
    "origin": "Spain",
-   "photo": "",
+   "photo": "images/W051-1794288064125.jpg",
    "referencePrice": 7560,
-   "revision": 1,
+   "revision": 2,
    "source": "",
    "status": "active",
-   "updatedAt": "2026-09-30T04:39:57.619Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-10T05:21:10.438Z",
+   "updatedBy": "芝琦",
    "vintage": "2003",
    "volume": "1500ml",
    "wineName": "Rioja Reserva(1500ml)",
-   "wineryRegion": "Remírez de Ganuza"
+   "wineryRegion": "Remírez de Ganuza",
+   "photos": [
+    {
+     "photo": "images/W051-1794288064125.jpg",
+     "thumb": "images/W051-1794288064125-t.jpg"
+    }
+   ],
+   "thumb": "images/W051-1794288064125-t.jpg"
   },
   "W052": {
    "createdAt": "",
@@ -1672,7 +1679,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 70,
- "updatedAt": "2026-11-10T05:20:04.104Z",
+ "rev": 71,
+ "updatedAt": "2026-11-10T05:21:10.438Z",
  "pending": []
 }
