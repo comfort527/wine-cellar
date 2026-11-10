@@ -1011,18 +1011,25 @@
     }
    ],
    "origin": "Spain",
-   "photo": "",
+   "photo": "images/W038-1794287601736.jpg",
    "referencePrice": 930,
-   "revision": 2,
+   "revision": 3,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-11-10T05:13:10.589Z",
+   "updatedAt": "2026-11-10T05:13:35.125Z",
    "updatedBy": "芝琦",
    "vintage": "2013",
    "volume": "750ml",
    "wineName": "Selección Especial",
    "wineryRegion": "Marqués de Arviza(Boltun Group)",
-   "color": "red"
+   "color": "red",
+   "photos": [
+    {
+     "photo": "images/W038-1794287601736.jpg",
+     "thumb": "images/W038-1794287601736-t.jpg"
+    }
+   ],
+   "thumb": "images/W038-1794287601736-t.jpg"
   },
   "W040": {
    "createdAt": "",
@@ -1645,7 +1652,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 64,
- "updatedAt": "2026-11-10T05:13:10.589Z",
+ "rev": 65,
+ "updatedAt": "2026-11-10T05:13:35.125Z",
  "pending": []
 }
