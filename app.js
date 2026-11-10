@@ -36,7 +36,7 @@ function fail(m) { const e = new Error(m); e.user = true; throw e; }
 function msgOf(e) { return e?.user ? e.message : '操作未完成，請稍後再試。'; }
 const canEdit = () => !!S.session;
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261110e';
+const APP_VER = '20261110f';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -245,7 +245,9 @@ addEventListener('hashchange', readHash);
 /* ---------- 畫面 ---------- */
 const countryOf = w => (w.origin || '').split(/[,，/]/)[0].trim() || '未填產地';
 const shelfNo = s => { const m = /\d+/.exec(s || ''); return m ? Number(m[0]) : 999; };
-const isWhite = w => /白酒|white|riesling|sauvignon blanc|chardonnay/i.test(`${w.grapeNotes} ${w.wineName}`);
+// 編輯表單有選紅酒／白酒就照選的；沒選過的舊資料才看酒名與備註的關鍵字判斷
+const isWhite = w => w.color ? w.color === 'white' : /白酒|white|riesling|sauvignon blanc|chardonnay/i.test(`${w.grapeNotes} ${w.wineName}`);
+const colorName = w => isWhite(w) ? '白酒' : '紅酒';
 function renderSync() {
   const el = $('sync'), every = (S.session ? CFG.pollSecondsEditor : CFG.pollSecondsViewer) * 1000;
   const age = S.syncedAt ? Date.now() - new Date(S.syncedAt).getTime() : Infinity;
@@ -400,7 +402,7 @@ function galleryHtml(w) {
 function renderDrawer() {
   const w = byId(S.drawer); if (!w) { closeDrawer(); return; }
   const p = photoUrl(w), ed = canEdit(), t = total(w), archived = w.status === 'archived';
-  const facts = [['wineryRegion', '酒莊／產區'], ['origin', '產地'], ['volume', '容量'], ['source', '來源'], ['referencePrice', '參考價格'], ['entryDate', '入庫日期'], ['drinkWindow', '適飲期']]
+  const facts = `<div><dt>紅酒／白酒</dt><dd>${colorName(w)}</dd></div>` + [['wineryRegion', '酒莊／產區'], ['origin', '產地'], ['volume', '容量'], ['source', '來源'], ['referencePrice', '參考價格'], ['entryDate', '入庫日期'], ['drinkWindow', '適飲期']]
     .map(([k, l]) => `<div><dt>${l}</dt><dd>${k === 'referencePrice' ? fmtPrice(w[k]) : esc(w[k] || '—')}</dd></div>`).join('');
   const locs = (w.locations || []).map(l => `<div class="dw-loc"><span class="where">${esc(l.cabinet)} <small>· ${esc(l.shelf)}</small></span><span class="n">${l.quantity}</span></div>`).join('');
   const prevSl = $('drawerBody').querySelector('.slides'), keep = S.drawerShown === S.drawer && prevSl ? prevSl.scrollLeft : 0;
@@ -707,6 +709,8 @@ function openWineForm(w, pend) {
   for (const [k] of FIELDS) { const el = $('f_' + k); if (el) el.value = w?.[k] ?? ''; }
   setChoice('f_volumeChoice', 'f_volumeOther', w?.volume, '750ml');
   setChoice('f_sourceChoice', 'f_sourceOther', w?.source, '');
+  const col = w && isWhite(w) ? 'white' : 'red';
+  document.querySelectorAll('input[name=f_color]').forEach(r => r.checked = r.value === col);
   $('locInputs').replaceChildren(); (w?.locations?.length ? w.locations : [{cabinet: '', shelf: '', quantity: 1}]).forEach(addLocRow);
   $('locHint').hidden = !w; $('locLbl').textContent = w ? '存放位置與瓶數' : '存放位置與初始瓶數';
   $('newPhotoField').hidden = !!w; $('f_camera').value = ''; $('f_gallery').value = '';
@@ -717,6 +721,7 @@ function readWineForm() {
   for (const [k] of FIELDS) { if (k === 'volume' || k === 'source' || k === 'referencePrice') continue; r[k] = $('f_' + k).value.trim(); }
   r.volume = ($('f_volumeChoice').value === '__other__' ? $('f_volumeOther').value : $('f_volumeChoice').value).trim();
   r.source = ($('f_sourceChoice').value === '__other__' ? $('f_sourceOther').value : $('f_sourceChoice').value).trim();
+  r.color = document.querySelector('input[name=f_color]:checked')?.value === 'white' ? 'white' : 'red';
   const price = $('f_referencePrice').value.trim(); r.referencePrice = price === '' ? null : Number(price);
   if (!r.wineName) fail('請填寫酒名。');
   if (r.referencePrice !== null && (!Number.isFinite(r.referencePrice) || r.referencePrice < 0)) fail('參考價格格式不正確。');
@@ -745,6 +750,7 @@ async function saveWine() {
       d.wines[id] = next;
       const changes = [];
       for (const [k, label] of FIELDS) if (String(cur[k] ?? '') !== String(r[k] ?? '')) changes.push(`${label}：${cur[k] ?? '—'} → ${r[k] ?? '—'}`);
+      if (isWhite(cur) !== (r.color === 'white')) changes.push(`紅酒／白酒：${colorName(cur)} → ${r.color === 'white' ? '白酒' : '紅酒'}`);
       if (JSON.stringify(cur.locations || []) !== JSON.stringify(r.locations)) changes.push(`位置：${locText(cur.locations)} → ${locText(r.locations)}`);
       return changes;
     }, changes => `編輯 ${id} ${r.wineName}${changes.length ? '' : '（無變更）'}${changes.length ? '\n\n' + changes.join('\n') : ''}`);
@@ -1164,11 +1170,11 @@ async function checkStorage() {
 /* ---------- CSV ---------- */
 function exportCsv() {
   const cell = v => { const s = String(v ?? ''); return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
-  const lines = [['資料類型', ...FIELDS.map(f => f[1]), '櫃位', '層位', '瓶數', '飲用優先', '最後修改者', '最後修改時間'].join(',')];
+  const lines = [['資料類型', ...FIELDS.map(f => f[1]), '紅酒／白酒', '櫃位', '層位', '瓶數', '飲用優先', '最後修改者', '最後修改時間'].join(',')];
   for (const w of wines()) {
     const type = w.status === 'archived' ? '歷史酒單' : '目前酒款';
     const locs = w.locations?.length ? w.locations : [{cabinet: '', shelf: '', quantity: 0}];
-    for (const l of locs) lines.push([type, ...FIELDS.map(f => w[f[0]]), l.cabinet, l.shelf, l.quantity, prioOf(w), nameOf(w.updatedBy), w.updatedAt].map(cell).join(','));
+    for (const l of locs) lines.push([type, ...FIELDS.map(f => w[f[0]]), colorName(w), l.cabinet, l.shelf, l.quantity, prioOf(w), nameOf(w.updatedBy), w.updatedAt].map(cell).join(','));
   }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['﻿' + lines.join('\r\n')], {type: 'text/csv;charset=utf-8'}));

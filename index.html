@@ -24,7 +24,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261110e" id="mainCss">
+<link rel="stylesheet" href="style.css?v=20261110f" id="mainCss">
 </head>
 <body>
 <header class="bar">
@@ -127,6 +127,7 @@
   <div class="field"><label for="f_wineName">酒名 *</label><input id="f_wineName" maxlength="200" required></div>
   <div class="field"><label for="f_wineryRegion">酒莊／產區</label><input id="f_wineryRegion" maxlength="200"></div>
   <div class="field"><label for="f_vintage">年份</label><input id="f_vintage" maxlength="40" placeholder="例如 2018 或 NV"></div>
+  <fieldset class="field types colorpick" id="f_colorSet"><legend>紅酒／白酒</legend><label><input type="radio" name="f_color" value="red"><span>🍷 紅酒</span></label><label><input type="radio" name="f_color" value="white"><span>🥂 白酒</span></label></fieldset>
   <div class="field"><label for="f_entryDate">入庫日期</label><input id="f_entryDate" type="date"></div>
   <div class="field"><label for="f_volumeChoice">容量</label><select id="f_volumeChoice"><option>750ml</option><option>500ml</option><option>375ml</option><option>1500ml</option><option>3000ml</option><option value="__other__">其他（手動輸入）</option></select><input id="f_volumeOther" hidden maxlength="40" placeholder="例如 187ml"></div>
   <div class="field"><label for="f_sourceChoice">來源</label><select id="f_sourceChoice"><option value="">請選擇</option><option>購</option><option>贈</option><option>寄存</option><option value="__other__">其他（手動輸入）</option></select><input id="f_sourceOther" hidden maxlength="80" placeholder="輸入其他來源"></div>
@@ -295,7 +296,7 @@
 
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="config.js?v=20261110e"></script>
-<script src="app.js?v=20261110e"></script>
+<script src="config.js?v=20261110f"></script>
+<script src="app.js?v=20261110f"></script>
 </body>
 </html>

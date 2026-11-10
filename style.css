@@ -1,4 +1,4 @@
-:root{--ver:"20261110e"}
+:root{--ver:"20261110f"}
 /* 酒窖：冷石灰與酒紅（淺色）／酒瓶玻璃墨綠（深色）。
    版面：頂列 → 總瓶數 → 酒櫃配置圖（每層一排瓶點）→ 帳冊式酒款清單；詳細資料從側邊（手機為底部）滑出。 */
 :root{
@@ -622,3 +622,7 @@ dialog.viewer{width:min(720px,calc(100vw - 32px))}
 .viewer .gal .slides>img{height:auto;max-height:68vh;aspect-ratio:3/4;object-fit:contain}
 .viewer-hint{text-align:center;margin:10px 0 0}
 .viewer .dh h2{font-size:24px;line-height:1.3}
+fieldset.colorpick{display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;align-content:flex-start;gap:8px}
+.colorpick legend{width:100%}
+.colorpick input[value=red]:checked+span{background:var(--frame-red);border-color:var(--frame-red);color:#fff}
+.colorpick input[value=white]:checked+span{background:var(--frame-white);border-color:var(--frame-white);color:#fff}
