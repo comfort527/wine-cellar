@@ -3,8 +3,7 @@
  "catalog": {
   "cabinets": [
    "8樓右LB櫃",
-   "8樓外冰箱",
-   "陽明"
+   "8樓外冰箱"
   ],
   "shelves": [
    "第1層",
@@ -1769,8 +1768,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 93,
- "updatedAt": "2026-11-10T15:35:24.594Z",
+ "rev": 94,
+ "updatedAt": "2026-11-10T15:36:11.733Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
