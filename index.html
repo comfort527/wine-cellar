@@ -24,7 +24,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261110i" id="mainCss">
+<link rel="stylesheet" href="style.css?v=20261110j" id="mainCss">
 </head>
 <body>
 <header class="bar">
@@ -275,7 +275,7 @@
   <div class="ferr" id="locErr" hidden></div>
  </section>
  <section id="tab-ai" hidden>
-  <p class="hint" style="margin-top:0">填入<b>你自己</b>的 AI 金鑰並驗證成功後，「新增紅酒」的照片欄會多一個「✨ 智慧辨識」按鈕，依照片自動填入酒名、年份、產地等欄位。金鑰只存在這台裝置、只給目前登入的「<b id="aiWho"></b>」使用，不會上傳到 GitHub，其他編輯者看不到。</p>
+  <p class="hint" style="margin-top:0">填入<b>你自己</b>的 AI 金鑰並驗證成功後，「新增紅酒」的照片欄會多一個「✨ 智慧辨識」按鈕，依照片自動填入酒名、年份、產地等欄位。金鑰只存在這台裝置、只給目前登入的「<b id="aiWho"></b>」使用，不會上傳到 GitHub，其他編輯者看不到；<b>儲存 30 分鐘後自動清除</b>，要用再重新貼上。</p>
   <div class="ai-status" id="aiStatus"></div>
   <form class="form" id="aiForm" novalidate>
    <div class="field"><label for="ai_provider">AI 服務</label><select id="ai_provider"><option value="claude">Claude（Anthropic）</option><option value="gemini">Gemini（Google）</option><option value="openai">OpenAI</option></select></div>
@@ -308,7 +308,7 @@
 
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="config.js?v=20261110i"></script>
-<script src="app.js?v=20261110i"></script>
+<script src="config.js?v=20261110j"></script>
+<script src="app.js?v=20261110j"></script>
 </body>
 </html>

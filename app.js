@@ -36,7 +36,7 @@ function fail(m) { const e = new Error(m); e.user = true; throw e; }
 function msgOf(e) { return e?.user ? e.message : '操作未完成，請稍後再試。'; }
 const canEdit = () => !!S.session;
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261110i';
+const APP_VER = '20261110j';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -195,6 +195,7 @@ function saveSession(s, remember) {
   S.session = s;
   const v = JSON.stringify(s);
   try { localStorage.removeItem('cellarSession'); sessionStorage.removeItem('cellarSession'); (remember ? localStorage : sessionStorage).setItem('cellarSession', v); localStorage.setItem('cellarSlot', s.slotId); } catch {}
+  scheduleAiExpiry();
 }
 function restoreSession() {
   try { const v = localStorage.getItem('cellarSession') || sessionStorage.getItem('cellarSession'); if (v) S.session = JSON.parse(v); } catch {}
@@ -524,9 +525,10 @@ function wire() {
   });
   $('aiForm').addEventListener('submit', e => { e.preventDefault(); submit('aiForm', 'aiErr', saveAiSettings); });
   $('ai_provider').addEventListener('change', () => { $('ai_modelBox').hidden = true; $('ai_key').value = ''; showErr('aiErr', ''); });
-  $('ai_model').addEventListener('change', () => { const c = getAI(); if (c) { c.model = $('ai_model').value; setAI(c); renderAiSettings(); } });
+  $('ai_model').addEventListener('change', () => { const c = getAI(); if (c) { c.model = $('ai_model').value; setAI(c); setAIPref({provider: c.provider, model: c.model}); renderAiSettings(); } });
   $('aiRemove').addEventListener('click', () => { if (!confirm('移除這台裝置上的 AI 金鑰？「智慧辨識」按鈕會隱藏。')) return; setAI(null); renderAiSettings(); toast('已移除 AI 金鑰。'); });
   $('aiBtn').addEventListener('click', aiRecognize);
+  setTimeout(() => { sweepAI(); scheduleAiExpiry(); });  // 等整個程式載入完再執行
   for (const id of ['f_wineName', 'f_wineryRegion', 'f_vintage', 'f_origin', 'f_grapeNotes', 'f_volumeChoice', 'f_volumeOther']) $(id).addEventListener('input', e => e.target.classList.remove('ai-filled', 'ai-guess'));
   $('pendList').addEventListener('change', e => {
     const inp = e.target.closest('[data-padd]'); if (!inp) return;
@@ -946,9 +948,24 @@ const AI_SCHEMA = {type: 'object', additionalProperties: false, required: [...AI
   properties: {wineName: {type: 'string'}, wineryRegion: {type: 'string'}, vintage: {type: 'string'}, origin: {type: 'string'}, volume: {type: 'string'}, grapeNotes: {type: 'string'},
     color: {type: 'string', enum: ['red', 'white', 'unknown']}, uncertain: {type: 'array', items: {type: 'string', enum: AI_FIELDS}}}};
 const CLAUDE_MODELS = ['claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5'];
+/* 金鑰只在本機保留 30 分鐘（從儲存那一刻算），時間到自動清除，要用再重新輸入。登出不提早清除 */
+const AI_TTL = 30 * 60 * 1000;
 const aiStoreKey = () => S.session ? 'cellarAI:' + S.session.slotId : '';
-function getAI() { try { const k = aiStoreKey(); return k ? JSON.parse(localStorage.getItem(k) || 'null') : null; } catch { return null; } }
-function setAI(cfg) { try { const k = aiStoreKey(); if (!k) return; if (cfg) localStorage.setItem(k, JSON.stringify(cfg)); else localStorage.removeItem(k); } catch {} }
+const aiPrefKey = () => S.session ? 'cellarAIpref:' + S.session.slotId : '';  // 只記服務與模型，不含金鑰
+function sweepAI() {  // 清掉這台裝置上所有已過期（或舊版沒有期限）的金鑰
+  try { for (const k of Object.keys(localStorage)) if (k.startsWith('cellarAI:')) { let c = null; try { c = JSON.parse(localStorage.getItem(k)); } catch {} if (!c?.expiresAt || c.expiresAt <= Date.now()) localStorage.removeItem(k); } } catch {}
+}
+function getAI() { sweepAI(); try { const k = aiStoreKey(); return k ? JSON.parse(localStorage.getItem(k) || 'null') : null; } catch { return null; } }
+function setAI(cfg) { try { const k = aiStoreKey(); if (!k) return; if (cfg) localStorage.setItem(k, JSON.stringify(cfg)); else localStorage.removeItem(k); } catch {} scheduleAiExpiry(); }
+function getAIPref() { try { return JSON.parse(localStorage.getItem(aiPrefKey()) || 'null'); } catch { return null; } }
+function setAIPref(p) { try { if (aiPrefKey()) localStorage.setItem(aiPrefKey(), JSON.stringify(p)); } catch {} }
+let aiTimer = 0;
+function scheduleAiExpiry() {  // 時間一到就把按鈕藏起來、更新設定頁
+  clearTimeout(aiTimer); const c = (() => { try { return JSON.parse(localStorage.getItem(aiStoreKey()) || 'null'); } catch { return null; } })();
+  const onExpire = () => { sweepAI(); if (!$('tab-ai').hidden) renderAiSettings(); if ($('wineModal').open) renderAiRow(); };
+  if (c?.expiresAt) aiTimer = setTimeout(onExpire, Math.max(0, c.expiresAt - Date.now()) + 500);
+}
+const hhmm = t => new Date(t).toLocaleTimeString('zh-TW', {hour12: false, hour: '2-digit', minute: '2-digit'});
 let anthropicMod = null;
 async function claudeClient(key) {
   // 官方 SDK（已打包放在 vendor/，不依賴外部 CDN）；只有用 Claude 的編輯者按下時才載入
@@ -994,17 +1011,19 @@ async function saveAiSettings() {
     let models;
     try { models = await aiListModels(provider, useKey); } catch (e) { fail(aiError(e)); }
     if (!models.length) fail('這把金鑰讀不到可用的模型，請確認帳號已開通 API。');
-    const model = old && old.provider === provider && models.includes(old.model) ? old.model : models[0];
-    setAI({provider, key: useKey, model, models, ok: true, checkedAt: now()});
-    $('ai_key').value = ''; renderAiSettings(); toast(`${AI_NAMES[provider]} 金鑰驗證成功，「新增紅酒」已出現智慧辨識。`);
+    const pref = getAIPref(), model = old && old.provider === provider && models.includes(old.model) ? old.model : pref && pref.provider === provider && models.includes(pref.model) ? pref.model : models[0];
+    setAI({provider, key: useKey, model, models, ok: true, checkedAt: now(), expiresAt: Date.now() + AI_TTL});
+    setAIPref({provider, model});
+    $('ai_key').value = ''; renderAiSettings(); toast(`${AI_NAMES[provider]} 金鑰驗證成功，30 分鐘內「新增紅酒」可使用智慧辨識。`);
   } finally { $('aiSave').textContent = '驗證並儲存'; }
 }
 function renderAiSettings() {
   const c = getAI();
   $('aiWho').textContent = S.session?.label || '';
-  $('aiStatus').innerHTML = c?.ok ? `<b>✅ 已啟用</b>　${AI_NAMES[c.provider]} · ${esc(c.model.replace(/^models\//, ''))} · 金鑰 ••••${esc(c.key.slice(-4))}` : '<b>尚未設定</b>　「新增紅酒」不會顯示智慧辨識。';
+  const left = c?.expiresAt ? Math.max(1, Math.ceil((c.expiresAt - Date.now()) / 60000)) : 0, pref = getAIPref();
+  $('aiStatus').innerHTML = c?.ok ? `<b>✅ 已啟用</b>　${AI_NAMES[c.provider]} · ${esc(c.model.replace(/^models\//, ''))} · 金鑰 ••••${esc(c.key.slice(-4))}<br><span class="ai-left">還剩約 ${left} 分鐘，${hhmm(c.expiresAt)} 自動從這台裝置清除</span>` : `<b>尚未輸入金鑰</b>　「新增紅酒」不會顯示智慧辨識。${pref ? `<br><span class="ai-left">上次用的是 ${AI_NAMES[pref.provider]}，重新貼上金鑰即可</span>` : ''}`;
   $('aiStatus').classList.toggle('on', !!c?.ok);
-  if (c) $('ai_provider').value = c.provider;
+  if (c) $('ai_provider').value = c.provider; else if (pref && !$('ai_key').value) $('ai_provider').value = pref.provider;
   $('ai_key').placeholder = c?.ok ? '已儲存；要更換才需重新貼上' : '貼上這家服務的 API 金鑰';
   $('ai_modelBox').hidden = !c?.ok;
   if (c?.ok) $('ai_model').innerHTML = (c.models || [c.model]).map(m => `<option value="${esc(m)}" ${m === c.model ? 'selected' : ''}>${esc(m.replace(/^models\//, ''))}</option>`).join('');
@@ -1053,7 +1072,9 @@ function aiParse(text) {
     color: ['red', 'white'].includes(o.color) ? o.color : '', uncertain: Array.isArray(o.uncertain) ? o.uncertain.filter(k => AI_FIELDS.includes(k)) : []};
 }
 async function aiRecognize() {
-  const c = getAI(); if (!c?.ok || S.aiBusy) return;
+  const c = getAI();
+  if (!c?.ok) { renderAiRow(); showErr('wineErr', 'AI 金鑰已超過 30 分鐘、自動清除了。要再用請到「管理 → 智慧辨識」重新貼上。'); return; }
+  if (S.aiBusy) return;
   S.aiBusy = true; delete $('aiMsg').dataset.keep; renderAiRow(); $('aiBtn').textContent = '✨ 辨識中…'; $('aiMsg').textContent = '照片傳送中，約需幾秒到十幾秒'; showErr('wineErr', '');
   try {
     const imgs = await aiImages(); if (!imgs.length) fail('讀不到照片，請重新加入後再試。');
