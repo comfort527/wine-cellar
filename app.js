@@ -36,7 +36,7 @@ function fail(m) { const e = new Error(m); e.user = true; throw e; }
 function msgOf(e) { return e?.user ? e.message : '操作未完成，請稍後再試。'; }
 const canEdit = () => !!S.session;
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261110d';
+const APP_VER = '20261110e';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -550,7 +550,9 @@ function wire() {
   $('jDayList').addEventListener('keydown', e => { if (!e.target.closest('button')) openHist(e); });
   $('journalForm').addEventListener('submit', e => { e.preventDefault(); submit('journalForm', 'journalErr', saveJournal); });
   document.querySelectorAll('input[name=j_src]').forEach(r => r.addEventListener('change', () => { S.jf = {src: '', cab: '', shelf: '', wineId: '', miss: false}; showErr('journalErr', ''); syncJournalForm(); }));
-  $('j_pick').addEventListener('click', journalPick); $('j_path').addEventListener('click', journalPick);
+  $('j_pick').addEventListener('click', journalPick);
+  $('j_pick').addEventListener('keydown', e => { const v = e.target.closest('[data-jview]'); if (v && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.stopPropagation(); openViewer(v.dataset.jview); } });
+  $('viewerBody').addEventListener('click', e => { const gn = e.target.closest('[data-gnav]'); if (gn) { const sl = gn.parentElement.querySelector('.slides'); sl.scrollBy({left: Number(gn.dataset.gnav) * sl.clientWidth, behavior: 'smooth'}); } }); $('j_path').addEventListener('click', journalPick);
   $('j_missBtn').addEventListener('click', startMissing);
   $('j_left').addEventListener('input', syncJournalForm);
   $('j_stars').addEventListener('click', e => { const b = e.target.closest('[data-jstar]'); if (b) { const n = Number(b.dataset.jstar); S.jRating = S.jRating === n ? 0 : n; syncJournalForm(); } });
@@ -1291,7 +1293,8 @@ function renderPicker() {
   const crumb = (step, label, on) => `<button type="button" data-jstep="${step}" class="${on ? 'on' : ''}">${esc(label)}</button>`;
   const sel = f.wineId ? byId(f.wineId) : null;
   $('j_path').innerHTML = [crumb('cab', f.cab || '① 選櫃位', !f.cab), f.cab ? crumb('shelf', f.shelf || '② 選層位', !f.shelf) : '', f.shelf ? crumb('wine', sel ? sel.wineName : '③ 選酒', !f.wineId) : ''].filter(Boolean).join('<span class="sep">›</span>');
-  const thumb = w => { const u = thumbUrl(w); return u ? `<img class="pthumb" src="${esc(u)}" alt="" loading="lazy">` : `<span class="pthumb">${esc(w.vintage || 'NV')}</span>`; };
+  // 有照片的酒：點縮圖可放大，左右滑動看全部照片
+  const thumb = w => { const u = thumbUrl(w), n = photosOf(w).length; return u ? `<span class="pthumb-v" data-jview="${esc(w.wineId)}" role="button" tabindex="0" aria-label="查看「${esc(w.wineName)}」的 ${n} 張照片"><img class="pthumb" src="${esc(u)}" alt="" loading="lazy"><i class="pcount">🔍${n > 1 ? ' ' + n : ''}</i></span>` : `<span class="pthumb">${esc(w.vintage || 'NV')}</span>`; };
   const card = (attr, title, sub, n, w) => `<button type="button" class="pcard ${w ? 'withimg' : ''}" ${attr}>${w ? thumb(w) : ''}<span><b>${title}</b>${sub ? `<small>${sub}</small>` : ''}</span><em>${n} 瓶</em></button>`;
   let html = '';
   if (!f.cab) {
@@ -1325,7 +1328,16 @@ function syncJournalForm() {
   } else $('j_qty').removeAttribute('max');
   document.querySelectorAll('#j_stars [data-jstar]').forEach(b => { b.classList.toggle('on', Number(b.dataset.jstar) <= S.jRating); b.setAttribute('aria-pressed', Number(b.dataset.jstar) === S.jRating); });
 }
+/* 看照片：飲酒日誌選酒時確認是哪一瓶 */
+function openViewer(id) {
+  const w = byId(id); if (!w || !photosOf(w).length) return;
+  const n = photosOf(w).length;
+  $('viewerTitle').textContent = [w.wineName, w.vintage].filter(Boolean).join('　');
+  $('viewerBody').innerHTML = galleryHtml(w) + `<p class="hint viewer-hint">${n > 1 ? `共 ${n} 張，左右滑動查看` : '只有 1 張照片'}</p>`;
+  showDialog('viewerModal');
+}
 function journalPick(e) {
+  const v = e.target.closest('[data-jview]'); if (v) { e.preventDefault(); return openViewer(v.dataset.jview); }
   const f = S.jf, t = e.target.closest('button'); if (!t) return;
   if (t.dataset.jcab !== undefined) { f.cab = t.dataset.jcab; f.shelf = ''; f.wineId = ''; }
   else if (t.dataset.jshelf !== undefined) { f.shelf = t.dataset.jshelf; f.wineId = ''; }

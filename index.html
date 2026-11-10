@@ -24,7 +24,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261110d" id="mainCss">
+<link rel="stylesheet" href="style.css?v=20261110e" id="mainCss">
 </head>
 <body>
 <header class="bar">
@@ -219,6 +219,9 @@
  <div class="dact"><button type="button" data-close>取消</button><button type="submit" class="primary" id="j_save">儲存</button></div>
 </form></dialog>
 
+<dialog id="viewerModal" class="viewer" aria-labelledby="viewerTitle"><div class="dh"><h2 id="viewerTitle">照片</h2><button data-close aria-label="關閉">×</button></div>
+<div class="db" id="viewerBody"></div></dialog>
+
 <dialog class="small" id="photoModal" aria-labelledby="photoTitle"><div class="dh"><h2 id="photoTitle">照片</h2><button data-close aria-label="關閉">×</button></div>
 <div class="db">
  <p id="photoWine" class="strong"></p>
@@ -292,7 +295,7 @@
 
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="config.js?v=20261110d"></script>
-<script src="app.js?v=20261110d"></script>
+<script src="config.js?v=20261110e"></script>
+<script src="app.js?v=20261110e"></script>
 </body>
 </html>
