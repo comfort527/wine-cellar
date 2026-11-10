@@ -541,17 +541,24 @@
     }
    ],
    "origin": "France",
-   "photo": "",
+   "photo": "images/W020-1794287655862.jpg",
    "referencePrice": 1890,
-   "revision": 1,
+   "revision": 2,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-09-29T14:09:22.075Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-10T05:14:28.897Z",
+   "updatedBy": "芝琦",
    "vintage": "2020",
    "volume": "750ml",
    "wineName": "Jean Gautreau Red",
-   "wineryRegion": "Château Sociando-Mallet"
+   "wineryRegion": "Château Sociando-Mallet",
+   "photos": [
+    {
+     "photo": "images/W020-1794287655862.jpg",
+     "thumb": "images/W020-1794287655862-t.jpg"
+    }
+   ],
+   "thumb": "images/W020-1794287655862-t.jpg"
   },
   "W021": {
    "createdAt": "",
@@ -1652,7 +1659,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 65,
- "updatedAt": "2026-11-10T05:13:35.125Z",
+ "rev": 66,
+ "updatedAt": "2026-11-10T05:14:28.897Z",
  "pending": []
 }
