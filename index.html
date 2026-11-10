@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com; connect-src 'self' https://api.github.com https://raw.githubusercontent.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com; connect-src 'self' blob: https://api.github.com https://raw.githubusercontent.com https://api.anthropic.com https://generativelanguage.googleapis.com https://api.openai.com; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <!-- 提前連線：打開網頁時先和照片、資料所在的 GitHub 伺服器建立連線，第一批照片與資料可早一點出現 -->
 <link rel="preconnect" href="https://raw.githubusercontent.com">
@@ -24,7 +24,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261110f" id="mainCss">
+<link rel="stylesheet" href="style.css?v=20261110g" id="mainCss">
 </head>
 <body>
 <header class="bar">
@@ -136,7 +136,7 @@
   <div class="field"><label for="f_drinkWindow">適飲期</label><input id="f_drinkWindow" maxlength="200" placeholder="例如 2026–2035"></div>
   <div class="field span"><label for="f_grapeNotes">葡萄品種／備註</label><textarea id="f_grapeNotes" maxlength="2000"></textarea></div>
   <div class="field span"><span class="lbl" id="locLbl">存放位置與瓶數</span><div id="locInputs"></div><div><button type="button" class="small" id="addLoc">＋ 新增位置</button></div><p class="hint" id="locHint" hidden>要扣除瓶數請用「出庫」，才會留下原因；這裡的瓶數調整會記為「資料修正」。</p></div>
-  <div class="field span" id="newPhotoField"><span class="lbl">酒款照片（最多 4 張）</span><div class="photo-in"><label>📷 拍照<input type="file" id="f_camera" accept="image/*" capture="environment"></label><label>從相簿選擇（可多選）<input type="file" id="f_gallery" accept="image/*" multiple></label></div><div class="pstrip" id="f_strip"></div><span class="hint">照片會自動壓縮到 200 KB 以內，另存一張小縮圖。第一張是封面。</span></div>
+  <div class="field span" id="newPhotoField"><span class="lbl">酒款照片（最多 4 張）</span><div class="photo-in"><label>📷 拍照<input type="file" id="f_camera" accept="image/*" capture="environment"></label><label>從相簿選擇（可多選）<input type="file" id="f_gallery" accept="image/*" multiple></label></div><div class="pstrip" id="f_strip"></div><div class="ai-row" id="aiRow" hidden><button type="button" class="ai-btn" id="aiBtn">✨ 智慧辨識</button><span class="hint" id="aiMsg"></span></div><span class="hint">照片會自動壓縮到 200 KB 以內，另存一張小縮圖。第一張是封面。</span></div>
  </div>
  <div class="ferr" id="wineErr" hidden></div>
  <div class="dact"><button type="button" data-close>取消</button><button type="submit" class="primary">儲存資料</button></div>
@@ -251,7 +251,7 @@
 
 <dialog id="adminModal" aria-labelledby="adminTitle"><div class="dh"><h2 id="adminTitle">管理</h2><button data-close aria-label="關閉">×</button></div>
 <div class="db">
- <div class="tabs"><button data-tab="audit" class="on">異動紀錄</button><button data-tab="outs">出庫紀錄</button><button data-tab="loc">櫃位／層位</button><button data-tab="keys" id="keysTab">裝置密碼</button></div>
+ <div class="tabs"><button data-tab="audit" class="on">異動紀錄</button><button data-tab="outs">出庫紀錄</button><button data-tab="loc">櫃位／層位</button><button data-tab="ai">智慧辨識</button><button data-tab="keys" id="keysTab">裝置密碼</button></div>
  <section id="tab-audit"><p class="hint" style="margin-top:0" id="auditHint">每次異動都是一筆 GitHub commit，由新到舊。</p><div class="audit" id="auditList"></div><button class="small" id="moreAudit" hidden style="margin-top:10px">載入更多</button></section>
  <section id="tab-outs" hidden>
   <p class="hint" style="margin-top:0">每一次出庫（含送禮）都記在這裡，由新到舊。點一筆可以查看那款酒。</p>
@@ -273,6 +273,18 @@
   <p class="hint">層位</p><div class="chips" id="shelfChips"></div>
   <form class="inline" id="locForm" novalidate><div class="field"><label for="l_type">類型</label><select id="l_type"><option value="cabinets">櫃位</option><option value="shelves">層位</option></select></div><div class="field"><label for="l_name">名稱</label><input id="l_name" maxlength="80" placeholder="例如 A櫃、第 2 層"></div><button class="primary" type="submit">新增</button></form>
   <div class="ferr" id="locErr" hidden></div>
+ </section>
+ <section id="tab-ai" hidden>
+  <p class="hint" style="margin-top:0">填入<b>你自己</b>的 AI 金鑰並驗證成功後，「新增紅酒」的照片欄會多一個「✨ 智慧辨識」按鈕，依照片自動填入酒名、年份、產地等欄位。金鑰只存在這台裝置、只給目前登入的「<b id="aiWho"></b>」使用，不會上傳到 GitHub，其他編輯者看不到。</p>
+  <div class="ai-status" id="aiStatus"></div>
+  <form class="form" id="aiForm" novalidate>
+   <div class="field"><label for="ai_provider">AI 服務</label><select id="ai_provider"><option value="claude">Claude（Anthropic）</option><option value="gemini">Gemini（Google）</option><option value="openai">OpenAI</option></select></div>
+   <div class="field"><label for="ai_key">API 金鑰</label><input id="ai_key" type="password" autocomplete="off" spellcheck="false" placeholder="貼上這家服務的 API 金鑰"></div>
+   <div class="field span" id="ai_modelBox" hidden><label for="ai_model">使用的模型</label><select id="ai_model"></select><span class="hint">驗證時從你的帳號讀到的可用模型；換了會立即生效。</span></div>
+   <div class="ferr span" id="aiErr" hidden></div>
+   <div class="ai-acts span"><button type="submit" class="primary" id="aiSave">驗證並儲存</button><button type="button" class="danger" id="aiRemove" hidden>移除金鑰</button></div>
+  </form>
+  <p class="hint">建議先到該服務的帳號設定<b>每月花費上限</b>。辨識結果只會幫你填表，存檔前請自己確認。</p>
  </section>
  <section id="tab-keys" hidden>
   <p class="hint" style="margin-top:0">每台裝置一組密碼。刪除後該裝置就無法再登入管理。編輯者可新增、編輯、出庫與上傳照片；管理員另可管理裝置密碼與更換權杖。</p>
@@ -296,7 +308,7 @@
 
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="config.js?v=20261110f"></script>
-<script src="app.js?v=20261110f"></script>
+<script src="config.js?v=20261110g"></script>
+<script src="app.js?v=20261110g"></script>
 </body>
 </html>

@@ -36,7 +36,7 @@ function fail(m) { const e = new Error(m); e.user = true; throw e; }
 function msgOf(e) { return e?.user ? e.message : '操作未完成，請稍後再試。'; }
 const canEdit = () => !!S.session;
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261110f';
+const APP_VER = '20261110g';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -516,6 +516,12 @@ function wire() {
     const d = e.target.closest('[data-pdelq]'); if (d) return deletePending(d);
     const rm = e.target.closest('[data-pprm]'); if (rm) return removePendPhoto(rm.closest('[data-pid]').dataset.pid, rm.dataset.pprm);
   });
+  $('aiForm').addEventListener('submit', e => { e.preventDefault(); submit('aiForm', 'aiErr', saveAiSettings); });
+  $('ai_provider').addEventListener('change', () => { $('ai_modelBox').hidden = true; $('ai_key').value = ''; showErr('aiErr', ''); });
+  $('ai_model').addEventListener('change', () => { const c = getAI(); if (c) { c.model = $('ai_model').value; setAI(c); renderAiSettings(); } });
+  $('aiRemove').addEventListener('click', () => { if (!confirm('移除這台裝置上的 AI 金鑰？「智慧辨識」按鈕會隱藏。')) return; setAI(null); renderAiSettings(); toast('已移除 AI 金鑰。'); });
+  $('aiBtn').addEventListener('click', aiRecognize);
+  for (const id of ['f_wineName', 'f_wineryRegion', 'f_vintage', 'f_origin', 'f_grapeNotes', 'f_volumeChoice', 'f_volumeOther']) $(id).addEventListener('input', e => e.target.classList.remove('ai-filled', 'ai-guess'));
   $('pendList').addEventListener('change', e => {
     const inp = e.target.closest('[data-padd]'); if (!inp) return;
     const files = [...inp.files]; inp.value = ''; addPendPhotos(inp.closest('[data-pid]').dataset.pid, files);
@@ -582,11 +588,12 @@ async function submit(formId, errId, fn) {
 }
 function switchTab(name, noLoad) {
   document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
-  for (const t of ['audit', 'outs', 'loc', 'keys']) $('tab-' + t).hidden = t !== name;
+  for (const t of ['audit', 'outs', 'loc', 'ai', 'keys']) $('tab-' + t).hidden = t !== name;
   $('keysTab').hidden = !isAdmin();
   if (name === 'loc') renderAdmin();
   if (name === 'outs') renderHistory();
   if (name === 'keys') renderSlots();
+  if (name === 'ai') renderAiSettings();
   if (name === 'audit' && !noLoad) loadAudit('', 1);
 }
 
@@ -702,8 +709,11 @@ function renderNewStrip() {
     + (S.newPhotos || []).map((ph, i) => `<span class="nthumb"><img src="${URL.createObjectURL(ph.thumb)}" alt="照片 ${n + i + 1}">${n + i === 0 ? '<em>封面</em>' : ''}<button type="button" data-nrm="${i}" aria-label="移除這張">×</button></span>`).join('');
   const full = n + (S.newPhotos || []).length >= MAX_PHOTOS;
   document.querySelectorAll('#newPhotoField .photo-in label').forEach(l => l.hidden = full);
+  renderAiRow();
 }
 function openWineForm(w, pend) {
+  document.querySelectorAll('#wineForm .ai-filled, #wineForm .ai-guess').forEach(el => el.classList.remove('ai-filled', 'ai-guess'));
+  $('aiMsg').textContent = '';
   S.editing = w; S.fromPend = !w && pend || null; S.pendKeep = S.fromPend ? S.fromPend.photos.slice() : []; S.newPhotos = []; renderNewStrip(); ensureLists();
   $('wineTitle').textContent = w ? '編輯酒款' : S.fromPend ? '補資料並加入酒櫃' : '新增紅酒';
   for (const [k] of FIELDS) { const el = $('f_' + k); if (el) el.value = w?.[k] ?? ''; }
@@ -913,6 +923,148 @@ async function uploadPhoto(ph, id) {
   if (thumb.ok) S.localPhotos.set(`${base}-t.jpg`, URL.createObjectURL(ph.thumb));
   return {photo: `${base}.jpg`, thumb: thumb.ok ? `${base}-t.jpg` : ''};
 }
+/* ---------- 智慧辨識：每位編輯者用自己的 AI 金鑰，只存在這台裝置 ---------- */
+const AI_NAMES = {claude: 'Claude', gemini: 'Gemini', openai: 'OpenAI'};
+const AI_FIELDS = ['wineName', 'wineryRegion', 'vintage', 'origin', 'volume', 'grapeNotes', 'color'];
+const AI_PROMPT = `These photos show ONE wine bottle (front and/or back label). Read the labels and reply with JSON only, using exactly these keys:
+wineName: the wine's name as printed, keeping the original language and accents (include a cuvée or classification such as "Grand Cru Classé" if it is part of the name);
+wineryRegion: the producer / château, then "/" and the appellation or region if printed (for example "Mazzei/Chianti Classico Riserva DOCG");
+vintage: the 4-digit year, "NV" for non-vintage, or "" if not visible;
+origin: the country in English (for example France, Italy, Spain, Germany, United States, Australia, Chile);
+volume: bottle size such as "750ml", "375ml" or "1500ml" if visible, else "";
+grapeNotes: the grape variety or varieties if printed; if not printed but you are confident from the appellation, give them and include "grapeNotes" in uncertain;
+color: "red" or "white" (rosé, sparkling and sweet white wines count as "white"), or "unknown";
+uncertain: an array of the key names you inferred or could not read clearly.
+Use "" for anything you cannot determine. Never invent a producer, name or year.`;
+const AI_SCHEMA = {type: 'object', additionalProperties: false, required: [...AI_FIELDS, 'uncertain'],
+  properties: {wineName: {type: 'string'}, wineryRegion: {type: 'string'}, vintage: {type: 'string'}, origin: {type: 'string'}, volume: {type: 'string'}, grapeNotes: {type: 'string'},
+    color: {type: 'string', enum: ['red', 'white', 'unknown']}, uncertain: {type: 'array', items: {type: 'string', enum: AI_FIELDS}}}};
+const CLAUDE_MODELS = ['claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5'];
+const aiStoreKey = () => S.session ? 'cellarAI:' + S.session.slotId : '';
+function getAI() { try { const k = aiStoreKey(); return k ? JSON.parse(localStorage.getItem(k) || 'null') : null; } catch { return null; } }
+function setAI(cfg) { try { const k = aiStoreKey(); if (!k) return; if (cfg) localStorage.setItem(k, JSON.stringify(cfg)); else localStorage.removeItem(k); } catch {} }
+let anthropicMod = null;
+async function claudeClient(key) {
+  // 官方 SDK（已打包放在 vendor/，不依賴外部 CDN）；只有用 Claude 的編輯者按下時才載入
+  anthropicMod = anthropicMod || (await import('./vendor/anthropic-sdk-1.3.0.js')).default;
+  return new anthropicMod({apiKey: key, dangerouslyAllowBrowser: true, maxRetries: 1});
+}
+function aiError(e) {
+  const st = e?.status;
+  if (anthropicMod && e instanceof anthropicMod.APIConnectionError) return '連不到 AI 服務，請檢查網路後再試。';
+  if (st === 401 || st === 403) return '金鑰無效或沒有權限，請到「管理 → 智慧辨識」重新確認。';
+  if (st === 429) return '已達使用上限或次數限制，請稍後再試，或檢查 AI 帳號的額度。';
+  if (st === 404) return '找不到這個模型，請到「管理 → 智慧辨識」改選其他模型。';
+  if (e?.user) return e.message;
+  if (e instanceof TypeError) return '連不到 AI 服務，請檢查網路後再試。';
+  return 'AI 服務發生錯誤' + (st ? `（${st}）` : '') + '，請稍後再試。';
+}
+async function aiFetch(url, opts) {
+  const r = await fetch(url, opts);
+  if (!r.ok) { const err = new Error('http'); err.status = r.status; try { err.detail = await r.text(); } catch {} throw err; }
+  return r.json();
+}
+/* 驗證金鑰：向該服務讀取可用模型清單，讀得到就代表金鑰可用 */
+async function aiListModels(provider, key) {
+  if (provider === 'claude') {
+    const client = await claudeClient(key), ids = [];
+    for await (const m of client.models.list({limit: 100})) ids.push(m.id);
+    const pick = CLAUDE_MODELS.filter(id => ids.includes(id));
+    return pick.length ? pick : ids.filter(id => /^claude-/.test(id));
+  }
+  if (provider === 'gemini') {
+    const j = await aiFetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000', {headers: {'x-goog-api-key': key}});
+    return (j.models || []).filter(m => (m.supportedGenerationMethods || []).includes('generateContent') && /gemini/i.test(m.name) && !/embed|tts|audio|image-generation|live/i.test(m.name)).map(m => m.name).sort().reverse();
+  }
+  const j = await aiFetch('https://api.openai.com/v1/models', {headers: {Authorization: 'Bearer ' + key}});
+  return (j.data || []).map(m => m.id).filter(id => /^(gpt-|o\d)/.test(id) && !/audio|realtime|tts|transcribe|search|image|instruct|embedding/i.test(id)).sort().reverse();
+}
+async function saveAiSettings() {
+  const provider = $('ai_provider').value, key = $('ai_key').value.trim(), old = getAI();
+  const useKey = key || (old && old.provider === provider ? old.key : '');
+  if (!useKey) fail('請貼上 API 金鑰。');
+  $('aiSave').textContent = '驗證中…';
+  try {
+    let models;
+    try { models = await aiListModels(provider, useKey); } catch (e) { fail(aiError(e)); }
+    if (!models.length) fail('這把金鑰讀不到可用的模型，請確認帳號已開通 API。');
+    const model = old && old.provider === provider && models.includes(old.model) ? old.model : models[0];
+    setAI({provider, key: useKey, model, models, ok: true, checkedAt: now()});
+    $('ai_key').value = ''; renderAiSettings(); toast(`${AI_NAMES[provider]} 金鑰驗證成功，「新增紅酒」已出現智慧辨識。`);
+  } finally { $('aiSave').textContent = '驗證並儲存'; }
+}
+function renderAiSettings() {
+  const c = getAI();
+  $('aiWho').textContent = S.session?.label || '';
+  $('aiStatus').innerHTML = c?.ok ? `<b>✅ 已啟用</b>　${AI_NAMES[c.provider]} · ${esc(c.model.replace(/^models\//, ''))} · 金鑰 ••••${esc(c.key.slice(-4))}` : '<b>尚未設定</b>　「新增紅酒」不會顯示智慧辨識。';
+  $('aiStatus').classList.toggle('on', !!c?.ok);
+  if (c) $('ai_provider').value = c.provider;
+  $('ai_key').placeholder = c?.ok ? '已儲存；要更換才需重新貼上' : '貼上這家服務的 API 金鑰';
+  $('ai_modelBox').hidden = !c?.ok;
+  if (c?.ok) $('ai_model').innerHTML = (c.models || [c.model]).map(m => `<option value="${esc(m)}" ${m === c.model ? 'selected' : ''}>${esc(m.replace(/^models\//, ''))}</option>`).join('');
+  $('aiRemove').hidden = !c;
+}
+function renderAiRow() {
+  const c = getAI(), n = (S.pendKeep || []).length + (S.newPhotos || []).length, show = !!c?.ok && !S.editing && canEdit();
+  $('aiRow').hidden = !show; if (!show) return;
+  $('aiBtn').disabled = !n || !!S.aiBusy;
+  if (!S.aiBusy && !$('aiMsg').dataset.keep) $('aiMsg').textContent = n ? `用 ${AI_NAMES[c.provider]} 讀這 ${n} 張照片，自動填入表單裡的空白欄位` : '先加入酒標照片，再按智慧辨識';
+}
+const blobToB64 = b => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(b); });
+async function aiImages() {
+  const blobs = [];
+  for (const ph of S.pendKeep || []) { try { const r = await fetch(fileUrl(ph.photo)); if (r.ok) blobs.push(await r.blob()); } catch {} }
+  for (const ph of S.newPhotos || []) blobs.push(ph.full);
+  return Promise.all(blobs.slice(0, MAX_PHOTOS).map(async b => ({type: /^image\//.test(b.type) ? b.type : 'image/jpeg', b64: await blobToB64(b)})));
+}
+async function aiCall(c, imgs) {
+  if (c.provider === 'claude') {
+    const client = await claudeClient(c.key);
+    const req = {model: c.model, max_tokens: 16000, output_config: {effort: 'low', format: {type: 'json_schema', schema: AI_SCHEMA}},
+      messages: [{role: 'user', content: [...imgs.map(i => ({type: 'image', source: {type: 'base64', media_type: i.type, data: i.b64}})), {type: 'text', text: AI_PROMPT}]}]};
+    // 遇到安全分類器婉拒時，由伺服器自動改用替代模型重試（Haiku 沒有這個機制）
+    if (/opus|sonnet/.test(c.model)) Object.assign(req, {betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default'});
+    const res = await client.beta.messages.create(req);
+    if (res.stop_reason === 'refusal') fail('AI 婉拒辨識這組照片，請換張照片再試。');
+    if (res.stop_reason === 'max_tokens') fail('AI 回覆不完整，請再試一次。');
+    return res.content.filter(b => b.type === 'text').map(b => b.text).join('');
+  }
+  if (c.provider === 'gemini') {
+    const j = await aiFetch(`https://generativelanguage.googleapis.com/v1beta/${c.model}:generateContent`, {method: 'POST', headers: {'Content-Type': 'application/json', 'x-goog-api-key': c.key},
+      body: JSON.stringify({contents: [{role: 'user', parts: [...imgs.map(i => ({inline_data: {mime_type: i.type, data: i.b64}})), {text: AI_PROMPT}]}], generationConfig: {responseMimeType: 'application/json'}})});
+    return (j.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('');
+  }
+  const j = await aiFetch('https://api.openai.com/v1/chat/completions', {method: 'POST', headers: {'Content-Type': 'application/json', Authorization: 'Bearer ' + c.key},
+    body: JSON.stringify({model: c.model, response_format: {type: 'json_object'}, messages: [{role: 'user', content: [{type: 'text', text: AI_PROMPT}, ...imgs.map(i => ({type: 'image_url', image_url: {url: `data:${i.type};base64,${i.b64}`}}))]}]})});
+  return j.choices?.[0]?.message?.content || '';
+}
+function aiParse(text) {
+  const m = String(text).match(/\{[\s\S]*\}/); if (!m) fail('AI 沒有回傳可用的資料，請再試一次。');
+  let o; try { o = JSON.parse(m[0]); } catch { fail('AI 回傳的格式不正確，請再試一次。'); }
+  const str = v => typeof v === 'string' ? v.trim() : '';
+  return {wineName: str(o.wineName), wineryRegion: str(o.wineryRegion), vintage: str(o.vintage), origin: str(o.origin), grapeNotes: str(o.grapeNotes),
+    volume: str(o.volume).replace(/\s+/g, '').replace(/ML$/i, 'ml').replace(/^(\d+(?:\.\d+)?)l$/i, (x, n) => Math.round(Number(n) * 1000) + 'ml'),
+    color: ['red', 'white'].includes(o.color) ? o.color : '', uncertain: Array.isArray(o.uncertain) ? o.uncertain.filter(k => AI_FIELDS.includes(k)) : []};
+}
+async function aiRecognize() {
+  const c = getAI(); if (!c?.ok || S.aiBusy) return;
+  S.aiBusy = true; delete $('aiMsg').dataset.keep; renderAiRow(); $('aiBtn').textContent = '✨ 辨識中…'; $('aiMsg').textContent = '照片傳送中，約需幾秒到十幾秒'; showErr('wineErr', '');
+  try {
+    const imgs = await aiImages(); if (!imgs.length) fail('讀不到照片，請重新加入後再試。');
+    let text; try { text = await aiCall(c, imgs); } catch (e) { fail(aiError(e)); }
+    const r = aiParse(text), filled = [];
+    const put = (k, el) => { if (!r[k] || el.value.trim()) return; el.value = r[k]; el.classList.add('ai-filled'); el.classList.toggle('ai-guess', r.uncertain.includes(k)); filled.push(k); };
+    for (const k of ['wineName', 'wineryRegion', 'vintage', 'origin', 'grapeNotes']) put(k, $('f_' + k));
+    if (r.volume) { setChoice('f_volumeChoice', 'f_volumeOther', r.volume, '750ml'); const el = $('f_volumeOther').hidden ? $('f_volumeChoice') : $('f_volumeOther'); el.classList.add('ai-filled'); el.classList.toggle('ai-guess', r.uncertain.includes('volume')); filled.push('volume'); }
+    if (r.color) { document.querySelectorAll('input[name=f_color]').forEach(x => x.checked = x.value === r.color); filled.push('color'); }
+    const guess = filled.filter(k => r.uncertain.includes(k)).length;
+    $('aiMsg').dataset.keep = '1';
+    $('aiMsg').textContent = filled.length ? `已填入 ${filled.length} 項，請逐欄確認${guess ? `；虛線框的 ${guess} 欄是推測` : ''}。已有內容的欄位不會被覆蓋。` : '沒有讀到可填入的資料（或欄位都已有內容），請換張更清楚的酒標照片。';
+    $('f_wineName').scrollIntoView({block: 'center', behavior: 'smooth'});
+  } catch (e) { $('aiMsg').dataset.keep = '1'; $('aiMsg').textContent = ''; showErr('wineErr', e?.user ? e.message : aiError(e)); if (!e?.user) console.error(e); }
+  finally { S.aiBusy = false; $('aiBtn').textContent = '✨ 智慧辨識'; renderAiRow(); }
+}
+
 /* ---------- 待入櫃：先拍照，資料之後補 ---------- */
 function renderPendStrip() {
   const n = S.pendNew.length;

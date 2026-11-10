@@ -1,4 +1,4 @@
-:root{--ver:"20261110f"}
+:root{--ver:"20261110g"}
 /* 酒窖：冷石灰與酒紅（淺色）／酒瓶玻璃墨綠（深色）。
    版面：頂列 → 總瓶數 → 酒櫃配置圖（每層一排瓶點）→ 帳冊式酒款清單；詳細資料從側邊（手機為底部）滑出。 */
 :root{
@@ -626,3 +626,14 @@ fieldset.colorpick{display:flex;flex-direction:row;flex-wrap:wrap;align-items:ce
 .colorpick legend{width:100%}
 .colorpick input[value=red]:checked+span{background:var(--frame-red);border-color:var(--frame-red);color:#fff}
 .colorpick input[value=white]:checked+span{background:var(--frame-white);border-color:var(--frame-white);color:#fff}
+
+/* 智慧辨識 */
+.ai-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:10px}
+.ai-btn{background:linear-gradient(135deg,#6d4bd8,#b0459c);color:#fff;border:0;font-weight:600;padding:10px 18px;border-radius:999px}
+.ai-btn:disabled{opacity:.45;cursor:default}
+.ai-row .hint{margin:0;flex:1 1 220px}
+#wineForm .ai-filled{background:color-mix(in srgb,#6d4bd8 9%,var(--surface));border-color:color-mix(in srgb,#6d4bd8 55%,var(--line))}
+#wineForm .ai-guess{outline:2px dashed #c9971c;outline-offset:2px}
+.ai-status{padding:12px 14px;border-radius:var(--r-sm);background:var(--surface-2);border:1px solid var(--line);margin-bottom:14px}
+.ai-status.on{border-color:var(--frame-white);background:color-mix(in srgb,var(--frame-white) 10%,var(--surface))}
+.ai-acts{display:flex;gap:10px;flex-wrap:wrap}
