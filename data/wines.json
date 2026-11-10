@@ -442,24 +442,19 @@
     }
    ],
    "origin": "France",
-   "photo": "images/W015-1794321343273.jpg",
+   "photo": "",
    "referencePrice": 4084,
-   "revision": 2,
+   "revision": 3,
    "source": "",
    "status": "active",
-   "updatedAt": "2026-11-10T14:35:49.981Z",
+   "updatedAt": "2026-11-10T14:36:03.220Z",
    "updatedBy": "芝琦",
    "vintage": "2011",
    "volume": "750ml",
    "wineName": "Saint-Julien(Grand Cru Classé)",
    "wineryRegion": "Château Léoville Poyferré",
-   "photos": [
-    {
-     "photo": "images/W015-1794321343273.jpg",
-     "thumb": "images/W015-1794321343273-t.jpg"
-    }
-   ],
-   "thumb": "images/W015-1794321343273-t.jpg"
+   "photos": [],
+   "thumb": ""
   },
   "W016": {
    "createdAt": "",
@@ -1719,7 +1714,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 78,
- "updatedAt": "2026-11-10T14:35:49.981Z",
+ "rev": 79,
+ "updatedAt": "2026-11-10T14:36:03.220Z",
  "pending": []
 }
