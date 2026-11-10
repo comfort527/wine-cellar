@@ -1001,27 +1001,28 @@
    "locations": [
     {
      "cabinet": "8樓右LB櫃",
-     "quantity": 5,
-     "shelf": "第4層"
+     "shelf": "第4層",
+     "quantity": 3
     },
     {
      "cabinet": "8樓右LB櫃",
-     "quantity": 2,
-     "shelf": "第7層"
+     "shelf": "第7層",
+     "quantity": 2
     }
    ],
    "origin": "Spain",
    "photo": "",
    "referencePrice": 930,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-09-30T04:23:14.162Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-10T05:13:10.589Z",
+   "updatedBy": "芝琦",
    "vintage": "2013",
    "volume": "750ml",
    "wineName": "Selección Especial",
-   "wineryRegion": "Marqués de Arviza(Boltun Group)"
+   "wineryRegion": "Marqués de Arviza(Boltun Group)",
+   "color": "red"
   },
   "W040": {
    "createdAt": "",
@@ -1644,7 +1645,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 63,
- "updatedAt": "2026-11-10T05:12:23.226Z",
+ "rev": 64,
+ "updatedAt": "2026-11-10T05:13:10.589Z",
  "pending": []
 }
