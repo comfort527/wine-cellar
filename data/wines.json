@@ -411,22 +411,23 @@
    "locations": [
     {
      "cabinet": "8樓右LB櫃",
-     "quantity": 1,
-     "shelf": "第8層"
+     "shelf": "第3層",
+     "quantity": 1
     }
    ],
    "origin": "France",
    "photo": "",
    "referencePrice": 7272,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-09-29T13:48:33.902Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-10T14:46:42.980Z",
+   "updatedBy": "芝琦",
    "vintage": "2009",
    "volume": "750ml",
    "wineName": "Saint-Julien (Grand Cru Classé)",
-   "wineryRegion": "Château Léoville Barton"
+   "wineryRegion": "Château Léoville Barton",
+   "color": "red"
   },
   "W015": {
    "createdAt": "",
@@ -1754,7 +1755,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 85,
- "updatedAt": "2026-11-10T14:43:37.212Z",
+ "rev": 86,
+ "updatedAt": "2026-11-10T14:46:42.981Z",
  "pending": []
 }
