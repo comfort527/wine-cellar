@@ -650,17 +650,24 @@
     }
    ],
    "origin": "",
-   "photo": "",
+   "photo": "images/W024-1794286899564.jpg",
    "referencePrice": 1485,
-   "revision": 1,
+   "revision": 2,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-09-29T14:53:43.902Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-10T05:02:11.572Z",
+   "updatedBy": "芝琦",
    "vintage": "2020",
    "volume": "750ml",
    "wineName": "Le Clos",
-   "wineryRegion": "Clos Venturi"
+   "wineryRegion": "Clos Venturi",
+   "photos": [
+    {
+     "photo": "images/W024-1794286899564.jpg",
+     "thumb": "images/W024-1794286899564-t.jpg"
+    }
+   ],
+   "thumb": "images/W024-1794286899564-t.jpg"
   },
   "W026": {
    "createdAt": "",
@@ -1612,7 +1619,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 58,
- "updatedAt": "2026-11-09T15:49:58.414Z",
+ "rev": 59,
+ "updatedAt": "2026-11-10T05:02:11.572Z",
  "pending": []
 }
