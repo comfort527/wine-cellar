@@ -174,17 +174,24 @@
     }
    ],
    "origin": "France",
-   "photo": "",
+   "photo": "images/W006-1794321174646.jpg",
    "referencePrice": 3685,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-09-29T13:32:04.849Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-10T14:33:02.602Z",
+   "updatedBy": "芝琦",
    "vintage": "2010",
    "volume": "750ml",
    "wineName": "Margaux (Grand Cru Classé)",
-   "wineryRegion": "Château d'Issan"
+   "wineryRegion": "Château d'Issan",
+   "photos": [
+    {
+     "photo": "images/W006-1794321174646.jpg",
+     "thumb": "images/W006-1794321174646-t.jpg"
+    }
+   ],
+   "thumb": "images/W006-1794321174646-t.jpg"
   },
   "W007": {
    "createdAt": "",
@@ -1680,7 +1687,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 72,
- "updatedAt": "2026-11-10T05:21:55.381Z",
+ "rev": 73,
+ "updatedAt": "2026-11-10T14:33:02.602Z",
  "pending": []
 }
