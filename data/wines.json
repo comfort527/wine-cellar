@@ -536,17 +536,17 @@
    "locations": [
     {
      "cabinet": "8樓右LB櫃",
-     "quantity": 7,
-     "shelf": "第4層"
+     "shelf": "第4層",
+     "quantity": 6
     }
    ],
    "origin": "France",
    "photo": "images/W020-1794287655862.jpg",
    "referencePrice": 1890,
-   "revision": 2,
+   "revision": 3,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-11-10T05:14:28.897Z",
+   "updatedAt": "2026-11-10T05:14:43.593Z",
    "updatedBy": "芝琦",
    "vintage": "2020",
    "volume": "750ml",
@@ -558,7 +558,8 @@
      "thumb": "images/W020-1794287655862-t.jpg"
     }
    ],
-   "thumb": "images/W020-1794287655862-t.jpg"
+   "thumb": "images/W020-1794287655862-t.jpg",
+   "color": "red"
   },
   "W021": {
    "createdAt": "",
@@ -1659,7 +1660,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 66,
- "updatedAt": "2026-11-10T05:14:28.897Z",
+ "rev": 67,
+ "updatedAt": "2026-11-10T05:14:43.593Z",
  "pending": []
 }
