@@ -1393,17 +1393,24 @@
     }
    ],
    "origin": "Germany",
-   "photo": "",
+   "photo": "images/W053-1794321377489.jpg",
    "referencePrice": 2060,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-09-30T04:42:18.723Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-10T14:36:25.072Z",
+   "updatedBy": "芝琦",
    "vintage": "2021",
    "volume": "750ml",
    "wineName": "Kiedrich Klosterberg Riesling Trocken",
-   "wineryRegion": "Robert Weil"
+   "wineryRegion": "Robert Weil",
+   "photos": [
+    {
+     "photo": "images/W053-1794321377489.jpg",
+     "thumb": "images/W053-1794321377489-t.jpg"
+    }
+   ],
+   "thumb": "images/W053-1794321377489-t.jpg"
   },
   "W054": {
    "createdAt": "",
@@ -1714,7 +1721,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 79,
- "updatedAt": "2026-11-10T14:36:03.220Z",
+ "rev": 80,
+ "updatedAt": "2026-11-10T14:36:25.072Z",
  "pending": []
 }
