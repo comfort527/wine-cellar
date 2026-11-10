@@ -654,17 +654,17 @@
    "locations": [
     {
      "cabinet": "8樓右LB櫃",
-     "quantity": 1,
-     "shelf": "第3層"
+     "shelf": "第3層",
+     "quantity": 1
     }
    ],
    "origin": "Australia",
    "photo": "images/W022-1794321425033.jpg",
-   "referencePrice": 2520,
-   "revision": 2,
+   "referencePrice": 2880,
+   "revision": 3,
    "source": "",
    "status": "active",
-   "updatedAt": "2026-11-10T14:37:11.439Z",
+   "updatedAt": "2026-11-10T14:48:03.232Z",
    "updatedBy": "芝琦",
    "vintage": "2015",
    "volume": "750ml",
@@ -676,7 +676,8 @@
      "thumb": "images/W022-1794321425033-t.jpg"
     }
    ],
-   "thumb": "images/W022-1794321425033-t.jpg"
+   "thumb": "images/W022-1794321425033-t.jpg",
+   "color": "red"
   },
   "W023": {
    "createdAt": "",
@@ -1762,7 +1763,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 87,
- "updatedAt": "2026-11-10T14:47:03.471Z",
+ "rev": 88,
+ "updatedAt": "2026-11-10T14:48:03.232Z",
  "pending": []
 }
