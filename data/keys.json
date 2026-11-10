@@ -32,6 +32,15 @@
    "iv": "h9BQqlMLJQQQbx/G",
    "ct": "n5yL67Wsasy0L/k9CnI1PSuC4laeB6EwaBEH6ru+g4hGQTTvdk3w+sZuNNhn3imi",
    "createdAt": "2026-11-08T12:59:34.878Z"
+  },
+  {
+   "id": "23aa2109-f183-45f0-95a6-386381f53884",
+   "label": "曉菁",
+   "role": "editor",
+   "salt": "MoFNK0W4V2KngE0oEYvQNA==",
+   "iv": "Wf265JZlUuA936Bq",
+   "ct": "uRnkaiABp0hBrMoc+Y67X/ILLCkJGxS5qNCNxUbvMBNGxDE/mqxGr9psPQuyGuG9",
+   "createdAt": "2026-11-10T04:05:45.622Z"
   }
  ]
 }
