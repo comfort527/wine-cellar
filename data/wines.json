@@ -293,17 +293,24 @@
     }
    ],
    "origin": "France",
-   "photo": "",
+   "photo": "images/W010-1794321259158.jpg",
    "referencePrice": 1399,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-09-29T13:39:06.761Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-10T14:34:25.602Z",
+   "updatedBy": "芝琦",
    "vintage": "2009",
    "volume": "750ml",
    "wineName": "Pauillac (Grand Cru Classé)/Cabernet Sauvignon",
-   "wineryRegion": "Château Haut-Bages Libéral"
+   "wineryRegion": "Château Haut-Bages Libéral",
+   "photos": [
+    {
+     "photo": "images/W010-1794321259158.jpg",
+     "thumb": "images/W010-1794321259158-t.jpg"
+    }
+   ],
+   "thumb": "images/W010-1794321259158-t.jpg"
   },
   "W011": {
    "createdAt": "",
@@ -1694,7 +1701,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 74,
- "updatedAt": "2026-11-10T14:33:49.237Z",
+ "rev": 75,
+ "updatedAt": "2026-11-10T14:34:25.602Z",
  "pending": []
 }
