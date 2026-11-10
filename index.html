@@ -24,7 +24,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261110j" id="mainCss">
+<link rel="stylesheet" href="style.css?v=20261110k" id="mainCss">
 </head>
 <body>
 <header class="bar">
@@ -135,7 +135,7 @@
   <div class="field"><label for="f_origin">產地</label><input id="f_origin" maxlength="200"></div>
   <div class="field"><label for="f_drinkWindow">適飲期</label><input id="f_drinkWindow" maxlength="200" placeholder="例如 2026–2035"></div>
   <div class="field span"><label for="f_grapeNotes">葡萄品種／備註</label><textarea id="f_grapeNotes" maxlength="2000"></textarea></div>
-  <div class="field span"><span class="lbl" id="locLbl">存放位置與瓶數</span><div id="locInputs"></div><div><button type="button" class="small" id="addLoc">＋ 新增位置</button></div><p class="hint" id="locHint" hidden>要扣除瓶數請用「出庫」，才會留下原因；這裡的瓶數調整會記為「資料修正」。</p></div>
+  <div class="field span"><span class="lbl" id="locLbl">存放位置與瓶數</span><div id="locInputs"></div><div><button type="button" class="small" id="addLoc">＋ 新增位置</button></div><p class="hint">櫃位、層位從清單選擇；要新增名稱請到「管理 → 櫃位／層位」。</p><p class="hint" id="locHint" hidden>要扣除瓶數請用「出庫」，才會留下原因；這裡的瓶數調整會記為「資料修正」。</p></div>
   <div class="field span" id="newPhotoField"><span class="lbl">酒款照片（最多 4 張）</span><div class="photo-in"><label>📷 拍照<input type="file" id="f_camera" accept="image/*" capture="environment"></label><label>從相簿選擇（可多選）<input type="file" id="f_gallery" accept="image/*" multiple></label></div><div class="pstrip" id="f_strip"></div><div class="ai-row" id="aiRow" hidden><button type="button" class="ai-btn" id="aiBtn">✨ 智慧辨識</button><span class="hint" id="aiMsg"></span></div><span class="hint">照片會自動壓縮到 200 KB 以內，另存一張小縮圖。第一張是封面。</span></div>
  </div>
  <div class="ferr" id="wineErr" hidden></div>
@@ -164,15 +164,15 @@
  <p id="moveWine" class="strong"></p>
  <fieldset class="locpick" id="m_from"></fieldset>
  <div class="move-to">
-  <div class="field"><label for="m_cab">移到櫃位</label><input id="m_cab" list="cabList" maxlength="80" autocomplete="off"></div>
-  <div class="field"><label for="m_shelf">層位</label><input id="m_shelf" list="shelfList" maxlength="80" autocomplete="off"></div>
+  <div class="field"><label for="m_cab">移到櫃位</label><select id="m_cab"></select></div>
+  <div class="field"><label for="m_shelf">層位</label><select id="m_shelf"></select></div>
  </div>
  <div class="move-to">
   <div class="field"><label for="m_qty">瓶數</label><input id="m_qty" type="number" min="1" step="1" value="1" inputmode="numeric"></div>
   <div class="field"><label for="m_date">日期</label><input id="m_date" type="date"></div>
  </div>
  <div class="field" style="margin-top:10px"><label for="m_note">備註（選填）</label><input id="m_note" maxlength="200" placeholder="例如 準備聚餐"></div>
- <p class="hint">移動不會改變總瓶數；舊位置移空後會自動移除。</p>
+ <p class="hint">移動不會改變總瓶數；舊位置移空後會自動移除。要新增櫃位或層位，請到「管理 → 櫃位／層位」。</p>
  <div class="ferr" id="moveErr" hidden></div>
  <div class="dact"><button type="button" data-close>取消</button><button type="submit" class="primary">確認移動</button></div>
 </form></dialog>
@@ -193,7 +193,7 @@
    <div class="field"><label for="j_mname">酒名 *</label><input id="j_mname" maxlength="200" autocomplete="off"></div>
    <div class="field"><label for="j_mvintage">年份</label><input id="j_mvintage" maxlength="40" placeholder="例如 2018 或 NV"></div>
    <div class="field"><span class="lbl">原本的位置 *</span></div>
-   <div class="move-to" id="j_leftLoc" style="margin-top:0"><div class="field" style="margin-top:0"><label for="j_cab">櫃位</label><input id="j_cab" list="cabList" maxlength="80" autocomplete="off"></div><div class="field" style="margin-top:0"><label for="j_shelf">層位</label><input id="j_shelf" list="shelfList" maxlength="80" autocomplete="off"></div></div>
+   <div class="move-to" id="j_leftLoc" style="margin-top:0"><div class="field" style="margin-top:0"><label for="j_cab">櫃位</label><select id="j_cab"></select></div><div class="field" style="margin-top:0"><label for="j_shelf">層位</label><select id="j_shelf"></select></div></div>
    <div class="field"><label for="j_left">酒窖裡還剩幾瓶（留在原本的位置）</label><input id="j_left" type="number" min="0" step="1" value="0" inputmode="numeric"></div>
   </div>
  </div>
@@ -308,7 +308,7 @@
 
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="config.js?v=20261110j"></script>
-<script src="app.js?v=20261110j"></script>
+<script src="config.js?v=20261110k"></script>
+<script src="app.js?v=20261110k"></script>
 </body>
 </html>

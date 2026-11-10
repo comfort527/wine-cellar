@@ -36,7 +36,7 @@ function fail(m) { const e = new Error(m); e.user = true; throw e; }
 function msgOf(e) { return e?.user ? e.message : '操作未完成，請稍後再試。'; }
 const canEdit = () => !!S.session;
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261110j';
+const APP_VER = '20261110k';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -693,6 +693,33 @@ async function changeToken() {
 
 /* ---------- 新增／編輯酒款 ---------- */
 function locOptions(kind) { const names = new Set(S.data?.catalog?.[kind] || []); for (const w of wines()) for (const l of w.locations || []) names.add(kind === 'cabinets' ? l.cabinet : l.shelf); return [...names].filter(Boolean).sort(); }
+/* 櫃位／層位一律用下拉選單：選項來自「管理 → 櫃位／層位」與目前資料裡用過的名稱 */
+const byShelf = (a, b) => shelfNo(a) - shelfNo(b) || a.localeCompare(b);
+function shelvesOf(cab) {  // 這個櫃子用過的層位（含已出清、出庫與移動紀錄）
+  const set = new Set();
+  for (const w of wines()) {
+    for (const l of w.locations || []) if (l.cabinet === cab && l.shelf) set.add(l.shelf);
+    for (const o of w.outs || []) if (o.cabinet === cab && o.shelf) set.add(o.shelf);
+    for (const m of w.moves || []) for (const x of [m.from, m.to]) if (x?.cabinet === cab && x.shelf) set.add(x.shelf);
+  }
+  return [...set].sort(byShelf);
+}
+function cabOptionsHtml(val) {
+  const names = locOptions('cabinets'); if (val && !names.includes(val)) names.push(val);
+  return `<option value="">${names.length ? '請選擇櫃位' : '尚無櫃位（請到 管理 → 櫃位／層位 新增）'}</option>` + names.map(n => `<option value="${esc(n)}" ${n === val ? 'selected' : ''}>${esc(n)}</option>`).join('');
+}
+function shelfOptionsHtml(cab, val) {
+  if (!cab) return '<option value="">先選櫃位</option>';
+  const here = shelvesOf(cab), other = locOptions('shelves').filter(n => !here.includes(n)).sort(byShelf);
+  if (val && !here.includes(val) && !other.includes(val)) here.push(val);
+  const opt = n => `<option value="${esc(n)}" ${n === val ? 'selected' : ''}>${esc(n)}</option>`;
+  if (!here.length && !other.length) return '<option value="">尚無層位（請到 管理 → 櫃位／層位 新增）</option>';
+  return '<option value="">請選擇層位</option>' + (here.length && other.length ? `<optgroup label="這個櫃子的層位">${here.map(opt).join('')}</optgroup><optgroup label="其他層位">${other.map(opt).join('')}</optgroup>` : [...here, ...other].map(opt).join(''));
+}
+function fillLocPair(cabEl, shelfEl, cab = '', shelf = '') {
+  cabEl.innerHTML = cabOptionsHtml(cab); shelfEl.innerHTML = shelfOptionsHtml(cab, shelf);
+  if (!cabEl.dataset.bound) { cabEl.dataset.bound = '1'; cabEl.addEventListener('change', () => { shelfEl.innerHTML = shelfOptionsHtml(cabEl.value, shelfEl.value); }); }
+}
 function ensureLists() {
   let c = $('cabList'), s = $('shelfList');
   if (!c) { c = document.createElement('datalist'); c.id = 'cabList'; document.body.append(c); s = document.createElement('datalist'); s.id = 'shelfList'; document.body.append(s); }
@@ -702,8 +729,9 @@ function ensureLists() {
 function addLocRow(l = {cabinet: '', shelf: '', quantity: 1}) {
   const i = $('locInputs').children.length + '_' + Math.random().toString(36).slice(2, 6);
   const row = document.createElement('div'); row.className = 'loc-ed';
-  row.innerHTML = `<div class="field"><label for="lc${i}">櫃位</label><input id="lc${i}" list="cabList" data-k="cabinet" maxlength="80" value="${esc(l.cabinet)}"></div><div class="field"><label for="ls${i}">層位</label><input id="ls${i}" list="shelfList" data-k="shelf" maxlength="80" value="${esc(l.shelf)}"></div><div class="field"><label for="lq${i}">瓶數</label><input id="lq${i}" type="number" min="0" step="1" inputmode="numeric" data-k="quantity" value="${Number(l.quantity) || 0}"></div><button type="button" data-rm aria-label="移除位置">×</button>`;
+  row.innerHTML = `<div class="field"><label for="lc${i}">櫃位</label><select id="lc${i}" data-k="cabinet"></select></div><div class="field"><label for="ls${i}">層位</label><select id="ls${i}" data-k="shelf"></select></div><div class="field"><label for="lq${i}">瓶數</label><input id="lq${i}" type="number" min="0" step="1" inputmode="numeric" data-k="quantity" value="${Number(l.quantity) || 0}"></div><button type="button" data-rm aria-label="移除位置">×</button>`;
   $('locInputs').append(row);
+  fillLocPair(row.querySelector('[data-k=cabinet]'), row.querySelector('[data-k=shelf]'), l.cabinet, l.shelf);
 }
 function setChoice(selId, otherId, value, fallback) {
   const v = value || fallback, sel = $(selId);
@@ -748,7 +776,7 @@ function readWineForm() {
     const g = k => row.querySelector(`[data-k="${k}"]`).value.trim();
     const cabinet = g('cabinet'), shelf = g('shelf'), quantity = Number(g('quantity'));
     if (!cabinet && !shelf) continue;
-    if (!cabinet || !shelf) fail('每個位置都要填櫃位與層位。');
+    if (!cabinet || !shelf) fail('每個位置都要選擇櫃位與層位。');
     if (!Number.isInteger(quantity) || quantity < 0 || quantity > 100000) fail('瓶數必須是 0 以上的整數。');
     const key = cabinet + '\u0000' + shelf; if (seen.has(key)) fail('同一位置不可重複。'); seen.add(key);
     r.locations.push({cabinet, shelf, quantity});
@@ -852,7 +880,7 @@ function openMove(id, cab, shelf) {
   const w = byId(id); if (!w) return; S.move = w; ensureLists();
   $('moveWine').textContent = [w.wineName, w.vintage].filter(Boolean).join('　');
   locPicker($('m_from'), 'm_fromr', '從哪裡移出', w, cab, shelf);
-  $('m_cab').value = ''; $('m_shelf').value = ''; $('m_qty').value = '1'; $('m_note').value = '';
+  fillLocPair($('m_cab'), $('m_shelf')); $('m_qty').value = '1'; $('m_note').value = '';
   $('m_date').value = today(); $('m_date').max = today();
   showDialog('moveModal');
 }
@@ -861,7 +889,7 @@ async function saveMove() {
   const to = {cabinet: $('m_cab').value.trim(), shelf: $('m_shelf').value.trim()};
   const qty = Number($('m_qty').value), date = $('m_date').value, note = $('m_note').value.trim(), who = S.session.label;
   if (!from) fail('請選擇要從哪個位置移出。');
-  if (!to.cabinet || !to.shelf) fail('請填寫要移到的櫃位和層位。');
+  if (!to.cabinet || !to.shelf) fail('請選擇要移到的櫃位和層位。');
   if (to.cabinet === from.cabinet && to.shelf === from.shelf) fail('新位置和原位置相同。');
   if (!Number.isInteger(qty) || qty < 1) fail('瓶數必須是 1 以上的整數。');
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date))) fail('請填寫日期。');
@@ -1457,7 +1485,7 @@ function openJournal(editId) {
   $('j_date').value = j?.date || S.jDay || today(); $('j_date').max = today();
   $('j_name').value = j?.name || ''; $('j_vintage').value = j?.vintage || ''; $('j_qty').value = j?.qty || 1; $('j_qty').removeAttribute('max');
   $('j_note').value = j?.note || ''; S.jRating = Number(j?.rating) || 0;
-  $('j_mname').value = ''; $('j_mvintage').value = ''; $('j_left').value = '0'; $('j_cab').value = ''; $('j_shelf').value = '';
+  $('j_mname').value = ''; $('j_mvintage').value = ''; $('j_left').value = '0'; fillLocPair($('j_cab'), $('j_shelf'));
   $('j_preview').hidden = true; $('j_camera').value = ''; $('j_gallery').value = '';
   syncJournalForm(); showDialog('journalModal');
 }
@@ -1538,8 +1566,7 @@ function journalPick(e) {
 }
 function startMissing() {
   const f = S.jf; f.miss = true; f.wineId = '';
-  if (f.cab) $('j_cab').value = f.cab;
-  if (f.shelf) $('j_shelf').value = f.shelf;
+  fillLocPair($('j_cab'), $('j_shelf'), f.cab || '', f.shelf || '');
   syncJournalForm(); $('j_mname').focus();
 }
 async function saveJournal() {
@@ -1573,7 +1600,7 @@ async function saveJournal() {
     const left = Number($('j_left').value || 0), cab = $('j_cab').value.trim(), shelf = $('j_shelf').value.trim();
     if (!name) fail('請填寫酒名。');
     if (!Number.isInteger(left) || left < 0) fail('剩下的瓶數必須是 0 以上的整數。');
-    if (!cab || !shelf) fail('請填寫這瓶酒原本的櫃位和層位。');
+    if (!cab || !shelf) fail('請選擇這瓶酒原本的櫃位和層位。');
     let photo = '', thumb = '';
     if (S.jPhoto) ({photo, thumb} = await uploadPhoto(S.jPhoto, 'new'));
     await mutate(d => {
