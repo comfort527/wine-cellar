@@ -1342,17 +1342,24 @@
     }
    ],
    "origin": "South Africa",
-   "photo": "",
+   "photo": "images/W054-1794287035441.jpg",
    "referencePrice": 2050,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-09-30T04:43:28.476Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-10T05:04:01.424Z",
+   "updatedBy": "芝琦",
    "vintage": "2008",
    "volume": "750ml",
    "wineName": "Baron Edmond",
-   "wineryRegion": "Rupert & Rothschild"
+   "wineryRegion": "Rupert & Rothschild",
+   "photos": [
+    {
+     "photo": "images/W054-1794287035441.jpg",
+     "thumb": "images/W054-1794287035441-t.jpg"
+    }
+   ],
+   "thumb": "images/W054-1794287035441-t.jpg"
   },
   "W055": {
    "createdAt": "",
@@ -1630,7 +1637,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 61,
- "updatedAt": "2026-11-10T05:03:15.500Z",
+ "rev": 62,
+ "updatedAt": "2026-11-10T05:04:01.424Z",
  "pending": []
 }
