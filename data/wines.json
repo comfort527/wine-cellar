@@ -295,10 +295,10 @@
    "origin": "France",
    "photo": "images/W010-1794321259158.jpg",
    "referencePrice": 1399,
-   "revision": 2,
+   "revision": 3,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-11-10T14:34:25.602Z",
+   "updatedAt": "2026-11-10T14:34:34.436Z",
    "updatedBy": "芝琦",
    "vintage": "2009",
    "volume": "750ml",
@@ -308,6 +308,10 @@
     {
      "photo": "images/W010-1794321259158.jpg",
      "thumb": "images/W010-1794321259158-t.jpg"
+    },
+    {
+     "photo": "images/W010-1794321267737.jpg",
+     "thumb": "images/W010-1794321267737-t.jpg"
     }
    ],
    "thumb": "images/W010-1794321259158-t.jpg"
@@ -1701,7 +1705,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 75,
- "updatedAt": "2026-11-10T14:34:25.602Z",
+ "rev": 76,
+ "updatedAt": "2026-11-10T14:34:34.436Z",
  "pending": []
 }
