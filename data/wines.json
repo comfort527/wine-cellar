@@ -1317,17 +1317,24 @@
     }
    ],
    "origin": "France",
-   "photo": "",
+   "photo": "images/W052-1794287941741.jpg",
    "referencePrice": 700,
-   "revision": 1,
+   "revision": 2,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-09-30T04:48:25.328Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-10T05:19:08.433Z",
+   "updatedBy": "芝琦",
    "vintage": "2020",
    "volume": "750ml",
    "wineName": "VENTOUX",
-   "wineryRegion": "RÉMY FERBRAS/VENTOUX"
+   "wineryRegion": "RÉMY FERBRAS/VENTOUX",
+   "photos": [
+    {
+     "photo": "images/W052-1794287941741.jpg",
+     "thumb": "images/W052-1794287941741-t.jpg"
+    }
+   ],
+   "thumb": "images/W052-1794287941741-t.jpg"
   },
   "W053": {
    "createdAt": "",
@@ -1664,7 +1671,7 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 68,
- "updatedAt": "2026-11-10T05:14:55.819Z",
+ "rev": 69,
+ "updatedAt": "2026-11-10T05:19:08.433Z",
  "pending": []
 }
