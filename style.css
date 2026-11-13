@@ -1,4 +1,4 @@
-:root{--ver:"20261113c"}
+:root{--ver:"20261113d"}
 /* 酒窖：冷石灰與酒紅（淺色）／酒瓶玻璃墨綠（深色）。
    版面：頂列 → 總瓶數 → 酒櫃配置圖（每層一排瓶點）→ 帳冊式酒款清單；詳細資料從側邊（手機為底部）滑出。 */
 :root{
@@ -731,4 +731,23 @@ fieldset.colorpick{display:flex;flex-direction:row;flex-wrap:wrap;align-items:ce
   .adm-menu .mt b{font-size:16px}
   .adm-menu .mt small{display:none}
   .dh .adm-back{display:none}
+}
+
+/* 手機底部導覽列 */
+.bnav{display:none}
+.adm-phone{display:none}
+@media (max-width:760px){
+  .bnav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(var(--n,5),1fr);align-items:end;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--surface) 94%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-top:1px solid var(--line)}
+  .bnav[data-n="3"]{--n:3}.bnav[data-n="4"]{--n:4}.bnav[data-n="5"]{--n:5}
+  .bnav button{all:unset;box-sizing:border-box;position:relative;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;font:600 14px var(--body);color:var(--muted);-webkit-tap-highlight-color:transparent}
+  .bnav button[hidden]{display:none}
+  .bnav button i{font-style:normal;font-size:25px;line-height:1.15}
+  .bnav button.on{color:var(--wine)}
+  .bnav button:focus-visible{outline:2px solid var(--wine);outline-offset:-2px;border-radius:10px}
+  .bnav .add i{display:grid;place-items:center;width:58px;height:58px;margin-top:-28px;border-radius:50%;background:var(--wine);color:var(--on-wine);font-size:34px;box-shadow:0 6px 16px rgba(0,0,0,.25)}
+  .bnav .bdot{position:absolute;top:0;left:calc(50% + 6px);min-width:20px;padding:0 5px;border-radius:999px;background:var(--wine);color:#fff;font:700 12px/20px var(--body);text-align:center}
+  body{padding-bottom:calc(78px + env(safe-area-inset-bottom,0px))}
+  .fab:not([hidden]),#adminBtn,#logoutBtn,#loginBtn{display:none!important}
+  .toast{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+  .adm-phone{display:block}
 }

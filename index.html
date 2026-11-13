@@ -24,7 +24,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261113c" id="mainCss">
+<link rel="stylesheet" href="style.css?v=20261113d" id="mainCss">
 </head>
 <body>
 <header class="bar">
@@ -77,6 +77,14 @@
 </main>
 
 <button class="fab" id="fab" hidden aria-label="新增酒款">＋</button>
+<nav class="bnav" id="bnav" aria-label="主要功能">
+ <button type="button" data-nav="home" class="on"><i aria-hidden="true">🍷</i>酒窖</button>
+ <button type="button" data-nav="journal"><i aria-hidden="true">📖</i>日誌</button>
+ <button type="button" data-nav="add" class="add" id="bnAdd" hidden><i aria-hidden="true">＋</i>新增</button>
+ <button type="button" data-nav="pend" id="bnPend" hidden><i aria-hidden="true">📷</i><span class="bdot" id="bnPendN" hidden></span>待入櫃</button>
+ <button type="button" data-nav="admin" id="bnAdmin" hidden><i aria-hidden="true">⚙️</i>管理</button>
+ <button type="button" data-nav="login" id="bnLogin"><i aria-hidden="true">🔑</i><span id="bnLoginT">登入</span></button>
+</nav>
 
 <dialog class="small" id="originModal" aria-labelledby="originTitle"><div class="dh"><h2 id="originTitle">依產地查看</h2><button data-close aria-label="關閉">×</button></div>
 <div class="db"><div class="origins" id="originList"></div></div></dialog>
@@ -276,6 +284,9 @@
    <button type="button" class="mi" data-tab="export"><span class="ic">⬇️</span><span class="mt"><b>匯出 CSV</b><small>下載全部酒款給 Excel 使用</small></span><span class="go">›</span></button>
    <button type="button" class="mi" data-tab="storage"><span class="ic">💾</span><span class="mt"><b>儲存空間</b><small id="storageSub">GitHub repo 已用空間</small></span><span class="go">›</span></button>
   </div></div>
+  <div class="adm-grp adm-phone"><h5>帳號</h5><div class="menu">
+   <button type="button" class="mi" data-act="logout"><span class="ic">🚪</span><span class="mt"><b>登出</b><small id="admWho">登出這台裝置</small></span><span class="go">›</span></button>
+  </div></div>
  </nav>
  <div class="adm-main" id="admMain">
  <section id="tab-audit"><p class="hint" style="margin-top:0" id="auditHint">每次異動都是一筆 GitHub commit，由新到舊。</p><div class="audit" id="auditList"></div><button class="small" id="moreAudit" hidden style="margin-top:10px">載入更多</button></section>
@@ -352,7 +363,7 @@
 
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="config.js?v=20261113c"></script>
-<script src="app.js?v=20261113c"></script>
+<script src="config.js?v=20261113d"></script>
+<script src="app.js?v=20261113d"></script>
 </body>
 </html>

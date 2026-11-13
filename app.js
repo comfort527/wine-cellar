@@ -36,7 +36,7 @@ function fail(m) { const e = new Error(m); e.user = true; throw e; }
 function msgOf(e) { return e?.user ? e.message : '操作未完成，請稍後再試。'; }
 const canEdit = () => !!S.session;
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261113c';
+const APP_VER = '20261113d';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -266,6 +266,13 @@ function render() {
   $('adminBtn').hidden = !S.session;
   $('addBtn').hidden = !canEdit();
   $('fab').hidden = !canEdit();
+  // 手機底部導覽列：訪客只有 酒窖／日誌／登入
+  const pn = (S.data?.pending || []).length;
+  $('bnAdd').hidden = $('bnPend').hidden = !canEdit(); $('bnAdmin').hidden = !S.session; $('bnLogin').hidden = !!S.session || !S.data;
+  $('bnLoginT').textContent = setup ? '設定' : '登入';
+  $('bnPendN').hidden = !pn; $('bnPendN').textContent = pn;
+  $('bnav').dataset.n = document.querySelectorAll('#bnav button:not([hidden])').length;
+  $('admWho').textContent = S.session ? `目前是「${S.session.label}」` : '';
   $('viewList').classList.toggle('on', S.view !== 'grid'); $('viewList').setAttribute('aria-pressed', S.view !== 'grid');
   $('viewGrid').classList.toggle('on', S.view === 'grid'); $('viewGrid').setAttribute('aria-pressed', S.view === 'grid');
   $('sortSel').value = S.sort;
@@ -487,7 +494,17 @@ function wire() {
   $('addBtn').addEventListener('click', () => openWineForm(null));
   $('fab').addEventListener('click', () => openWineForm(null));
   $('adminBtn').addEventListener('click', () => openAdmin());
-  $('admMenu').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) switchTab(b.dataset.tab); });
+  $('admMenu').addEventListener('click', e => { if (e.target.closest('[data-act=logout]')) return logout(); const b = e.target.closest('[data-tab]'); if (b) switchTab(b.dataset.tab); });
+  $('bnav').addEventListener('click', e => {
+    const b = e.target.closest('[data-nav]'); if (!b) return;
+    const n = b.dataset.nav;
+    if (n === 'home') { S.filter = null; S.search = ''; if ($('search')) $('search').value = ''; render(); window.scrollTo({top: 0, behavior: 'smooth'}); }
+    else if (n === 'journal') $('factJournal').click();
+    else if (n === 'add') openWineForm(null);
+    else if (n === 'pend') $('factPend').click();
+    else if (n === 'admin') openAdmin();
+    else if (n === 'login') $('loginBtn').click();
+  });
   $('admBack').addEventListener('click', adminMenu);
   matchMedia('(min-width: 761px)').addEventListener('change', () => { if (!$('adminModal').open) return; const cur = ADMIN_TABS.find(t => !$('tab-' + t).hidden); if (admWide()) switchTab(cur || 'lib'); else if (cur) switchTab(cur); });
   $('factPend').addEventListener('click', () => { showDialog('pendModal'); showErr('pendErr', ''); renderPendStrip(); renderPending(); });
@@ -1215,7 +1232,7 @@ function renderPendStrip() {
 function renderPending() {
   const list = S.data?.pending || [], n = list.length;
   $('factPend').hidden = !S.session;
-  $('sumPend').innerHTML = `${n} <small>瓶</small>` + (n ? `<span class="pend-mini">${list.slice(-3).reverse().map(p => `<img src="${esc(fileUrl(p.photos[0]?.thumb || p.photos[0]?.photo || ''))}" alt="">`).join('')}</span>` : '');
+  $('sumPend').innerHTML = `${n} <small>瓶</small>` + (n ? `<span class="pend-mini">${list.filter(p => p.photos?.length).slice(-3).reverse().map(p => `<img src="${esc(fileUrl(p.photos[0].thumb || p.photos[0].photo))}" alt="">`).join('')}</span>` : '');
   if (!$('pendModal').open) return;
   const html = n ? list.slice().reverse().map(p => {
     const busy = S.pendAdding === p.id, room = MAX_PHOTOS - p.photos.length, one = p.photos.length < 2;
