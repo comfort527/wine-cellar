@@ -40,7 +40,7 @@ const TABLET_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600p
 const DESK_MQ = '(min-width:1181px) and (pointer:fine), (min-width:1401px)';
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261113j';
+const APP_VER = '20261113k';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -53,8 +53,6 @@ const active = () => wines().filter(w => w.status !== 'archived');
 const byId = id => { const w = S.data?.wines[id]; return w ? {...w, wineId: id} : null; };
 const total = w => (w.locations || []).reduce((a, l) => a + (Number(l.quantity) || 0), 0);
 const nameOf = v => !v ? '—' : String(v).includes('@') ? String(v).split('@')[0] : String(v);
-const siteUrl = () => location.origin + location.pathname;
-const wineUrl = id => siteUrl() + '#' + id;
 const locText = ls => (ls || []).map(l => `${l.cabinet}/${l.shelf}×${l.quantity}`).join('、') || '無';
 const fileUrl = path => S.localPhotos.get(path) || `${CFG.rawBase}/${CFG.owner}/${CFG.repo}/${CFG.dataBranch}/${path.split('/').map(encodeURIComponent).join('/')}`;
 const photoUrl = w => w.photo ? fileUrl(w.photo) : '';
