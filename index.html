@@ -24,7 +24,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261110l" id="mainCss">
+<link rel="stylesheet" href="style.css?v=20261113a" id="mainCss">
 </head>
 <body>
 <header class="bar">
@@ -83,7 +83,8 @@
 
 <dialog id="journalView" class="wide" aria-labelledby="jvTitle"><div class="dh"><h2 id="jvTitle">飲酒日誌</h2><button data-close aria-label="關閉">×</button></div>
 <div class="db" id="tab-hist">
-  <div class="jr">
+  <div class="jtabs" id="jTabs" role="tablist"><button type="button" data-jt="cal" class="on" role="tab" aria-selected="true">日曆</button><button type="button" data-jt="search" role="tab" aria-selected="false">搜尋</button><button type="button" data-jt="mem" role="tab" aria-selected="false">回憶</button></div>
+  <div class="jr" id="jtCal">
    <div class="jcal">
     <div class="mhead"><button type="button" id="jPrev" aria-label="上個月">‹</button><h3 id="jTitle"></h3><button type="button" id="jNext" aria-label="下個月">›</button></div>
     <div class="msum" id="jSum"></div>
@@ -96,7 +97,22 @@
     <button type="button" class="addx" id="jAdd">＋紀錄</button>
    </div>
   </div>
+  <section id="jtSearch" hidden>
+   <label class="search"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="6"/><path d="m14 14 4 4"/></svg><input id="js_q" type="search" placeholder="搜酒名、酒莊、場合、說明（例如 董事會、王董）" aria-label="搜尋飲用紀錄"><button type="button" id="js_clear" aria-label="清除">×</button></label>
+   <div class="chips2" id="js_type"><button type="button" data-v="" class="on">全部場合</button><button type="button" data-v="自飲">自飲</button><button type="button" data-v="聚餐">聚餐</button><button type="button" data-v="送禮">送禮</button><button type="button" data-v="其他">其他</button><button type="button" data-v="ext">非酒窖</button></div>
+   <div class="chips2" id="js_when"><button type="button" data-v="year">今年</button><button type="button" data-v="3m">近 3 個月</button><button type="button" data-v="all" class="on">全部</button><button type="button" data-hi>★4 以上</button></div>
+   <p class="rsum" id="js_sum"></p>
+   <div id="js_list"></div>
+  </section>
+  <section id="jtMem" hidden>
+   <label class="search"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="6"/><path d="m14 14 4 4"/></svg><input id="jm_q" type="search" placeholder="搜酒名、酒莊、年份" aria-label="搜尋回憶"><button type="button" id="jm_clear" aria-label="清除">×</button></label>
+   <div class="chips2" id="jm_sort"><button type="button" data-v="freq" class="on">最常喝</button><button type="button" data-v="recent">最近喝</button><button type="button" data-v="rating">評分高</button><button type="button" data-v="name">名稱</button></div>
+   <div class="chips2" id="jm_group"><button type="button" data-v="all" class="on">全部</button><button type="button" data-v="have">酒窖還有</button><button type="button" data-v="gone">已喝完／非酒窖</button></div>
+   <p class="rsum" id="jm_sum"></p>
+   <div id="jm_list"></div>
+  </section>
 </div></dialog>
+<dialog class="small" id="memModal" aria-labelledby="memTitle"><div class="dh"><h2 id="memTitle">回憶</h2><button data-close aria-label="關閉">×</button></div><div class="db" id="memBody"></div></dialog>
 
 <dialog class="drawer" id="drawer" aria-labelledby="dwName" tabindex="-1"><div id="drawerBody"></div></dialog>
 
@@ -124,6 +140,7 @@
 <dialog id="wineModal" aria-labelledby="wineTitle"><div class="dh"><h2 id="wineTitle">新增紅酒</h2><button data-close aria-label="關閉">×</button></div>
 <form class="db" id="wineForm" novalidate>
  <div class="form">
+  <div class="rebuy-note span" id="rebuyNote" hidden></div>
   <div class="field"><label for="f_wineName">酒名 *</label><input id="f_wineName" maxlength="200" required></div>
   <div class="field"><label for="f_wineryRegion">酒莊／產區</label><input id="f_wineryRegion" maxlength="200"></div>
   <div class="field"><label for="f_vintage">年份</label><input id="f_vintage" maxlength="40" placeholder="例如 2018 或 NV"></div>
@@ -314,7 +331,7 @@
 
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="config.js?v=20261110l"></script>
-<script src="app.js?v=20261110l"></script>
+<script src="config.js?v=20261113a"></script>
+<script src="app.js?v=20261113a"></script>
 </body>
 </html>

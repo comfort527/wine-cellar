@@ -1,4 +1,4 @@
-:root{--ver:"20261110l"}
+:root{--ver:"20261113a"}
 /* 酒窖：冷石灰與酒紅（淺色）／酒瓶玻璃墨綠（深色）。
    版面：頂列 → 總瓶數 → 酒櫃配置圖（每層一排瓶點）→ 帳冊式酒款清單；詳細資料從側邊（手機為底部）滑出。 */
 :root{
@@ -660,3 +660,43 @@ fieldset.colorpick{display:flex;flex-direction:row;flex-wrap:wrap;align-items:ce
 .caprow .cl b{display:block;font-weight:600}.caprow .cl small{color:var(--muted);font-size:.8em;white-space:nowrap}
 .caprow .cf{display:flex;align-items:center;gap:6px;white-space:nowrap}
 .caprow input{width:3.4em;text-align:center;padding:6px}
+
+/* 飲酒日誌：分頁、搜尋、回憶 */
+.jtabs{display:flex;gap:8px;margin-bottom:16px}
+.jtabs button{flex:1 1 0;border-radius:999px;padding:8px 6px;white-space:nowrap}
+.jtabs button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+#jtSearch .search,#jtMem .search{flex:none}
+.chips2{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 4px}
+.chips2 button{border-radius:999px;padding:4px 12px;font-size:16px}
+.chips2 button.on{background:var(--wine);color:#fff;border-color:var(--wine)}
+.rsum{color:var(--muted);font-size:16px;margin:10px 0}
+.rdate{font:600 15px var(--body);color:var(--muted);margin:14px 0 6px}
+.entry.srch{cursor:pointer}.entry.srch:hover{border-color:var(--faint)}
+.occ{display:inline-block;font:600 13px/1.5 var(--body);padding:0 8px;border-radius:999px;margin-right:6px;background:#efe3c8;color:#7a5410;vertical-align:1px}
+.occ.dine{background:#f3dde3;color:#8c2a3f}.occ.self{background:#e1ece4;color:#2f6a45}.occ.gift{background:#e4e6f3;color:#3b4a8c}.occ.ext{background:color-mix(in srgb,var(--ext) 16%,transparent);color:var(--ext)}
+.rostar{display:block;color:var(--star);font-size:15px;letter-spacing:1px;margin-top:2px}
+.tl .rostar{display:inline}
+.lib{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;padding:10px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);margin-bottom:8px;align-items:center;cursor:pointer}
+.lib:hover{border-color:var(--faint)}
+.lib img,.lib .ph{width:64px;height:84px;object-fit:cover;border-radius:8px;background:var(--sunk);display:grid;place-items:center;color:var(--faint);font:600 13px var(--display)}
+.lib .t{font:600 19px/1.25 var(--display);overflow-wrap:anywhere}.lib .t .v,.entry .t .v{color:var(--brass);font-weight:500}
+.lib .s{font-size:14px;color:var(--muted);margin-top:3px;line-height:1.55}
+.stock{display:inline-block;font:600 13px/1.5 var(--body);padding:0 8px;border-radius:999px;background:var(--wine-soft);color:var(--wine);white-space:nowrap}
+.stock.none{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+#memBody .gal{margin-bottom:12px}
+.mfacts{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:17px;margin:0 0 12px}.mfacts dt{color:var(--muted)}.mfacts dd{margin:0;overflow-wrap:anywhere}
+.mstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.mstats div{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-sm);padding:8px;text-align:center}
+.mstats b{display:block;font:600 24px var(--display);font-variant-numeric:lining-nums tabular-nums}.mstats span{font-size:13px;color:var(--muted)}
+.mh{margin:14px 0 4px;font-size:19px}.mh .hint{font-weight:400;margin-left:6px}
+.tl{border-left:2px solid var(--line);margin:8px 0 0 6px;padding-left:14px}
+.tl div{position:relative;padding:6px 0;font-size:15px}
+.tl div::before{content:"";position:absolute;left:-21px;top:13px;width:10px;height:10px;border-radius:50%;background:var(--wine)}
+.buy{display:flex;gap:8px;margin-top:16px}.buy .primary{flex:1}
+.rebuy-note{background:color-mix(in srgb,#2f7a45 10%,var(--surface));border:1px solid #2f7a45;border-radius:var(--r-sm);padding:10px 12px;font-size:15px}
+.rb-merge{color:var(--wine);font-weight:600}.rb-new{color:#2f7a45;font-weight:600}
+#wineForm .rb-filled{background:color-mix(in srgb,#2f7a45 8%,var(--surface));border-color:color-mix(in srgb,#2f7a45 50%,var(--line))}
+#wineForm .rb-check{outline:2px dashed #c9971c;outline-offset:2px}
+.out.in .q{color:#2f7a45}
+#jm_list{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,380px),1fr));gap:8px}
+#jm_list .lib{margin-bottom:0}
