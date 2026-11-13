@@ -30,7 +30,7 @@ try { S.view = localStorage.getItem('cellarView') === 'list' ? 'list' : 'grid'; 
 let toastTimer;
 function toast(m) { $('toast').textContent = m; $('toast').hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').hidden = true, 5000); }
 function notice(m, bad) { const n = $('notice'); n.textContent = m || ''; n.hidden = !m; n.classList.toggle('bad', !!bad); }
-function showErr(id, m) { const e = $(id); e.textContent = m || ''; e.hidden = !m; }
+function showErr(id, m) { const e = $(id); e.textContent = m || ''; e.hidden = !m; if (m) e.scrollIntoView({block: 'nearest'}); }  // 手機的按鈕固定在底部，錯誤訊息要捲到看得見
 function showDialog(id) { document.querySelectorAll('.ferr').forEach(e => e.hidden = true); $(id).showModal(); }
 function fail(m) { const e = new Error(m); e.user = true; throw e; }
 function msgOf(e) { return e?.user ? e.message : '操作未完成，請稍後再試。'; }
@@ -40,7 +40,7 @@ const TABLET_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600p
 const DESK_MQ = '(min-width:1181px) and (pointer:fine), (min-width:1401px)';
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261113r';
+const APP_VER = '20261113s';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -543,8 +543,10 @@ function cardHtml(w) {
 /* ---------- 詳細資料抽屜 ---------- */
 function openDrawer(id, fromHash) {
   if (!byId(id)) return;
+  const changed = S.drawer !== id || !$('drawer').open;
   S.drawer = id; renderDrawer();
   if (!$('drawer').open) { $('drawer').showModal(); $('drawer').focus({preventScroll: true}); }
+  if (changed) $('drawer').scrollTop = 0;
   if (!fromHash && location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
 }
 function closeDrawer() { if ($('drawer').open) $('drawer').close(); }
@@ -573,8 +575,8 @@ function renderDrawer() {
   const prevSl = $('drawerBody').querySelector('.slides'), keep = S.drawerShown === S.drawer && prevSl ? prevSl.scrollLeft : 0;
   S.drawerShown = S.drawer;
   $('drawerBody').innerHTML = `
-   <div class="dw-top"><span class="id">${archived ? '已出清' : esc(w.volume || '')}</span><button class="x" data-dwclose aria-label="關閉">×</button></div>
-   <div class="dw">
+   <div class="dw-top ${photosOf(w).length ? 'over' : ''}"><span class="id ${archived ? 'gone' : ''}">${archived ? '已出清' : esc(w.volume || '')}</span><button class="x" data-dwclose aria-label="關閉">×</button></div>
+   <div class="dw ${photosOf(w).length ? '' : 'no-ph'}">
     <div class="dw-head"><span class="vin">${esc(w.vintage || 'NV')}</span><h2 id="dwName">${esc(w.wineName)}</h2>${w.wineryRegion ? `<p>${esc(w.wineryRegion)}</p>` : ''}</div>
     ${galleryHtml(w)}
     <div class="dw-stock"><div class="sum"><span>目前庫存</span><b>${t} <small style="font-size:22px">瓶</small></b></div>${locs || '<div class="dw-loc"><span class="where hint">沒有存放位置</span></div>'}</div>
