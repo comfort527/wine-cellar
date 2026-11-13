@@ -40,7 +40,7 @@ const TABLET_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600p
 const DESK_MQ = '(min-width:1181px) and (pointer:fine), (min-width:1401px)';
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261113n';
+const APP_VER = '20261113p';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -107,6 +107,24 @@ function takeOut(d, id, {cabinet, shelf, qty, out}, who, hint) {
   if (archived) { cur.status = 'archived'; cur.archivedAt = t; cur.archivedBy = who; }
   return {old, left: l.quantity, archived, name: cur.wineName};
 }
+// 表單送出：擋掉瀏覽器預設的送出，執行 fn，錯誤顯示在 errId
+const onSubmit = (formId, errId, fn) => $(formId).addEventListener('submit', e => { e.preventDefault(); submit(formId, errId, fn); });
+// 日期要是 YYYY-MM-DD 而且不晚於今天；label 例如「出庫」→「請填寫出庫日期」
+function checkDate(date, label = '') {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date))) fail(`請填寫${label}日期。`);
+  if (date > today()) fail(`${label}日期不能晚於今天。`);
+}
+function checkQty(qty) { if (!Number.isInteger(qty) || qty < 1) fail('瓶數必須是 1 以上的整數。'); }
+// 依日期（同一天再依建立時間）由新到舊
+const byNewest = (a, b) => ((b.date || '') + (b.at || '')).localeCompare((a.date || '') + (a.at || ''));
+// 新酒款編號：現有最大的 W### 加一
+const nextWineId = d => 'W' + String(Object.keys(d.wines).reduce((m, k) => /^W\d+$/.test(k) ? Math.max(m, Number(k.slice(1))) : m, 0) + 1).padStart(3, '0');
+// 還沒有資料檔時的空白內容；GitHub 偶爾回傳比手上還舊的版本
+const emptyData = () => ({schema: 1, rev: 0, catalog: {cabinets: [], shelves: []}, wines: {}});
+const isOlder = json => !!S.data && (json.rev || 0) < (S.data.rev || 0);
+// 某一櫃某一層目前有幾瓶（list 是要計算的酒款）
+function bottlesAt(list, cab, sh) { let n = 0; for (const w of list) for (const l of w.locations || []) if (l.cabinet === cab && l.shelf === sh) n += l.quantity || 0; return n; }
+const pendingOf = (d, id, msg) => (d.pending || []).find(x => x.id === id) || fail(msg);
 const takeOutMsg = (id, x, {type, cabinet, shelf, qty, date, note}) =>
   `出庫 ${id} ${x.name}（${type}）：${cabinet}/${shelf} ${x.old}→${x.left}（−${qty}）${x.archived ? '，全部出清' : ''}\n\n日期：${date}\n類型：${type}${note ? '\n說明：' + note : ''}`;
 const sdots = n => n > 1 ? `<span class="sdots" aria-hidden="true">${Array.from({length: n}, (_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</span>` : '';
@@ -176,8 +194,8 @@ async function loadData(force) {
   }
   S.syncedAt = now();
   if (res === 'same') return false;
-  const json = res ? res.json : {schema: 1, rev: 0, catalog: {cabinets: [], shelves: []}, wines: {}};
-  if (S.data && (json.rev || 0) < (S.data.rev || 0)) return false; // GitHub 偶爾回舊版本，忽略
+  const json = res ? res.json : emptyData();
+  if (isOlder(json)) return false; // GitHub 偶爾回舊版本，忽略
   S.data = json; S.etag = res?.etag || null;
   return true;
 }
@@ -196,8 +214,8 @@ async function mutate(fn, message, {quiet = false} = {}) {
   try {
     for (let i = 0; i < 4; i++) {
       const cur = await readJson(CFG.dataPath);
-      const base = cur ? cur.json : {schema: 1, rev: 0, catalog: {cabinets: [], shelves: []}, wines: {}};
-      if (S.data && (base.rev || 0) < (S.data.rev || 0)) { await sleep(800 * (i + 1)); continue; }
+      const base = cur ? cur.json : emptyData();
+      if (isOlder(base)) { await sleep(800 * (i + 1)); continue; }
       const draft = structuredClone(base);
       const result = fn(draft);
       draft.rev = (base.rev || 0) + 1; if (!quiet) draft.updatedAt = now();
@@ -371,6 +389,8 @@ function render() {
   if ($('memModal').open) renderMemDetail();
   renderPending();
 }
+// 一個櫃子的各層，依層號排序
+const shelfEntries = sh => [...sh].sort((a, b) => shelfNo(a[0]) - shelfNo(b[0]));
 function renderMap(list) {
   const cabs = new Map();
   for (const c of S.data?.catalog?.cabinets || []) cabs.set(c, new Map());
@@ -395,7 +415,7 @@ function renderMap(list) {
   const html = back + all.filter(([cab]) => !overview || cab === S.cabOpen).map(([cab, sh]) => {
     const sum = [...sh.values()].reduce((a, s) => a + s.red + s.white, 0);
     const on = S.filter?.cabinet === cab;
-    const shelves = [...sh].sort((a, b) => shelfNo(a[0]) - shelfNo(b[0])).map(([name, s]) => {
+    const shelves = shelfEntries(sh).map(([name, s]) => {
       const n = s.red + s.white;
       const sel = on && S.filter.shelf === name;
       return `<button class="fr-shelf ${sel ? 'on' : ''} ${n ? '' : 'zero'}" data-cab="${esc(cab)}" data-shelf="${esc(name)}" aria-pressed="${sel}" aria-label="${esc(cab)} ${esc(name)}：${n} 瓶，${s.wines} 款"><span class="fr-btl" data-r="${s.red}" data-w="${s.white}"></span><span class="fr-rail"><b>${shelfNo(name) < 999 ? shelfNo(name) : esc(name)}</b><em>${n} 瓶${(f => f === null ? '' : f ? ` <span class="cap-pill ok">可再放 ${f}</span>` : ' <span class="cap-pill full">已滿</span>')(freeAt(cab, name, n))}</em></span></button>`;
@@ -408,7 +428,7 @@ function renderMap(list) {
   if (html && !$('mapLegend')) $('map').insertAdjacentHTML('afterend', '<div class="map-legend" id="mapLegend"><span><i class="lg-r"></i>紅酒</span><span><i class="lg-w"></i>白酒</span></div>');
 }
 function miniCabHtml(cab, sh) {
-  const rows = [...sh].sort((a, b) => shelfNo(a[0]) - shelfNo(b[0])).map(([name, s]) => ({name, ...s, n: s.red + s.white, free: freeAt(cab, name, s.red + s.white)}));
+  const rows = shelfEntries(sh).map(([name, s]) => ({name, ...s, n: s.red + s.white, free: freeAt(cab, name, s.red + s.white)}));
   const scale = Math.max(1, ...rows.map(r => r.n + (r.free || 0)));
   const sum = rows.reduce((a, r) => a + r.n, 0), frees = rows.filter(r => r.free !== null), freeSum = frees.reduce((a, r) => a + r.free, 0);
   const on = S.filter?.cabinet === cab;
@@ -420,7 +440,7 @@ function miniCabHtml(cab, sh) {
 }
 /* ---------- 各層容量：存「現有＋還可放」，空位＝容量−目前瓶數，出入庫後自動更新 ---------- */
 const capOf = (cab, sh) => { const v = S.data?.capacity?.[cab]?.[sh]; return Number.isFinite(v) ? v : null; };
-function qtyAt(cab, sh) { let n = 0; for (const w of active()) for (const l of w.locations || []) if (l.cabinet === cab && l.shelf === sh) n += l.quantity || 0; return n; }
+const qtyAt = (cab, sh) => bottlesAt(active(), cab, sh);
 const freeAt = (cab, sh, n) => { const c = capOf(cab, sh); return c === null ? null : Math.max(0, c - n); };
 /* 每層最多畫兩排：下排排滿，上排少一瓶、疊在兩瓶之間；放不下的以「+n」表示，紅白依比例 */
 function fillBottles() {
@@ -436,13 +456,15 @@ function fillBottles() {
     el.innerHTML = '<i></i>'.repeat(r) + '<i class="w"></i>'.repeat(wh) + (n > show ? `<b class="fr-more" title="還有 ${n - show} 瓶">+${n - show}</b>` : '');
   }
 }
+// 年份由舊到新（沒有年份的排最後），同年份依登錄先後
+const oldestFirst = (a, b) => (Number(a.vintage) || 9999) - (Number(b.vintage) || 9999) || a.wineId.localeCompare(b.wineId);
 function sortWines(rows) {
   const k = S.sort;
   const firstLoc = w => { const l = (w.locations || []).find(x => x.quantity > 0) || {}; return [l.cabinet || '', shelfNo(l.shelf)]; };
   return rows.sort((a, b) => {
-    if (k === 'prio') return prioOf(b) - prioOf(a) || (Number(a.vintage) || 9999) - (Number(b.vintage) || 9999) || a.wineId.localeCompare(b.wineId);
+    if (k === 'prio') return prioOf(b) - prioOf(a) || oldestFirst(a, b);
     if (k === 'vintage-desc') { const va = Number(a.vintage) || 0, vb = Number(b.vintage) || 0; return vb - va || a.wineId.localeCompare(b.wineId); }
-    if (k === 'vintage') return (Number(a.vintage) || 9999) - (Number(b.vintage) || 9999) || a.wineId.localeCompare(b.wineId);
+    if (k === 'vintage') return oldestFirst(a, b);
     if (k === 'qty') return total(b) - total(a) || a.wineId.localeCompare(b.wineId);
     if (k === 'name') return a.wineName.localeCompare(b.wineName, 'en');
     if (k === 'loc') { const [ca, sa] = firstLoc(a), [cb, sb] = firstLoc(b); return ca.localeCompare(cb) || sa - sb || a.wineId.localeCompare(b.wineId); }
@@ -508,7 +530,7 @@ function openDrawer(id, fromHash) {
 function closeDrawer() { if ($('drawer').open) $('drawer').close(); }
 function outsHtml(w) {
   const outs = (w.outs || []).map(o => ({...o, kind: 'out'})), moves = (w.moves || []).map(m => ({...m, kind: 'move'})), ins = (w.ins || []).map(x => ({...x, kind: 'in'}));
-  const all = [...outs, ...moves, ...ins].sort((a, b) => ((b.date || '') + (b.at || '')).localeCompare((a.date || '') + (a.at || '')));
+  const all = [...outs, ...moves, ...ins].sort(byNewest);
   if (!all.length) return '';
   const outQty = outs.reduce((a, o) => a + (Number(o.qty) || 0), 0);
   const sumText = [ins.length ? `入庫 ${ins.length} 次` : '', outs.length ? `出庫 ${outs.length} 次、${outQty} 瓶` : '', moves.length ? `移動 ${moves.length} 次` : ''].filter(Boolean).join('；');
@@ -678,7 +700,7 @@ function wire() {
     const d = e.target.closest('[data-pdelq]'); if (d) return deletePending(d);
     const rm = e.target.closest('[data-pprm]'); if (rm) return removePendPhoto(rm.closest('[data-pid]').dataset.pid, rm.dataset.pprm);
   });
-  $('aiForm').addEventListener('submit', e => { e.preventDefault(); submit('aiForm', 'aiErr', saveAiSettings); });
+  onSubmit('aiForm', 'aiErr', saveAiSettings);
   $('ai_provider').addEventListener('change', () => { $('ai_modelBox').hidden = true; $('ai_key').value = ''; showErr('aiErr', ''); });
   $('ai_model').addEventListener('change', () => { const c = getAI(); if (c) { c.model = $('ai_model').value; setAI(c); setAIPref({provider: c.provider, model: c.model}); renderAiSettings(); } });
   $('aiRemove').addEventListener('click', () => { if (!confirm('移除這台裝置上的 AI 金鑰？「智慧辨識」按鈕會隱藏。')) return; setAI(null); renderAiSettings(); toast('已移除 AI 金鑰。'); });
@@ -693,16 +715,16 @@ function wire() {
   $('p_gallery').addEventListener('change', e => addPhotos(e.target.files));
   setupPhotoDrag();
   $('pgrid').addEventListener('click', e => { const c = e.target.closest('[data-pcover]'); if (c) return coverPhoto(c.dataset.pcover); const d = e.target.closest('[data-pdel]'); if (d) return deletePhoto(d); });
-  $('loginForm').addEventListener('submit', e => { e.preventDefault(); submit('loginForm', 'loginErr', doLogin); });
-  $('setupForm').addEventListener('submit', e => { e.preventDefault(); submit('setupForm', 'setupErr', doSetup); });
-  $('wineForm').addEventListener('submit', e => { e.preventDefault(); submit('wineForm', 'wineErr', saveWine); });
-  $('stockForm').addEventListener('submit', e => { e.preventDefault(); submit('stockForm', 'stockErr', saveStock); });
-  $('moveForm').addEventListener('submit', e => { e.preventDefault(); submit('moveForm', 'moveErr', saveMove); });
+  onSubmit('loginForm', 'loginErr', doLogin);
+  onSubmit('setupForm', 'setupErr', doSetup);
+  onSubmit('wineForm', 'wineErr', saveWine);
+  onSubmit('stockForm', 'stockErr', saveStock);
+  onSubmit('moveForm', 'moveErr', saveMove);
   document.querySelectorAll('input[name=s_type]').forEach(r => r.addEventListener('change', () => { $('s_reasonLbl').textContent = r.value === '其他' ? '說明 *' : '說明（選填）'; }));
-  $('locForm').addEventListener('submit', e => { e.preventDefault(); submit('locForm', 'locErr', saveCatalog); });
-  $('capForm').addEventListener('submit', e => { e.preventDefault(); submit('capForm', 'capErr', saveCapacity); });
-  $('slotForm').addEventListener('submit', e => { e.preventDefault(); submit('slotForm', 'keysErr', addSlot); });
-  $('tokenForm').addEventListener('submit', e => { e.preventDefault(); submit('tokenForm', 'keysErr', changeToken); });
+  onSubmit('locForm', 'locErr', saveCatalog);
+  onSubmit('capForm', 'capErr', saveCapacity);
+  onSubmit('slotForm', 'keysErr', addSlot);
+  onSubmit('tokenForm', 'keysErr', changeToken);
   $('moreAudit').addEventListener('click', () => loadAudit(S.auditWine, S.auditPage + 1));
   $('cabChips').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) removeCatalog('cabinets', b.dataset.rm); });
   $('shelfChips').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) removeCatalog('shelves', b.dataset.rm); });
@@ -719,7 +741,7 @@ function wire() {
     openHist(e);
   });
   $('jDayList').addEventListener('keydown', e => { if (!e.target.closest('button')) openHist(e); });
-  $('journalForm').addEventListener('submit', e => { e.preventDefault(); submit('journalForm', 'journalErr', saveJournal); });
+  onSubmit('journalForm', 'journalErr', saveJournal);
   document.querySelectorAll('input[name=j_src]').forEach(r => r.addEventListener('change', () => { S.jf = {src: '', cab: '', shelf: '', wineId: '', miss: false}; showErr('journalErr', ''); syncJournalForm(); }));
   $('j_pick').addEventListener('click', journalPick);
   onKeyActivate($('j_pick'), '[data-jview]', v => openViewer(v.dataset.jview));
@@ -995,8 +1017,7 @@ async function saveWine() {
     const photo = photos[0]?.photo || '', thumb = photos[0]?.thumb || '';
     const id = await mutate(d => {
       if (src) { const i = (d.pending || []).findIndex(x => x.id === src.id); if (i < 0) fail('這瓶已被其他人加入酒櫃或刪除，請關閉後重新整理。'); d.pending.splice(i, 1); }
-      const n = Object.keys(d.wines).reduce((m, k) => /^W\d+$/.test(k) ? Math.max(m, Number(k.slice(1))) : m, 0) + 1;
-      const wid = 'W' + String(n).padStart(3, '0'), t = now();
+      const wid = nextWineId(d), t = now();
       d.wines[wid] = {...r, photo, thumb, photos, status: total(r) > 0 ? 'active' : 'archived', createdAt: t, createdBy: who, updatedAt: t, updatedBy: who, revision: 1};
       return wid;
     }, wid => `新增 ${wid} ${r.wineName}${src ? '（由待入櫃加入）' : ''}\n\n位置：${locText(r.locations)}`);
@@ -1046,12 +1067,11 @@ function openStock(id, cab, shelf) {
 async function saveStock() {
   const id = S.stock.wineId, picked = pickedLoc('s_locr', S.stock) || {}, {cabinet, shelf} = picked, qty = Number($('s_qty').value), reason = $('s_reason').value.trim(), date = $('s_date').value, type = document.querySelector('input[name=s_type]:checked')?.value || '', who = S.session.label;
   if (!cabinet) fail('請選擇目前有庫存的位置。');
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date))) fail('請填寫出庫日期。');
-  if (date > today()) fail('出庫日期不能晚於今天。');
+  checkDate(date, '出庫');
   if (date < '1990-01-01') fail('出庫日期不正確，請重新選擇。');
   if (!type) fail('請選擇出庫類型：自飲、聚餐、送禮或其他。');
   if (type === '其他' && !reason) fail('選「其他」時請填寫說明。');
-  if (!Number.isInteger(qty) || qty < 1) fail('瓶數必須是 1 以上的整數。');
+  checkQty(qty);
   const res = await mutate(d => takeOut(d, id, {cabinet, shelf, qty, out: {date, type, reason}}, who, '沒有扣除任何瓶數。'),
     x => takeOutMsg(id, x, {type, cabinet, shelf, qty, date, note: reason}));
   $('stockModal').close();
@@ -1091,9 +1111,8 @@ async function saveMove() {
   if (!from) fail('請選擇要從哪個位置移出。');
   if (!to.cabinet || !to.shelf) fail('請選擇要移到的櫃位和層位。');
   if (to.cabinet === from.cabinet && to.shelf === from.shelf) fail('新位置和原位置相同。');
-  if (!Number.isInteger(qty) || qty < 1) fail('瓶數必須是 1 以上的整數。');
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date))) fail('請填寫日期。');
-  if (date > today()) fail('日期不能晚於今天。');
+  checkQty(qty);
+  checkDate(date);
   const res = await mutate(d => {
     const cur = wineOf(d, id);
     const locs = cur.locations || [];
@@ -1357,7 +1376,7 @@ async function addPendPhotos(id, fileList) {
     await compressEach(files.slice(0, room), 'pendErr', async ph => { up.push(await uploadPhoto(ph, 'pending')); });
     if (!up.length) return;
     const extra = await mutate(d => {
-      const cur = (d.pending || []).find(x => x.id === id); if (!cur) fail('這瓶已被其他人加入酒櫃或刪除。');
+      const cur = pendingOf(d, id, '這瓶已被其他人加入酒櫃或刪除。');
       const fit = up.slice(0, MAX_PHOTOS - cur.photos.length); cur.photos.push(...fit);
       return up.slice(fit.length);
     }, `待入櫃：加入照片（${up.length} 張）`);
@@ -1371,7 +1390,7 @@ async function removePendPhoto(id, path) {
   showErr('pendErr', '');
   try {
     const gone = await mutate(d => {
-      const cur = (d.pending || []).find(x => x.id === id); if (!cur) fail('這瓶已不存在。');
+      const cur = pendingOf(d, id, '這瓶已不存在。');
       if (cur.photos.length < 2) fail('至少要留一張照片；整瓶不要請按「刪除」。');
       return cur.photos.splice(photoIndex(cur.photos, path), 1)[0];
     }, '待入櫃：移除一張照片');
@@ -1612,7 +1631,7 @@ async function saveCapacity() {
   for (const r of rows) if (r.v !== '' && (!/^\d+$/.test(r.v) || Number(r.v) > 999)) fail(`${r.cab} ${r.sh}：還可放的瓶數要是 0 以上的整數。`);
   const changes = await mutate(d => {
     d.capacity = d.capacity || {}; const out = [];
-    const cnt = (cab, sh) => { let n = 0; for (const w of Object.values(d.wines)) if (w.status !== 'archived') for (const l of w.locations || []) if (l.cabinet === cab && l.shelf === sh) n += l.quantity || 0; return n; };
+    const cnt = (cab, sh) => bottlesAt(Object.values(d.wines).filter(w => w.status !== 'archived'), cab, sh);
     for (const r of rows) {
       const old = d.capacity[r.cab]?.[r.sh];
       if (r.v === '') { if (old !== undefined) { delete d.capacity[r.cab][r.sh]; out.push(`${r.cab} ${r.sh}：不顯示空位`); } continue; }
@@ -1640,16 +1659,8 @@ const occBadge = e => e.kind === 'ext' ? '<span class="occ ext">非酒窖</span>
 const roStars = n => n ? `<span class="rostar" aria-label="評分 ${n}／5">${'★'.repeat(n)}${'☆'.repeat(5 - n)}</span>` : '';
 const normKey = v => String(v || '').trim().toLowerCase().replace(/\s+/g, ' ');
 const mdDate = d => d ? d.replace(/^\d{4}-0?(\d+)-0?(\d+)$/, '$1/$2') : '';
-function drinkEvents() {  // 所有飲用（含送禮）與非酒窖紀錄
-  const out = [];
-  for (const w of wines()) for (const o of w.outs || []) {
-    const type = OUT_TYPES.includes(o.type) ? o.type : '其他';
-    out.push({kind: 'cellar', mem: 'w:' + w.wineId, wineId: w.wineId, date: o.date || '', at: o.at || '', name: w.wineName, vintage: w.vintage || '', winery: w.wineryRegion || '',
-      qty: Number(o.qty) || 1, type, note: o.reason || '', where: [o.cabinet, o.shelf].filter(Boolean).join(' · '), rating: Number(o.rating) || 0, photo: thumbUrl(w)});
-  }
-  for (const j of S.data?.journal || []) out.push({kind: 'ext', mem: 'x:' + normKey(j.name) + '|' + normKey(j.vintage), date: j.date || '', at: j.at || '', name: j.name, vintage: j.vintage || '', winery: '',
-    qty: Number(j.qty) || 1, type: '', note: j.note || '', who: j.who || '', where: '', rating: Number(j.rating) || 0, photo: j.thumb ? fileUrl(j.thumb) : j.photo ? fileUrl(j.photo) : '', j});
-  return out.sort((a, b) => (b.date + b.at).localeCompare(a.date + a.at));
+function drinkEvents() {  // 回憶：所有飲用（含送禮）與非酒窖紀錄，由新到舊
+  return drinkRecords().sort(byNewest);
 }
 function switchJTab(t) {
   S.jt = t;
@@ -1670,7 +1681,7 @@ function renderJSearch() {
   let html = '', month = '';
   for (const e of list) {
     const m = (e.date || '').slice(0, 7); if (m !== month) { month = m; const [yy, mm] = m.split('-'); html += `<div class="rdate">${yy ? `${yy} 年 ${Number(mm)} 月` : '日期不明'}</div>`; }
-    const ph = e.photo ? `<img class="ph" src="${esc(e.photo)}" alt="" loading="lazy">` : `<span class="ph">${esc(e.vintage || 'NV')}</span>`;
+    const ph = entryPhoto(e);
     html += `<div class="entry srch" data-mem="${esc(e.mem)}" role="button" tabindex="0">${ph}<div class="eb"><div class="t">${esc(e.name)}${e.vintage ? ` <span class="v">${esc(e.vintage)}</span>` : ''}</div>`
       + `<div class="m">${occBadge(e)}${fmtDate(e.date)}・${e.qty} 瓶${e.where ? '・' + esc(e.where) : ''}${e.who ? '・' + esc(e.who) : ''}</div>${e.note ? `<div class="note">${esc(e.note)}</div>` : ''}${roStars(e.rating)}</div></div>`;
   }
@@ -1754,19 +1765,23 @@ function renderRebuyNote() {
 
 /* ---------- 飲酒日誌：日曆＋當天紀錄（酒窖出庫自飲／聚餐／其他＋外來的酒） ---------- */
 const WEEK = '日一二三四五六';
-function journalEntries() {
-  const out = [];
-  for (const w of wines()) for (const o of w.outs || []) {
-    const type = OUT_TYPES.includes(o.type) ? o.type : '其他';
-    if (type === '送禮') continue;
-    out.push({kind: 'cellar', key: `o|${w.wineId}|${o.at || ''}`, wineId: w.wineId, at: o.at || '', date: o.date, name: w.wineName, vintage: w.vintage,
-      qty: Number(o.qty) || 1, type, note: o.reason || '', where: [o.cabinet, o.shelf].filter(Boolean).join(' · '), rating: Number(o.rating) || 0, photo: thumbUrl(w)});
-  }
-  for (const j of S.data?.journal || []) out.push({kind: 'ext', key: `j|${j.id}`, id: j.id, at: j.at || '', date: j.date, name: j.name, vintage: j.vintage,
-    qty: Number(j.qty) || 1, source: j.source, who: j.who || '', note: j.note || '', rating: Number(j.rating) || 0, photo: j.thumb ? fileUrl(j.thumb) : j.photo ? fileUrl(j.photo) : ''});
-  return out;
+function journalEntries() {  // 日曆：送禮不算喝掉
+  return drinkRecords().filter(e => e.type !== '送禮');
 }
 const sumQty = list => list.reduce((a, e) => a + e.qty, 0);
+// 紀錄卡片左邊的照片；沒有照片就顯示年份
+const entryPhoto = e => e.photo ? `<img class="ph" src="${esc(e.photo)}" alt="" loading="lazy">` : `<span class="ph">${esc(e.vintage || 'NV')}</span>`;
+// 飲用紀錄：酒窖的每一筆出庫，加上非酒窖的紀錄。日曆與回憶共用
+function drinkRecords() {
+  const out = [];
+  for (const w of wines()) for (const o of w.outs || []) out.push({kind: 'cellar', key: `o|${w.wineId}|${o.at || ''}`, mem: 'w:' + w.wineId, wineId: w.wineId,
+    date: o.date || '', at: o.at || '', name: w.wineName, vintage: w.vintage || '', winery: w.wineryRegion || '', qty: Number(o.qty) || 1,
+    type: OUT_TYPES.includes(o.type) ? o.type : '其他', note: o.reason || '', where: [o.cabinet, o.shelf].filter(Boolean).join(' · '), rating: Number(o.rating) || 0, photo: thumbUrl(w)});
+  for (const j of S.data?.journal || []) out.push({kind: 'ext', key: `j|${j.id}`, mem: 'x:' + normKey(j.name) + '|' + normKey(j.vintage), id: j.id,
+    date: j.date || '', at: j.at || '', name: j.name, vintage: j.vintage || '', winery: '', qty: Number(j.qty) || 1, type: '', source: j.source,
+    note: j.note || '', who: j.who || '', where: '', rating: Number(j.rating) || 0, photo: j.thumb ? fileUrl(j.thumb) : j.photo ? fileUrl(j.photo) : '', j});
+  return out;
+}
 function starsHtml(e) {
   const ed = canEdit();
   return `<span class="stars" ${ed ? 'role="group"' : 'role="img"'} aria-label="評分 ${e.rating}／5">${[1, 2, 3, 4, 5].map(i => ed
@@ -1774,7 +1789,7 @@ function starsHtml(e) {
     : `<i class="${i <= e.rating ? 'on' : ''}">★</i>`).join('')}</span>`;
 }
 function entryHtml(e) {
-  const ph = e.photo ? `<img class="ph" src="${esc(e.photo)}" alt="" loading="lazy">` : `<span class="ph">${esc(e.vintage || 'NV')}</span>`;
+  const ph = entryPhoto(e);
   const meta = e.kind === 'cellar'
     ? `<span class="badge c">酒窖</span>${esc(e.type)} · ${e.qty} 瓶${e.where ? ' · ' + esc(e.where) : ''}`
     : `<span class="badge e">非酒窖${e.source && e.source !== '非酒窖' ? ' · ' + esc(e.source) : ''}</span>${e.qty} 瓶${e.who ? ' · ' + esc(e.who) : ''}`;
@@ -1928,9 +1943,8 @@ async function saveJournal() {
   const type = document.querySelector('input[name=j_type]:checked')?.value || '';
   if (!src) fail('請先選擇「酒窖」或「非酒窖」。');
   if (src === 'cellar' && !f.wineId && !f.miss) fail('請依序點選櫃位、層位和酒；找不到的話按「補登一筆」。');
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date))) fail('請填寫日期。');
-  if (date > today()) fail('日期不能晚於今天。');
-  if (!Number.isInteger(qty) || qty < 1) fail('瓶數必須是 1 以上的整數。');
+  checkDate(date);
+  checkQty(qty);
   if (src === 'cellar' && !type) fail('請選擇類型：自飲、聚餐或其他。');
   const stamp = rating ? {rating} : {};
   if (src === 'cellar' && f.wineId) {
@@ -1947,8 +1961,7 @@ async function saveJournal() {
     let photo = '', thumb = '';
     if (S.jPhoto) ({photo, thumb} = await uploadPhoto(S.jPhoto, 'new'));
     await mutate(d => {
-      const n = Object.keys(d.wines).reduce((mx, k) => /^W\d+$/.test(k) ? Math.max(mx, Number(k.slice(1))) : mx, 0) + 1;
-      const id = 'W' + String(n).padStart(3, '0'), t = now();
+      const id = nextWineId(d), t = now();
       d.wines[id] = {wineName: name, wineryRegion: '', vintage, entryDate: '', volume: '750ml', source: '', referencePrice: null, origin: '', drinkWindow: '', grapeNotes: '飲用時補登',
         photo, thumb, status: left > 0 ? 'active' : 'archived', locations: left > 0 ? [{cabinet: cab, shelf, quantity: left}] : [],
         outs: [{date, type, qty, cabinet: cab, shelf, reason: note, ...stamp, by: me, at: t}],
@@ -1994,7 +2007,7 @@ function renderHistory() {
   if ($('journalView').open) renderJTab();
   const all = [];
   for (const w of wines()) for (const o of w.outs || []) all.push({...o, wineId: w.wineId, wineName: w.wineName, vintage: w.vintage, gone: w.status === 'archived'});
-  all.sort((a, b) => ((b.date || '') + (b.at || '')).localeCompare((a.date || '') + (a.at || '')));
+  all.sort(byNewest);
   const years = [...new Set(all.map(o => (o.date || '').slice(0, 4)).filter(Boolean))].sort().reverse();
   if (S.histYear && !years.includes(S.histYear)) S.histYear = '';
   $('h_year').innerHTML = `<option value="">全部年份</option>` + years.map(y => `<option value="${y}" ${y === S.histYear ? 'selected' : ''}>${y} 年</option>`).join('');
