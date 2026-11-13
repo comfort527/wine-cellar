@@ -1528,22 +1528,23 @@
    "locations": [
     {
      "cabinet": "8樓右LB櫃",
-     "quantity": 7,
-     "shelf": "第6層"
+     "shelf": "第6層",
+     "quantity": 5
     }
    ],
    "origin": "Spain",
    "photo": "",
    "referencePrice": 1704,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-09-30T04:44:36.748Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-13T01:58:41.827Z",
+   "updatedBy": "芝琦",
    "vintage": "2015",
    "volume": "750ml",
    "wineName": "Pam de Nas",
-   "wineryRegion": "Trossos del Priorat"
+   "wineryRegion": "Trossos del Priorat",
+   "color": "red"
   },
   "W056": {
    "createdAt": "",
@@ -1795,8 +1796,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 106,
- "updatedAt": "2026-11-13T01:51:11.096Z",
+ "rev": 107,
+ "updatedAt": "2026-11-13T01:58:41.827Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
