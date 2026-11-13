@@ -40,7 +40,7 @@ const TABLET_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600p
 const DESK_MQ = '(min-width:1181px) and (pointer:fine), (min-width:1401px)';
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261113h';
+const APP_VER = '20261113i';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -62,6 +62,55 @@ const thumbUrl = w => w.thumb ? fileUrl(w.thumb) : photoUrl(w);
 const MAX_PHOTOS = 4;
 const photosOf = w => Array.isArray(w?.photos) && w.photos.length ? w.photos : (w?.photo ? [{photo: w.photo, thumb: w.thumb || ''}] : []);
 function setPhotos(cur, list) { cur.photos = list; cur.photo = list[0]?.photo || ''; cur.thumb = list[0]?.thumb || ''; }
+
+/* ---------- 共用小工具 ---------- */
+// 寫入酒款時記下修改者、時間並遞增版本號（版本號用來偵測同時編輯）
+function touch(cur, who, t = now()) { cur.updatedAt = t; cur.updatedBy = who; cur.revision = (cur.revision || 0) + 1; return t; }
+const wineOf = (d, id) => d.wines[id] || fail('這款酒已不存在。');
+// 在照片清單找某張照片的位置，找不到就報錯
+function photoIndex(list, path, msg = '這張照片已不存在。') { const i = list.findIndex(p => p.photo === path); if (i < 0) fail(msg); return i; }
+const fmtMB = mb => mb < 10 ? mb.toFixed(1) : Math.round(mb);
+// 刪除鍵：第一次點只變成「確定刪除？」，4 秒內再點才真的刪。回傳 true 代表這次只是提醒
+function armDelete(btn) {
+  if (btn.dataset.confirm === '1') return false;
+  btn.dataset.confirm = '1'; btn.textContent = '確定刪除？';
+  setTimeout(() => { if (btn.isConnected) { btn.dataset.confirm = ''; btn.textContent = '刪除'; } }, 4000);
+  return true;
+}
+// 照片輪播的左右箭頭。回傳 true 代表已處理
+function galleryNav(e) {
+  const gn = e.target.closest('[data-gnav]'); if (!gn) return false;
+  const sl = gn.parentElement.querySelector('.slides'); sl.scrollBy({left: Number(gn.dataset.gnav) * sl.clientWidth, behavior: 'smooth'});
+  return true;
+}
+// 用鍵盤 Enter／空白鍵啟動非按鈕元素（卡片、縮圖）
+function onKeyActivate(el, selector, fn) {
+  el.addEventListener('keydown', e => { const t = e.target.closest(selector); if (t && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.stopPropagation(); fn(t); } });
+}
+// 新增照片時的縮圖（第一張標「封面」，右上角 × 移除）
+const thumbHtml = (src, i, attr) => `<span class="nthumb"><img src="${src}" alt="照片 ${i + 1}">${i === 0 ? '<em>封面</em>' : ''}<button type="button" ${attr} aria-label="移除這張">×</button></span>`;
+// 逐張壓縮；讀不到的照片顯示錯誤並略過，其餘交給 onEach
+async function compressEach(files, errId, onEach) {
+  for (const f of files) {
+    let ph; try { ph = await compress(f); } catch (err) { showErr(errId, err?.user ? err.message : '有一張圖片無法讀取，請換一張。'); continue; }
+    await onEach(ph);
+  }
+}
+// 從某個位置出庫：扣瓶數、記一筆出庫、全部出完就移入歷史酒單。出庫與飲酒日誌共用
+function takeOut(d, id, {cabinet, shelf, qty, out}, who, hint) {
+  const cur = wineOf(d, id);
+  const l = (cur.locations || []).find(x => x.cabinet === cabinet && x.shelf === shelf);
+  if (!l || l.quantity <= 0) fail(`這個位置已沒有庫存，${hint}`);
+  if (l.quantity < qty) fail(`此位置只剩 ${l.quantity} 瓶，${hint}`);
+  const old = l.quantity; l.quantity -= qty;
+  const t = touch(cur, who);
+  cur.outs = [...(cur.outs || []), {...out, qty, cabinet, shelf, by: who, at: t}];
+  const archived = cur.locations.every(x => !x.quantity);
+  if (archived) { cur.status = 'archived'; cur.archivedAt = t; cur.archivedBy = who; }
+  return {old, left: l.quantity, archived, name: cur.wineName};
+}
+const takeOutMsg = (id, x, {type, cabinet, shelf, qty, date, note}) =>
+  `出庫 ${id} ${x.name}（${type}）：${cabinet}/${shelf} ${x.old}→${x.left}（−${qty}）${x.archived ? '，全部出清' : ''}\n\n日期：${date}\n類型：${type}${note ? '\n說明：' + note : ''}`;
 const sdots = n => n > 1 ? `<span class="sdots" aria-hidden="true">${Array.from({length: n}, (_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</span>` : '';
 function b64e(bytes) { let s = ''; const b = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes); for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); return btoa(s); }
 function b64d(s) { return Uint8Array.from(atob(String(s).replace(/\s/g, '')), c => c.charCodeAt(0)); }
@@ -494,10 +543,10 @@ function wire() {
   $('jm_clear').addEventListener('click', () => { $('jm_q').value = S.jm.q = ''; renderMem(); });
   for (const id of ['js_list', 'jm_list']) {
     $(id).addEventListener('click', e => { const m = e.target.closest('[data-mem]'); if (m) openMem(m.dataset.mem); });
-    $(id).addEventListener('keydown', e => { const m = e.target.closest('[data-mem]'); if (m && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openMem(m.dataset.mem); } });
+    onKeyActivate($(id), '[data-mem]', m => openMem(m.dataset.mem));
   }
   $('memBody').addEventListener('click', e => {
-    const gn = e.target.closest('[data-gnav]'); if (gn) { const sl = gn.parentElement.querySelector('.slides'); sl.scrollBy({left: Number(gn.dataset.gnav) * sl.clientWidth, behavior: 'smooth'}); return; }
+    if (galleryNav(e)) return;
     const rb = e.target.closest('[data-rebuy]'); if (rb) return rebuy(rb.dataset.rebuy);
     const op = e.target.closest('[data-memopen]'); if (op) { $('memModal').close(); openDrawer(op.dataset.memopen); }
   });
@@ -556,7 +605,7 @@ function wire() {
     const o = e.target.closest('[data-open]'); if (!o) return;
     openDrawer(o.dataset.open);
   });
-  $('list').addEventListener('keydown', e => { const o = e.target.closest('div[data-open]'); if (o && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openDrawer(o.dataset.open); } });
+  onKeyActivate($('list'), 'div[data-open]', o => openDrawer(o.dataset.open));
   // 照片輪播：捲動時更新小圓點
   document.addEventListener('scroll', e => {
     const sl = e.target; if (!sl.classList || !sl.classList.contains('slides')) return;
@@ -574,7 +623,7 @@ function wire() {
     const ma = e.target.closest('[data-moveany]'); if (ma) return openMove(ma.dataset.moveany);
     const pr = e.target.closest('[data-prio]'); if (pr) return setPriority(S.drawer, Number(pr.dataset.prio));
     const ed = e.target.closest('[data-edit]'); if (ed) return openWineForm(byId(ed.dataset.edit));
-    const gn = e.target.closest('[data-gnav]'); if (gn) { const sl = gn.parentElement.querySelector('.slides'); sl.scrollBy({left: Number(gn.dataset.gnav) * sl.clientWidth, behavior: 'smooth'}); return; }
+    if (galleryNav(e)) return;
     const ph = e.target.closest('[data-photo]'); if (ph) return openPhoto(byId(ph.dataset.photo));
     const lg = e.target.closest('[data-log]'); if (lg) { showDialog('adminModal'); switchTab('audit', true); loadAudit(lg.dataset.log, 1); checkStorage(); }
   });
@@ -585,7 +634,7 @@ function wire() {
   for (const id of ['f_camera', 'f_gallery']) $(id).addEventListener('change', async e => {
     const files = [...e.target.files].slice(0, MAX_PHOTOS - S.pendKeep.length - S.newPhotos.length); e.target.value = '';
     showErr('wineErr', '');
-    for (const f of files) { try { S.newPhotos.push(await compress(f)); } catch (err) { showErr('wineErr', err?.user ? err.message : '有一張圖片無法讀取，請換一張。'); } }
+    await compressEach(files, 'wineErr', ph => { S.newPhotos.push(ph); });
     renderNewStrip();
   });
   $('f_strip').addEventListener('click', e => {
@@ -595,7 +644,7 @@ function wire() {
   for (const id of ['q_camera', 'q_gallery']) $(id).addEventListener('change', async e => {
     const files = [...e.target.files], room = MAX_PHOTOS - S.pendNew.length; e.target.value = '';
     showErr('pendErr', files.length > room ? `每瓶最多 ${MAX_PHOTOS} 張，只加入前 ${room} 張。` : '');
-    for (const f of files.slice(0, room)) { try { S.pendNew.push(await compress(f)); renderPendStrip(); } catch (err) { showErr('pendErr', err?.user ? err.message : '有一張圖片無法讀取，請換一張。'); } }
+    await compressEach(files.slice(0, room), 'pendErr', ph => { S.pendNew.push(ph); renderPendStrip(); });
     renderPendStrip();
   });
   $('q_strip').addEventListener('click', e => { const b = e.target.closest('[data-qrm]'); if (b) { S.pendNew.splice(Number(b.dataset.qrm), 1); renderPendStrip(); } });
@@ -649,8 +698,8 @@ function wire() {
   $('journalForm').addEventListener('submit', e => { e.preventDefault(); submit('journalForm', 'journalErr', saveJournal); });
   document.querySelectorAll('input[name=j_src]').forEach(r => r.addEventListener('change', () => { S.jf = {src: '', cab: '', shelf: '', wineId: '', miss: false}; showErr('journalErr', ''); syncJournalForm(); }));
   $('j_pick').addEventListener('click', journalPick);
-  $('j_pick').addEventListener('keydown', e => { const v = e.target.closest('[data-jview]'); if (v && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.stopPropagation(); openViewer(v.dataset.jview); } });
-  $('viewerBody').addEventListener('click', e => { const gn = e.target.closest('[data-gnav]'); if (gn) { const sl = gn.parentElement.querySelector('.slides'); sl.scrollBy({left: Number(gn.dataset.gnav) * sl.clientWidth, behavior: 'smooth'}); } }); $('j_path').addEventListener('click', journalPick);
+  onKeyActivate($('j_pick'), '[data-jview]', v => openViewer(v.dataset.jview));
+  $('viewerBody').addEventListener('click', galleryNav); $('j_path').addEventListener('click', journalPick);
   $('j_missBtn').addEventListener('click', startMissing);
   $('j_left').addEventListener('input', syncJournalForm);
   $('j_stars').addEventListener('click', e => { const b = e.target.closest('[data-jstar]'); if (b) { const n = Number(b.dataset.jstar); S.jRating = S.jRating === n ? 0 : n; syncJournalForm(); } });
@@ -764,7 +813,7 @@ async function addSlot() {
 }
 async function deleteSlot(btn) {
   if (!isAdmin()) return;
-  if (btn.dataset.confirm !== '1') { btn.dataset.confirm = '1'; btn.textContent = '確定刪除？'; setTimeout(() => { if (btn.isConnected) { btn.dataset.confirm = ''; btn.textContent = '刪除'; } }, 4000); return; }
+  if (armDelete(btn)) return;
   showErr('keysErr', '');
   try {
     await loadKeys();
@@ -840,8 +889,8 @@ function setChoice(selId, otherId, value, fallback) {
 function renderNewStrip() {
   const el = $('f_strip'); if (!el) return;
   const keep = S.pendKeep || [], n = keep.length;
-  el.innerHTML = keep.map((ph, i) => `<span class="nthumb"><img src="${esc(fileUrl(ph.thumb || ph.photo))}" alt="照片 ${i + 1}">${i === 0 ? '<em>封面</em>' : ''}<button type="button" data-krm="${i}" aria-label="移除這張">×</button></span>`).join('')
-    + (S.newPhotos || []).map((ph, i) => `<span class="nthumb"><img src="${URL.createObjectURL(ph.thumb)}" alt="照片 ${n + i + 1}">${n + i === 0 ? '<em>封面</em>' : ''}<button type="button" data-nrm="${i}" aria-label="移除這張">×</button></span>`).join('');
+  el.innerHTML = keep.map((ph, i) => thumbHtml(esc(fileUrl(ph.thumb || ph.photo)), i, `data-krm="${i}"`)).join('')
+    + (S.newPhotos || []).map((ph, i) => thumbHtml(URL.createObjectURL(ph.thumb), n + i, `data-nrm="${i}"`)).join('');
   const full = n + (S.newPhotos || []).length >= MAX_PHOTOS;
   document.querySelectorAll('#newPhotoField .photo-in label').forEach(l => l.hidden = full);
   renderAiRow();
@@ -948,7 +997,7 @@ async function mergeRebuy(target, r, who) {
     cur.ins = [...(cur.ins || []), ...add.map(l => ({date, qty: l.quantity, cabinet: l.cabinet, shelf: l.shelf, note: '再買一次', by: who, at: t}))];
     if (fresh.length) { const list = photosOf(cur).slice(); for (const p of fresh) if (list.length < MAX_PHOTOS) list.push(p); setPhotos(cur, list); }
     cur.status = 'active'; delete cur.archivedAt; delete cur.archivedBy;
-    cur.updatedAt = t; cur.updatedBy = who; cur.revision = (cur.revision || 0) + 1;
+    touch(cur, who, t);
     return {before, after: before + n};
   }, x => `再買入庫 ${id} ${target.wineName}${target.vintage ? ' ' + target.vintage : ''}：+${n} 瓶（庫存 ${x.before} → ${x.after}）\n\n位置：${add.map(l => `${l.cabinet}/${l.shelf}+${l.quantity}`).join('、')}`);
   S.rebuy = null; S.pendKeep = [];
@@ -979,18 +1028,8 @@ async function saveStock() {
   if (!type) fail('請選擇出庫類型：自飲、聚餐、送禮或其他。');
   if (type === '其他' && !reason) fail('選「其他」時請填寫說明。');
   if (!Number.isInteger(qty) || qty < 1) fail('瓶數必須是 1 以上的整數。');
-  const res = await mutate(d => {
-    const cur = d.wines[id]; if (!cur) fail('這款酒已不存在。');
-    const l = (cur.locations || []).find(x => x.cabinet === cabinet && x.shelf === shelf);
-    if (!l || l.quantity <= 0) fail('這個位置已沒有庫存，沒有扣除任何瓶數。');
-    if (l.quantity < qty) fail(`此位置只剩 ${l.quantity} 瓶，沒有扣除任何瓶數。`);
-    const old = l.quantity; l.quantity -= qty;
-    const t = now(); cur.updatedAt = t; cur.updatedBy = who; cur.revision = (cur.revision || 0) + 1;
-    cur.outs = [...(cur.outs || []), {date, type, qty, cabinet, shelf, reason, by: who, at: t}];
-    const archived = cur.locations.every(x => !x.quantity);
-    if (archived) { cur.status = 'archived'; cur.archivedAt = t; cur.archivedBy = who; }
-    return {old, left: l.quantity, archived, name: cur.wineName};
-  }, x => `出庫 ${id} ${x.name}（${type}）：${cabinet}/${shelf} ${x.old}→${x.left}（−${qty}）${x.archived ? '，全部出清' : ''}\n\n日期：${date}\n類型：${type}${reason ? '\n說明：' + reason : ''}`);
+  const res = await mutate(d => takeOut(d, id, {cabinet, shelf, qty, out: {date, type, reason}}, who, '沒有扣除任何瓶數。'),
+    x => takeOutMsg(id, x, {type, cabinet, shelf, qty, date, note: reason}));
   $('stockModal').close();
   toast(res.archived ? `「${res.name}」已全部出庫，移入歷史酒單。` : `${fmtDate(date)} ${type}出庫 ${qty} 瓶，${cabinet} / ${shelf} 剩 ${res.left} 瓶。`);
 }
@@ -1002,7 +1041,7 @@ async function setPriority(id, n) {
   S.prioBusy = true; document.querySelectorAll('#drawer [data-prio]').forEach(b => b.disabled = true);
   try {
     await mutate(d => {
-      const cur = d.wines[id]; if (!cur) fail('這款酒已不存在。');
+      const cur = wineOf(d, id);
       const old = prioOf(cur);
       if (next) cur.priority = next; else delete cur.priority;
       return old;
@@ -1032,7 +1071,7 @@ async function saveMove() {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date))) fail('請填寫日期。');
   if (date > today()) fail('日期不能晚於今天。');
   const res = await mutate(d => {
-    const cur = d.wines[id]; if (!cur) fail('這款酒已不存在。');
+    const cur = wineOf(d, id);
     const locs = cur.locations || [];
     const src = locs.find(x => x.cabinet === from.cabinet && x.shelf === from.shelf);
     if (!src || src.quantity <= 0) fail('原位置已沒有庫存，請重新整理。');
@@ -1041,7 +1080,7 @@ async function saveMove() {
     let dst = locs.find(x => x.cabinet === to.cabinet && x.shelf === to.shelf);
     if (dst) dst.quantity += qty; else { dst = {cabinet: to.cabinet, shelf: to.shelf, quantity: qty}; locs.push(dst); }
     cur.locations = locs.filter(x => x.quantity > 0 || x === dst);
-    const t = now(); cur.updatedAt = t; cur.updatedBy = who; cur.revision = (cur.revision || 0) + 1;
+    const t = touch(cur, who);
     cur.moves = [...(cur.moves || []), {date, qty, from: {cabinet: from.cabinet, shelf: from.shelf}, to, note, by: who, at: t}];
     d.catalog = d.catalog || {cabinets: [], shelves: []};
     if (!d.catalog.cabinets.includes(to.cabinet)) d.catalog.cabinets.push(to.cabinet);
@@ -1260,7 +1299,7 @@ async function aiRecognize() {
 /* ---------- 待入櫃：先拍照，資料之後補 ---------- */
 function renderPendStrip() {
   const n = S.pendNew.length;
-  $('q_strip').innerHTML = S.pendNew.map((ph, i) => `<span class="nthumb"><img src="${URL.createObjectURL(ph.thumb)}" alt="照片 ${i + 1}">${i === 0 ? '<em>封面</em>' : ''}<button type="button" data-qrm="${i}" aria-label="移除這張">×</button></span>`).join('');
+  $('q_strip').innerHTML = S.pendNew.map((ph, i) => thumbHtml(URL.createObjectURL(ph.thumb), i, `data-qrm="${i}"`)).join('');
   $('q_add').querySelectorAll('label').forEach(l => l.hidden = n >= MAX_PHOTOS);
   $('q_save').hidden = !n; $('q_save').textContent = S.pendSaving ? '上傳中…' : `存入待入櫃（${n} 張）`;
 }
@@ -1291,10 +1330,7 @@ async function addPendPhotos(id, fileList) {
   S.pendAdding = id; renderPending();
   const up = [];
   try {
-    for (const f of files.slice(0, room)) {
-      let ph; try { ph = await compress(f); } catch (err) { showErr('pendErr', err?.user ? err.message : '有一張圖片無法讀取，請換一張。'); continue; }
-      up.push(await uploadPhoto(ph, 'pending'));
-    }
+    await compressEach(files.slice(0, room), 'pendErr', async ph => { up.push(await uploadPhoto(ph, 'pending')); });
     if (!up.length) return;
     const extra = await mutate(d => {
       const cur = (d.pending || []).find(x => x.id === id); if (!cur) fail('這瓶已被其他人加入酒櫃或刪除。');
@@ -1313,8 +1349,7 @@ async function removePendPhoto(id, path) {
     const gone = await mutate(d => {
       const cur = (d.pending || []).find(x => x.id === id); if (!cur) fail('這瓶已不存在。');
       if (cur.photos.length < 2) fail('至少要留一張照片；整瓶不要請按「刪除」。');
-      const i = cur.photos.findIndex(p => p.photo === path); if (i < 0) fail('這張照片已不存在。');
-      return cur.photos.splice(i, 1)[0];
+      return cur.photos.splice(photoIndex(cur.photos, path), 1)[0];
     }, '待入櫃：移除一張照片');
     deleteFiles([gone.photo, gone.thumb], '待入櫃').then(checkStorage);
     toast('已移除這張照片。');
@@ -1337,7 +1372,7 @@ function editPending(id) {
   $('pendModal').close(); openWineForm(null, p);
 }
 async function deletePending(btn) {
-  if (btn.dataset.confirm !== '1') { btn.dataset.confirm = '1'; btn.textContent = '確定刪除？'; setTimeout(() => { if (btn.isConnected) { btn.dataset.confirm = ''; btn.textContent = '刪除'; } }, 4000); return; }
+  if (armDelete(btn)) return;
   const id = btn.dataset.pdelq; btn.disabled = true; showErr('pendErr', '');
   try {
     const gone = await mutate(d => { const i = (d.pending || []).findIndex(x => x.id === id); if (i < 0) fail('這筆已不存在。'); return d.pending.splice(i, 1)[0]; }, g => `刪除待入櫃（${g.photos.length} 張照片）`);
@@ -1391,10 +1426,9 @@ async function addPhotos(fileList) {
       S.pBusy = `${done + 1}/${files.length}`; renderPhotoMgr();
       const up = await uploadPhoto(await compress(f), id);
       await mutate(d => {
-        const cur = d.wines[id]; if (!cur) fail('這款酒已不存在。');
+        const cur = wineOf(d, id);
         const list = photosOf(cur).slice(); if (list.length >= MAX_PHOTOS) fail(`最多 ${MAX_PHOTOS} 張照片。`);
-        list.push({photo: up.photo, thumb: up.thumb}); setPhotos(cur, list);
-        cur.updatedAt = now(); cur.updatedBy = who; cur.revision = (cur.revision || 0) + 1;
+        list.push({photo: up.photo, thumb: up.thumb}); setPhotos(cur, list); touch(cur, who);
         return list.length;
       }, n => `新增照片 ${id} ${w.wineName}（${n}/${MAX_PHOTOS}）`);
       done++;
@@ -1480,20 +1514,20 @@ async function coverPhoto(path) {
   const id = S.photo, w = byId(id);
   try {
     await mutate(d => {
-      const cur = d.wines[id]; const list = photosOf(cur).slice(); const i = list.findIndex(p => p.photo === path); if (i < 0) fail('找不到這張照片，請重新整理。');
-      list.unshift(...list.splice(i, 1)); setPhotos(cur, list);
+      const cur = wineOf(d, id), list = photosOf(cur).slice();
+      list.unshift(...list.splice(photoIndex(list, path, '找不到這張照片，請重新整理。'), 1)); setPhotos(cur, list);
     }, `更換封面照片 ${id} ${w.wineName}`, {quiet: true});
     toast('已設為封面。');
   } catch (e) { showErr('photoErr', msgOf(e)); }
   renderPhotoMgr();
 }
 async function deletePhoto(btn) {
-  if (btn.dataset.confirm !== '1') { btn.dataset.confirm = '1'; btn.textContent = '確定刪除？'; setTimeout(() => { if (btn.isConnected) { btn.dataset.confirm = ''; btn.textContent = '刪除'; } }, 4000); return; }
+  if (armDelete(btn)) return;
   const id = S.photo, w = byId(id), path = btn.dataset.pdel, who = S.session.label;
   try {
     const gone = await mutate(d => {
-      const cur = d.wines[id]; const list = photosOf(cur).slice(); const i = list.findIndex(p => p.photo === path); if (i < 0) fail('這張照片已不存在。');
-      const [rm] = list.splice(i, 1); setPhotos(cur, list); cur.updatedAt = now(); cur.updatedBy = who; cur.revision = (cur.revision || 0) + 1;
+      const cur = wineOf(d, id), list = photosOf(cur).slice();
+      const [rm] = list.splice(photoIndex(list, path), 1); setPhotos(cur, list); touch(cur, who);
       return rm;
     }, `刪除照片 ${id} ${w.wineName}`);
     toast('已刪除照片。');
@@ -1513,8 +1547,8 @@ async function checkStorage() {
     if (el) {
       el.hidden = false; el.classList.toggle('warn', pct >= .8);
       el.querySelector('.fill').style.width = Math.min(100, pct * 100).toFixed(1) + '%';
-      el.querySelector('.txt').textContent = `儲存空間 ${mb < 10 ? mb.toFixed(1) : Math.round(mb)}／${STORAGE_LIMIT_MB} MB${pct >= .8 ? '　快滿了，請少換照片' : ''}`;
-      const sub = $('storageSub'); if (sub) sub.textContent = `已用 ${mb < 10 ? mb.toFixed(1) : Math.round(mb)}／${STORAGE_LIMIT_MB} MB${pct >= .8 ? '・快滿了' : ''}`;
+      el.querySelector('.txt').textContent = `儲存空間 ${fmtMB(mb)}／${STORAGE_LIMIT_MB} MB${pct >= .8 ? '　快滿了，請少換照片' : ''}`;
+      const sub = $('storageSub'); if (sub) sub.textContent = `已用 ${fmtMB(mb)}／${STORAGE_LIMIT_MB} MB${pct >= .8 ? '・快滿了' : ''}`;
     }
     return S.storage;
   } catch { return null; }
@@ -1877,18 +1911,8 @@ async function saveJournal() {
   const stamp = rating ? {rating} : {};
   if (src === 'cellar' && f.wineId) {
     const id = f.wineId, cabinet = f.cab, shelf = f.shelf;
-    const res = await mutate(d => {
-      const cur = d.wines[id]; if (!cur) fail('這款酒已不存在。');
-      const l = (cur.locations || []).find(x => x.cabinet === cabinet && x.shelf === shelf);
-      if (!l || l.quantity <= 0) fail('這個位置已沒有庫存，請重新點選。');
-      if (l.quantity < qty) fail(`這個位置只剩 ${l.quantity} 瓶。`);
-      const old = l.quantity; l.quantity -= qty;
-      const t = now(); cur.updatedAt = t; cur.updatedBy = me; cur.revision = (cur.revision || 0) + 1;
-      cur.outs = [...(cur.outs || []), {date, type, qty, cabinet, shelf, reason: note, ...stamp, by: me, at: t}];
-      const archived = cur.locations.every(x => !x.quantity);
-      if (archived) { cur.status = 'archived'; cur.archivedAt = t; cur.archivedBy = me; }
-      return {old, left: l.quantity, archived, name: cur.wineName};
-    }, x => `出庫 ${id} ${x.name}（${type}）：${cabinet}/${shelf} ${x.old}→${x.left}（−${qty}）${x.archived ? '，全部出清' : ''}\n\n日期：${date}\n類型：${type}${note ? '\n說明：' + note : ''}`);
+    const res = await mutate(d => takeOut(d, id, {cabinet, shelf, qty, out: {date, type, reason: note, ...stamp}}, me, '請重新點選。'),
+      x => takeOutMsg(id, x, {type, cabinet, shelf, qty, date, note}));
     toast(res.archived ? `已紀錄，「${res.name}」已全部喝完。` : `已紀錄，${cabinet} · ${shelf} 還有 ${res.left} 瓶。`);
   } else if (src === 'cellar') {
     const name = $('j_mname').value.trim(), vintage = $('j_mvintage').value.trim();
@@ -1933,7 +1957,7 @@ async function saveJournal() {
   $('journalModal').close(); renderHistory();
 }
 async function deleteJournal(btn) {
-  if (btn.dataset.confirm !== '1') { btn.dataset.confirm = '1'; btn.textContent = '確定刪除？'; setTimeout(() => { if (btn.isConnected) { btn.dataset.confirm = ''; btn.textContent = '刪除'; } }, 4000); return; }
+  if (armDelete(btn)) return;
   const id = btn.dataset.jdel, j = (S.data.journal || []).find(x => x.id === id); if (!j) return;
   try {
     await mutate(d => { d.journal = (d.journal || []).filter(x => x.id !== id); }, `刪除飲酒紀錄 ${j.name}\n\n日期：${j.date}`);
