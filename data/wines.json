@@ -150,10 +150,10 @@
    "origin": "United States",
    "photo": "images/W005-1794534506350.jpg",
    "referencePrice": 5900,
-   "revision": 2,
+   "revision": 3,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-11-13T01:48:35.712Z",
+   "updatedAt": "2026-11-13T01:48:44.579Z",
    "updatedBy": "芝琦",
    "vintage": "2017",
    "volume": "750ml",
@@ -163,6 +163,10 @@
     {
      "photo": "images/W005-1794534506350.jpg",
      "thumb": "images/W005-1794534506350-t.jpg"
+    },
+    {
+     "photo": "images/W005-1794534518483.jpg",
+     "thumb": "images/W005-1794534518483-t.jpg"
     }
    ],
    "thumb": "images/W005-1794534506350-t.jpg"
@@ -1776,8 +1780,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 99,
- "updatedAt": "2026-11-13T01:48:35.712Z",
+ "rev": 100,
+ "updatedAt": "2026-11-13T01:48:44.579Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
