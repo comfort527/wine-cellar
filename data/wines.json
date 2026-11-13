@@ -1235,27 +1235,28 @@
    "locations": [
     {
      "cabinet": "8樓右LB櫃",
-     "quantity": 11,
-     "shelf": "第5層"
+     "shelf": "第5層",
+     "quantity": 9
     },
     {
      "cabinet": "8樓右LB櫃",
-     "quantity": 2,
-     "shelf": "第7層"
+     "shelf": "第7層",
+     "quantity": 2
     }
    ],
    "origin": "Italy",
    "photo": "",
    "referencePrice": 1150,
-   "revision": 1,
+   "revision": 2,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-09-30T04:31:40.428Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-13T01:49:38.670Z",
+   "updatedBy": "芝琦",
    "vintage": "2021",
    "volume": "750ml",
    "wineName": "Fonterutoli Chianti Classico DOCG",
-   "wineryRegion": "Mazzei/Fonterutoli"
+   "wineryRegion": "Mazzei/Fonterutoli",
+   "color": "red"
   },
   "W044": {
    "createdAt": "",
@@ -1787,8 +1788,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 101,
- "updatedAt": "2026-11-13T01:49:16.336Z",
+ "rev": 102,
+ "updatedAt": "2026-11-13T01:49:38.670Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
