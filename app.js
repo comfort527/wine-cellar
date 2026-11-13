@@ -17,9 +17,9 @@ const enc = new TextEncoder(), dec = new TextDecoder();
 const FIELDS = [['wineName','酒名'],['wineryRegion','酒莊／產區'],['vintage','年份'],['entryDate','入庫日期'],['volume','容量'],['source','來源'],['referencePrice','參考價格'],['origin','產地'],['drinkWindow','適飲期'],['grapeNotes','葡萄品種／備註']];
 
 const S = {
-  data: null, sha: null, etag: null, keys: null, keysSha: null, session: null,
+  data: null, etag: null, keys: null, keysSha: null, session: null,
   filter: null, search: '', view: 'list', 
-  editing: null, stock: null, photo: null, photoBlob: null, newPhotoBlob: null, localPhotos: new Map(),
+  editing: null, stock: null, photo: null, localPhotos: new Map(),
   sort: 'loc', drawer: null, newPhotos: [], pendKeep: [], pendNew: [], jt: 'cal', js: {q: '', type: '', when: 'all', hi: false}, jm: {q: '', sort: 'freq', group: 'all'},
   busy: 0, lastPoll: 0, syncedAt: null, rawFallback: false, auditPage: 1, auditWine: '', audit: []
 };
@@ -40,7 +40,7 @@ const TABLET_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600p
 const DESK_MQ = '(min-width:1181px) and (pointer:fine), (min-width:1401px)';
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261113k';
+const APP_VER = '20261113l';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -178,7 +178,7 @@ async function loadData(force) {
   if (res === 'same') return false;
   const json = res ? res.json : {schema: 1, rev: 0, catalog: {cabinets: [], shelves: []}, wines: {}};
   if (S.data && (json.rev || 0) < (S.data.rev || 0)) return false; // GitHub 偶爾回舊版本，忽略
-  S.data = json; S.sha = res?.sha || null; S.etag = res?.etag || null;
+  S.data = json; S.etag = res?.etag || null;
   return true;
 }
 async function loadKeys() {
@@ -203,7 +203,7 @@ async function mutate(fn, message, {quiet = false} = {}) {
       draft.rev = (base.rev || 0) + 1; if (!quiet) draft.updatedAt = now();
       const title = typeof message === 'function' ? message(result, draft) : message;
       const r = await putFile(CFG.dataPath, jsonBytes(draft), cur?.sha, `${title}\n\n操作者：${S.session.label}`);
-      if (r.ok) { S.data = draft; S.sha = r.sha; S.etag = null; S.syncedAt = now(); render(); return result; }
+      if (r.ok) { S.data = draft; S.etag = null; S.syncedAt = now(); render(); return result; }
       await sleep(500 * (i + 1));
     }
     fail('同時有其他人在修改，請再試一次。');
@@ -498,7 +498,7 @@ function galleryHtml(w) {
 }
 function renderDrawer() {
   const w = byId(S.drawer); if (!w) { closeDrawer(); return; }
-  const p = photoUrl(w), ed = canEdit(), t = total(w), archived = w.status === 'archived';
+  const ed = canEdit(), t = total(w), archived = w.status === 'archived';
   const facts = `<div><dt>紅酒／白酒</dt><dd>${colorName(w)}</dd></div>` + [['wineryRegion', '酒莊／產區'], ['origin', '產地'], ['volume', '容量'], ['source', '來源'], ['referencePrice', '參考價格'], ['entryDate', '入庫日期'], ['drinkWindow', '適飲期']]
     .map(([k, l]) => `<div><dt>${l}</dt><dd>${k === 'referencePrice' ? fmtPrice(w[k]) : esc(w[k] || '—')}</dd></div>`).join('');
   const locs = (w.locations || []).map(l => `<div class="dw-loc ${S.filter?.cabinet === l.cabinet && (!S.filter.shelf || S.filter.shelf === l.shelf) ? 'here' : ''}"><span class="where">${esc(l.cabinet)} <small>· ${esc(l.shelf)}</small></span><span class="n">${l.quantity}</span></div>`).join('');
@@ -1322,7 +1322,7 @@ function renderPending() {
 async function addPendPhotos(id, fileList) {
   const files = [...fileList], item = (S.data?.pending || []).find(x => x.id === id);
   if (!item || !files.length || S.pendAdding) return;
-  const room = MAX_PHOTOS - item.photos.length, who = S.session.label;
+  const room = MAX_PHOTOS - item.photos.length;
   showErr('pendErr', files.length > room ? `每瓶最多 ${MAX_PHOTOS} 張，只加入前 ${room} 張。` : '');
   if (room <= 0) return;
   S.pendAdding = id; renderPending();
