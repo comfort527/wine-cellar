@@ -1245,18 +1245,25 @@
     }
    ],
    "origin": "Italy",
-   "photo": "",
+   "photo": "images/W043-1794534586648.jpg",
    "referencePrice": 1150,
-   "revision": 2,
+   "revision": 3,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-11-13T01:49:38.670Z",
+   "updatedAt": "2026-11-13T01:49:52.897Z",
    "updatedBy": "芝琦",
    "vintage": "2021",
    "volume": "750ml",
    "wineName": "Fonterutoli Chianti Classico DOCG",
    "wineryRegion": "Mazzei/Fonterutoli",
-   "color": "red"
+   "color": "red",
+   "photos": [
+    {
+     "photo": "images/W043-1794534586648.jpg",
+     "thumb": "images/W043-1794534586648-t.jpg"
+    }
+   ],
+   "thumb": "images/W043-1794534586648-t.jpg"
   },
   "W044": {
    "createdAt": "",
@@ -1788,8 +1795,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 102,
- "updatedAt": "2026-11-13T01:49:38.670Z",
+ "rev": 103,
+ "updatedAt": "2026-11-13T01:49:52.897Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
