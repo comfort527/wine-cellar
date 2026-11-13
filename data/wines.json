@@ -148,17 +148,24 @@
     }
    ],
    "origin": "United States",
-   "photo": "",
+   "photo": "images/W005-1794534506350.jpg",
    "referencePrice": 5900,
-   "revision": 1,
+   "revision": 2,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-09-29T13:30:54.552Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-13T01:48:35.712Z",
+   "updatedBy": "芝琦",
    "vintage": "2017",
    "volume": "750ml",
    "wineName": "Caymus Vineyards Special Selection",
-   "wineryRegion": "Caymus Vineyards/Napa Valley"
+   "wineryRegion": "Caymus Vineyards/Napa Valley",
+   "photos": [
+    {
+     "photo": "images/W005-1794534506350.jpg",
+     "thumb": "images/W005-1794534506350-t.jpg"
+    }
+   ],
+   "thumb": "images/W005-1794534506350-t.jpg"
   },
   "W006": {
    "createdAt": "",
@@ -1769,8 +1776,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 98,
- "updatedAt": "2026-11-10T15:37:03.895Z",
+ "rev": 99,
+ "updatedAt": "2026-11-13T01:48:35.712Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
