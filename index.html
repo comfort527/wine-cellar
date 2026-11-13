@@ -24,7 +24,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261113q" id="mainCss">
+<link rel="stylesheet" href="style.css?v=20261113r" id="mainCss">
 </head>
 <body>
 <header class="bar">
@@ -35,10 +35,10 @@
   </a>
   <span class="sync" id="sync"><span class="dot"></span><span id="syncText">讀取中</span></span>
   <nav class="tnav" id="tnav" aria-label="主要功能">
-   <button type="button" data-nav="home" class="on">🍷 酒窖</button>
-   <button type="button" data-nav="journal">📖 飲酒日誌</button>
-   <button type="button" data-nav="pend" id="tnPend" hidden>📷 待入櫃 <span class="bdot" id="tnPendN" hidden></span></button>
-   <button type="button" data-nav="admin" id="tnAdmin" hidden>⚙️ 管理</button>
+   <button type="button" data-nav="home" class="on"><i data-icon="home"></i>酒窖</button>
+   <button type="button" data-nav="journal"><i data-icon="journal"></i>飲酒日誌</button>
+   <button type="button" data-nav="pend" id="tnPend" hidden><i data-icon="pend"></i>待入櫃 <span class="bdot" id="tnPendN" hidden></span></button>
+   <button type="button" data-nav="admin" id="tnAdmin" hidden><i data-icon="admin"></i>管理</button>
    <button type="button" data-nav="add" class="tadd" id="tnAdd" hidden>＋ 新增紅酒</button>
   </nav>
   <div class="who">
@@ -85,12 +85,12 @@
 
 <button class="fab" id="fab" hidden aria-label="新增酒款">＋</button>
 <nav class="bnav" id="bnav" aria-label="主要功能">
- <button type="button" data-nav="home" class="on"><i aria-hidden="true">🍷</i>酒窖</button>
- <button type="button" data-nav="journal"><i aria-hidden="true">📖</i><span class="bn-pre">飲酒</span>日誌</button>
- <button type="button" data-nav="add" class="add" id="bnAdd" hidden><i aria-hidden="true">＋</i>新增</button>
- <button type="button" data-nav="pend" id="bnPend" hidden><i aria-hidden="true">📷</i><span class="bdot" id="bnPendN" hidden></span>待入櫃</button>
- <button type="button" data-nav="admin" id="bnAdmin" hidden><i aria-hidden="true">⚙️</i>管理</button>
- <button type="button" data-nav="login" id="bnLogin"><i aria-hidden="true">🔑</i><span id="bnLoginT">登入</span></button>
+ <button type="button" data-nav="home" class="on"><i data-icon="home"></i>酒窖</button>
+ <button type="button" data-nav="journal"><i data-icon="journal"></i><span><span class="bn-pre">飲酒</span>日誌</span></button>
+ <button type="button" data-nav="add" class="add" id="bnAdd" hidden><i data-icon="add"></i>新增</button>
+ <button type="button" data-nav="pend" id="bnPend" hidden><i data-icon="pend"></i><span class="bdot" id="bnPendN" hidden></span>待入櫃</button>
+ <button type="button" data-nav="admin" id="bnAdmin" hidden><i data-icon="admin"></i>管理</button>
+ <button type="button" data-nav="login" id="bnLogin"><i data-icon="keys"></i><span id="bnLoginT">登入</span></button>
 </nav>
 
 <dialog class="small" id="originModal" aria-labelledby="originTitle" data-title="依產地查看">
@@ -278,21 +278,21 @@
 <div class="db adm" id="admBody" data-view="menu">
  <nav class="adm-menu" id="admMenu" aria-label="管理選單">
   <div class="adm-grp"><h5>查資料</h5><div class="menu">
-   <button type="button" class="mi" data-tab="lib" data-ic="🔍" data-t="搜尋酒款" data-s="所有登錄過的酒・飲用紀錄・再買一次"></button>
-   <button type="button" class="mi" data-tab="outs" data-ic="🍷" data-t="出庫紀錄" data-s="自飲、聚餐、送禮與已出清的酒"></button>
-   <button type="button" class="mi" data-tab="audit" data-ic="🕘" data-t="異動紀錄" data-s="誰在什麼時候改了什麼"></button>
+   <button type="button" class="mi" data-tab="lib" data-ic="lib" data-t="搜尋酒款" data-s="所有登錄過的酒・飲用紀錄・再買一次"></button>
+   <button type="button" class="mi" data-tab="outs" data-ic="outs" data-t="出庫紀錄" data-s="自飲、聚餐、送禮與已出清的酒"></button>
+   <button type="button" class="mi" data-tab="audit" data-ic="audit" data-t="異動紀錄" data-s="誰在什麼時候改了什麼"></button>
   </div></div>
   <div class="adm-grp"><h5>設定</h5><div class="menu">
-   <button type="button" class="mi" data-tab="loc" data-ic="🗄️" data-t="櫃位／層位" data-s="名稱清單・各層還可放幾瓶"></button>
-   <button type="button" class="mi" data-tab="ai" data-ic="✨" data-t="智慧辨識" data-s="你的 AI 金鑰（30 分鐘後自動清除）"></button>
-   <button type="button" class="mi" data-tab="keys" id="keysTab" data-ic="🔑" data-t="裝置密碼" data-s="新增／刪除裝置・更換 GitHub 權杖"></button>
+   <button type="button" class="mi" data-tab="loc" data-ic="loc" data-t="櫃位／層位" data-s="名稱清單・各層還可放幾瓶"></button>
+   <button type="button" class="mi" data-tab="ai" data-ic="ai" data-t="智慧辨識" data-s="你的 AI 金鑰（30 分鐘後自動清除）"></button>
+   <button type="button" class="mi" data-tab="keys" id="keysTab" data-ic="keys" data-t="裝置密碼" data-s="新增／刪除裝置・更換 GitHub 權杖"></button>
   </div></div>
   <div class="adm-grp"><h5>資料</h5><div class="menu">
-   <button type="button" class="mi" data-tab="export" data-ic="⬇️" data-t="匯出 CSV" data-s="下載全部酒款給 Excel 使用"></button>
-   <button type="button" class="mi" data-tab="storage" data-ic="💾" data-t="儲存空間" data-s="GitHub repo 已用空間" data-sub-id="storageSub"></button>
+   <button type="button" class="mi" data-tab="export" data-ic="export" data-t="匯出 CSV" data-s="下載全部酒款給 Excel 使用"></button>
+   <button type="button" class="mi" data-tab="storage" data-ic="storage" data-t="儲存空間" data-s="GitHub repo 已用空間" data-sub-id="storageSub"></button>
   </div></div>
   <div class="adm-grp adm-phone"><h5>帳號</h5><div class="menu">
-   <button type="button" class="mi" data-act="logout" data-ic="🚪" data-t="登出" data-s="登出這台裝置" data-sub-id="admWho"></button>
+   <button type="button" class="mi" data-act="logout" data-ic="logout" data-t="登出" data-s="登出這台裝置" data-sub-id="admWho"></button>
   </div></div>
  </nav>
  <div class="adm-main" id="admMain">
@@ -370,7 +370,7 @@
 
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="config.js?v=20261113q"></script>
-<script src="app.js?v=20261113q"></script>
+<script src="config.js?v=20261113r"></script>
+<script src="app.js?v=20261113r"></script>
 </body>
 </html>

@@ -40,7 +40,7 @@ const TABLET_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600p
 const DESK_MQ = '(min-width:1181px) and (pointer:fine), (min-width:1401px)';
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261113q';
+const APP_VER = '20261113r';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -278,6 +278,24 @@ function logout(silent) {
 }
 
 /* ---------- 重複的 HTML 結構：在 HTML 只寫內容，這裡展開成完整結構（啟動前先執行） ---------- */
+// 線條圖示（24×24，筆畫用目前文字顏色）。底部列、上方列、管理選單共用
+const ICONS = {
+  home: '<path d="M10 2h4v5c0 1.6 3 2.6 3 6v8a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-8c0-3.4 3-4.4 3-6V2z"/><path d="M7 14h10"/>',
+  journal: '<path d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8 3v18M12 8h4M12 12h4"/>',
+  add: '<path d="M12 5v14M5 12h14"/>',
+  pend: '<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/>',
+  admin: '<path d="M4 7h9M18 7h2M4 17h2M11 17h9"/><circle cx="15.5" cy="7" r="2.3"/><circle cx="8.5" cy="17" r="2.3"/>',
+  lib: '<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
+  outs: '<path d="M7 3h10v4a5 5 0 0 1-10 0V3z"/><path d="M12 12v8M8 21h8"/>',
+  audit: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  loc: '<rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M5 9h14M5 15h14"/>',
+  ai: '<path d="M11 3l1.9 5.1L18 10l-5.1 1.9L11 17l-1.9-5.1L4 10l5.1-1.9z"/><path d="M19 15v5M16.5 17.5h5"/>',
+  keys: '<circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l3 3M13.5 9.5l2 2"/>',
+  export: '<path d="M4 14v5a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5M12 4v11M8 11l4 4 4-4"/>',
+  storage: '<path d="M5 6c0-1.7 3.1-3 7-3s7 1.3 7 3-3.1 3-7 3-7-1.3-7-3z"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',
+  logout: '<path d="M10 4H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4M15 8l4 4-4 4M19 12H9"/>',
+};
+const icon = name => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ''}</svg>`;
 function expandTemplates(root = document) {
   const take = (el, ...names) => names.map(n => { const v = el.getAttribute(n); el.removeAttribute(n); return v; });
   // 對話框標題列：<dialog aria-labelledby="xTitle" data-title="標題">
@@ -295,10 +313,12 @@ function expandTemplates(root = document) {
     const [id, ph, label, clear, clearLabel] = take(el, 'data-input', 'data-ph', 'data-label', 'data-clear', 'data-clear-label');
     el.innerHTML = `<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="6"/><path d="m14 14 4 4"/></svg><input id="${id}" type="search" placeholder="${ph}" aria-label="${label}"><button type="button" id="${clear}" aria-label="${clearLabel}">×</button>`;
   }
+  // 圖示：<i data-icon="home"></i>
+  for (const el of root.querySelectorAll('i[data-icon]')) { const [name] = take(el, 'data-icon'); el.setAttribute('aria-hidden', 'true'); el.innerHTML = icon(name); }
   // 管理選單項目：圖示、標題、說明
   for (const el of root.querySelectorAll('.mi[data-t]')) {
     const [ic, t, sub, subId] = take(el, 'data-ic', 'data-t', 'data-s', 'data-sub-id');
-    el.innerHTML = `<span class="ic">${ic}</span><span class="mt"><b>${t}</b><small${subId ? ` id="${subId}"` : ''}>${sub}</small></span><span class="go">›</span>`;
+    el.innerHTML = `<span class="ic">${icon(ic)}</span><span class="mt"><b>${t}</b><small${subId ? ` id="${subId}"` : ''}>${sub}</small></span><span class="go">›</span>`;
   }
 }
 
@@ -517,7 +537,7 @@ function cardHtml(w) {
   if (ps.length > 1) media = `<span class="slides">${ps.map((p, i) => `<img class="ph" src="${esc(fileUrl(p.thumb || p.photo))}" alt="${esc(w.wineName)} ${i + 1}" loading="lazy" draggable="false">`).join('')}</span>${sdots(ps.length)}`;
   else if (ps.length) media = `<img class="ph" src="${esc(thumbUrl(w))}" alt="${esc(w.wineName)}" loading="lazy">`;
   else media = `<span class="ph">${esc(w.vintage || 'NV')}</span>`;
-  return `<div class="card ${isWhite(w) ? 'white' : 'red'}" role="button" tabindex="0" data-open="${esc(w.wineId)}"><span class="phbox ${ps.length ? 'photo' : ''}">${media}${pdots(prioOf(w))}</span><span class="cb"><b>${esc(w.wineName)}</b><span class="prod">${esc(w.wineryRegion || '')}</span>${(() => { const t = total(w), h = hereQty(w); return h !== null && h !== t ? `<span class="here">${hereWord()} <strong class="hn">${h}</strong> 瓶</span><span class="tot">${esc(w.vintage || 'NV')}・共 ${t} 瓶</span>` : `<span>${esc(w.vintage || 'NV')} · ${t} 瓶</span>`; })()}</span></div>`;
+  return `<div class="card ${isWhite(w) ? 'white' : 'red'}" role="button" tabindex="0" data-open="${esc(w.wineId)}"><span class="phbox ${ps.length ? 'photo' : ''}">${media}${prioOf(w) ? pdots(prioOf(w)) : ''}</span><span class="cb"><b>${esc(w.wineName)}</b><span class="prod">${esc(w.wineryRegion || '')}</span>${(() => { const t = total(w), h = hereQty(w); return h !== null && h !== t ? `<span class="here">${hereWord()} <strong class="hn">${h}</strong> 瓶</span><span class="tot">${esc(w.vintage || 'NV')}・共 ${t} 瓶</span>` : `<span>${esc(w.vintage || 'NV')} · ${t} 瓶</span>`; })()}</span></div>`;
 }
 
 /* ---------- 詳細資料抽屜 ---------- */
