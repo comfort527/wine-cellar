@@ -24,7 +24,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261113a" id="mainCss">
+<link rel="stylesheet" href="style.css?v=20261113b" id="mainCss">
 </head>
 <body>
 <header class="bar">
@@ -83,7 +83,7 @@
 
 <dialog id="journalView" class="wide" aria-labelledby="jvTitle"><div class="dh"><h2 id="jvTitle">飲酒日誌</h2><button data-close aria-label="關閉">×</button></div>
 <div class="db" id="tab-hist">
-  <div class="jtabs" id="jTabs" role="tablist"><button type="button" data-jt="cal" class="on" role="tab" aria-selected="true">日曆</button><button type="button" data-jt="search" role="tab" aria-selected="false">搜尋</button><button type="button" data-jt="mem" role="tab" aria-selected="false">回憶</button></div>
+  <div class="jtabs" id="jTabs" role="tablist"><button type="button" data-jt="cal" class="on" role="tab" aria-selected="true">日曆</button><button type="button" data-jt="search" role="tab" aria-selected="false">回憶</button></div>
   <div class="jr" id="jtCal">
    <div class="jcal">
     <div class="mhead"><button type="button" id="jPrev" aria-label="上個月">‹</button><h3 id="jTitle"></h3><button type="button" id="jNext" aria-label="下個月">›</button></div>
@@ -104,15 +104,8 @@
    <p class="rsum" id="js_sum"></p>
    <div id="js_list"></div>
   </section>
-  <section id="jtMem" hidden>
-   <label class="search"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="6"/><path d="m14 14 4 4"/></svg><input id="jm_q" type="search" placeholder="搜酒名、酒莊、年份" aria-label="搜尋回憶"><button type="button" id="jm_clear" aria-label="清除">×</button></label>
-   <div class="chips2" id="jm_sort"><button type="button" data-v="freq" class="on">最常喝</button><button type="button" data-v="recent">最近喝</button><button type="button" data-v="rating">評分高</button><button type="button" data-v="name">名稱</button></div>
-   <div class="chips2" id="jm_group"><button type="button" data-v="all" class="on">全部</button><button type="button" data-v="have">酒窖還有</button><button type="button" data-v="gone">已喝完／非酒窖</button></div>
-   <p class="rsum" id="jm_sum"></p>
-   <div id="jm_list"></div>
-  </section>
 </div></dialog>
-<dialog class="small" id="memModal" aria-labelledby="memTitle"><div class="dh"><h2 id="memTitle">回憶</h2><button data-close aria-label="關閉">×</button></div><div class="db" id="memBody"></div></dialog>
+<dialog class="small" id="memModal" aria-labelledby="memTitle"><div class="dh"><h2 id="memTitle">酒款</h2><button data-close aria-label="關閉">×</button></div><div class="db" id="memBody"></div></dialog>
 
 <dialog class="drawer" id="drawer" aria-labelledby="dwName" tabindex="-1"><div id="drawerBody"></div></dialog>
 
@@ -268,7 +261,7 @@
 
 <dialog id="adminModal" aria-labelledby="adminTitle"><div class="dh"><h2 id="adminTitle">管理</h2><button data-close aria-label="關閉">×</button></div>
 <div class="db">
- <div class="tabs"><button data-tab="audit" class="on">異動紀錄</button><button data-tab="outs">出庫紀錄</button><button data-tab="loc">櫃位／層位</button><button data-tab="ai">智慧辨識</button><button data-tab="keys" id="keysTab">裝置密碼</button></div>
+ <div class="tabs"><button data-tab="audit" class="on">異動紀錄</button><button data-tab="outs">出庫紀錄</button><button data-tab="lib">搜尋</button><button data-tab="loc">櫃位／層位</button><button data-tab="ai">智慧辨識</button><button data-tab="keys" id="keysTab">裝置密碼</button></div>
  <section id="tab-audit"><p class="hint" style="margin-top:0" id="auditHint">每次異動都是一筆 GitHub commit，由新到舊。</p><div class="audit" id="auditList"></div><button class="small" id="moreAudit" hidden style="margin-top:10px">載入更多</button></section>
  <section id="tab-outs" hidden>
   <p class="hint" style="margin-top:0">每一次出庫（含送禮）都記在這裡，由新到舊。點一筆可以查看那款酒。</p>
@@ -284,6 +277,13 @@
   <p class="hint" style="margin-top:0">庫存全部出完的酒。再入手同一款酒時，可以按「編輯」補上瓶數。</p>
   <div class="hist" id="histGone"></div>
  </section>
+ <section id="tab-lib" hidden>
+   <label class="search"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="6"/><path d="m14 14 4 4"/></svg><input id="jm_q" type="search" placeholder="搜酒名、酒莊、年份" aria-label="搜尋酒款"><button type="button" id="jm_clear" aria-label="清除">×</button></label>
+   <div class="chips2" id="jm_sort"><button type="button" data-v="freq" class="on">最常喝</button><button type="button" data-v="recent">最近喝</button><button type="button" data-v="rating">評分高</button><button type="button" data-v="name">名稱</button></div>
+   <div class="chips2" id="jm_group"><button type="button" data-v="all" class="on">全部</button><button type="button" data-v="have">酒窖還有</button><button type="button" data-v="gone">已喝完／非酒窖</button></div>
+   <p class="rsum" id="jm_sum"></p>
+   <div id="jm_list"></div>
+  </section>
  <section id="tab-loc" hidden>
   <form id="capForm" class="capform" novalidate>
    <p class="hint" style="margin-top:0"><b>各層還可放幾瓶</b>：看著酒櫃數空位，填好後按「儲存空位」。之後出庫、入庫、移動，空位會自動更新。留空的層不顯示空位。</p>
@@ -331,7 +331,7 @@
 
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="config.js?v=20261113a"></script>
-<script src="app.js?v=20261113a"></script>
+<script src="config.js?v=20261113b"></script>
+<script src="app.js?v=20261113b"></script>
 </body>
 </html>

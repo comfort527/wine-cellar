@@ -36,7 +36,7 @@ function fail(m) { const e = new Error(m); e.user = true; throw e; }
 function msgOf(e) { return e?.user ? e.message : '操作未完成，請稍後再試。'; }
 const canEdit = () => !!S.session;
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261113a';
+const APP_VER = '20261113b';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -281,6 +281,8 @@ function render() {
   renderList(list);
   if ($('drawer').open && S.drawer) renderDrawer();
   if ($('journalView').open || ($('adminModal').open && !$('tab-outs').hidden)) renderHistory();
+  if ($('adminModal').open && !$('tab-lib').hidden) renderMem();
+  if ($('memModal').open) renderMemDetail();
   renderPending();
 }
 function renderMap(list) {
@@ -448,8 +450,8 @@ function wire() {
   const chipGroup = (id, fn) => $(id).addEventListener('click', e => { const b = e.target.closest('button'); if (b) { fn(b); renderJTab(); } });
   chipGroup('js_type', b => { S.js.type = b.dataset.v; });
   chipGroup('js_when', b => { if (b.hasAttribute('data-hi')) S.js.hi = !S.js.hi; else S.js.when = b.dataset.v; });
-  chipGroup('jm_sort', b => { S.jm.sort = b.dataset.v; });
-  chipGroup('jm_group', b => { S.jm.group = b.dataset.v; });
+  chipGroup('jm_sort', b => { S.jm.sort = b.dataset.v; renderMem(); });
+  chipGroup('jm_group', b => { S.jm.group = b.dataset.v; renderMem(); });
   $('js_q').addEventListener('input', e => { S.js.q = e.target.value; renderJSearch(); });
   $('jm_q').addEventListener('input', e => { S.jm.q = e.target.value; renderMem(); });
   $('js_clear').addEventListener('click', () => { $('js_q').value = S.js.q = ''; renderJSearch(); });
@@ -622,12 +624,13 @@ async function submit(formId, errId, fn) {
 }
 function switchTab(name, noLoad) {
   document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
-  for (const t of ['audit', 'outs', 'loc', 'ai', 'keys']) $('tab-' + t).hidden = t !== name;
+  for (const t of ['audit', 'outs', 'lib', 'loc', 'ai', 'keys']) $('tab-' + t).hidden = t !== name;
   $('keysTab').hidden = !isAdmin();
   if (name === 'loc') renderAdmin();
   if (name === 'outs') renderHistory();
   if (name === 'keys') renderSlots();
   if (name === 'ai') renderAiSettings();
+  if (name === 'lib') renderMem();
   if (name === 'audit' && !noLoad) loadAudit('', 1);
 }
 
@@ -1502,7 +1505,7 @@ function renderAdmin() {
 }
 const OUT_TYPES = ['自飲', '聚餐', '送禮', '其他'];
 
-/* ---------- 飲酒日誌：搜尋與「回憶」（所有登錄過的酒、飲用紀錄、再買一次） ---------- */
+/* ---------- 飲酒日誌「回憶」（依場合找飲用紀錄）與 管理「搜尋」（所有登錄過的酒、飲用紀錄、再買一次） ---------- */
 const OCC_CLASS = {'自飲': 'self', '聚餐': 'dine', '送禮': 'gift', '其他': 'other'};
 const occBadge = e => e.kind === 'ext' ? '<span class="occ ext">非酒窖</span>' : `<span class="occ ${OCC_CLASS[e.type] || 'other'}">${esc(e.type)}</span>`;
 const roStars = n => n ? `<span class="rostar" aria-label="評分 ${n}／5">${'★'.repeat(n)}${'☆'.repeat(5 - n)}</span>` : '';
@@ -1522,10 +1525,10 @@ function drinkEvents() {  // 所有飲用（含送禮）與非酒窖紀錄
 function switchJTab(t) {
   S.jt = t;
   document.querySelectorAll('#jTabs [data-jt]').forEach(b => { b.classList.toggle('on', b.dataset.jt === t); b.setAttribute('aria-selected', b.dataset.jt === t); });
-  $('jtCal').hidden = t !== 'cal'; $('jtSearch').hidden = t !== 'search'; $('jtMem').hidden = t !== 'mem';
+  $('jtCal').hidden = t !== 'cal'; $('jtSearch').hidden = t !== 'search';
   renderJTab();
 }
-function renderJTab() { if (S.jt === 'search') renderJSearch(); else if (S.jt === 'mem') renderMem(); }
+function renderJTab() { if (S.jt === 'search') renderJSearch(); }
 const setChips = (id, pick) => document.querySelectorAll(`#${id} button`).forEach(b => { const on = pick(b); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
 function renderJSearch() {
   const f = S.js, q = normKey(f.q), t = today();
@@ -1542,7 +1545,7 @@ function renderJSearch() {
     html += `<div class="entry srch" data-mem="${esc(e.mem)}" role="button" tabindex="0">${ph}<div class="eb"><div class="t">${esc(e.name)}${e.vintage ? ` <span class="v">${esc(e.vintage)}</span>` : ''}</div>`
       + `<div class="m">${occBadge(e)}${fmtDate(e.date)}・${e.qty} 瓶${e.where ? '・' + esc(e.where) : ''}${e.who ? '・' + esc(e.who) : ''}</div>${e.note ? `<div class="note">${esc(e.note)}</div>` : ''}${roStars(e.rating)}</div></div>`;
   }
-  $('js_list').innerHTML = html || `<p class="hint">${drinkEvents().length ? '沒有符合的紀錄，換個關鍵字或條件試試。' : '還沒有任何飲用紀錄。出庫或在日曆「＋紀錄」後，就能在這裡搜尋。'}</p>`;
+  $('js_list').innerHTML = html || `<p class="hint">${drinkEvents().length ? '沒有符合的紀錄，換個關鍵字或條件試試。' : '還沒有任何飲用紀錄。出庫或在日曆「＋紀錄」後，就會出現在這裡。'}</p>`;
 }
 function memItems() {
   const by = {}; for (const e of drinkEvents()) (by[e.mem] = by[e.mem] || []).push(e);
@@ -1870,7 +1873,6 @@ async function deleteJournal(btn) {
 function renderHistory() {
   renderJournal();
   if ($('journalView').open) renderJTab();
-  if ($('memModal').open) renderMemDetail();
   const all = [];
   for (const w of wines()) for (const o of w.outs || []) all.push({...o, wineId: w.wineId, wineName: w.wineName, vintage: w.vintage, gone: w.status === 'archived'});
   all.sort((a, b) => ((b.date || '') + (b.at || '')).localeCompare((a.date || '') + (a.at || '')));
