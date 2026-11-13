@@ -1,4 +1,4 @@
-:root{--ver:"20261113e"}
+:root{--ver:"20261113f"}
 /* 酒窖：冷石灰與酒紅（淺色）／酒瓶玻璃墨綠（深色）。
    版面：頂列 → 總瓶數 → 酒櫃配置圖（每層一排瓶點）→ 帳冊式酒款清單；詳細資料從側邊（手機為底部）滑出。 */
 :root{
@@ -752,3 +752,32 @@ fieldset.colorpick{display:flex;flex-direction:row;flex-wrap:wrap;align-items:ce
   .adm-phone{display:block}
 }
 @media (max-width:760px){#factJournal,#factPend{display:none!important}}
+
+/* iPad：底部導覽列（直放 B、橫放 D 共用），圖示旁直接寫字 */
+@media (min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse){
+  .bnav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:center;gap:8px;padding:8px 24px calc(10px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--surface) 94%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-top:1px solid var(--line)}
+  .bnav button{all:unset;box-sizing:border-box;position:relative;cursor:pointer;flex:1 1 0;max-width:220px;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 6px;border-radius:14px;font:600 18px var(--body);color:var(--muted);white-space:nowrap;-webkit-tap-highlight-color:transparent}
+  .bnav button[hidden]{display:none}
+  .bnav button i{font-style:normal;font-size:25px;line-height:1}
+  .bnav button.on{color:var(--wine);background:var(--wine-soft)}
+  .bnav button:focus-visible{outline:2px solid var(--wine);outline-offset:-2px}
+  .bnav .add{background:var(--wine);color:var(--on-wine)}
+  .bnav .bdot{min-width:20px;padding:0 6px;border-radius:999px;background:var(--wine);color:#fff;font:700 12px/20px var(--body);text-align:center}
+  body{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+  .fab:not([hidden]),#adminBtn,#logoutBtn,#loginBtn,#addBtn,#factJournal,#factPend{display:none!important}
+  .toast{bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+  .adm-phone{display:block}
+}
+/* iPad 橫放（D）：酒櫃固定在左、酒款在右 */
+@media (min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape){
+  .page,.bar-in{max-width:none}
+  .page{display:grid;grid-template-columns:minmax(340px,400px) minmax(0,1fr);gap:20px 28px;align-items:start}
+  .page > .notice,.summary{grid-column:1/-1}
+  .map-wrap{grid-column:1;position:sticky;top:84px;max-height:calc(100vh - 84px - 100px);overflow:auto;overscroll-behavior:contain;padding-right:4px}
+  .map-wrap .map{grid-template-columns:1fr}
+  .map-wrap .fridge{max-width:none}
+  .ledger,.foot{grid-column:2}
+  .rows.grid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
+}
+.bn-pre{display:none}
+@media (min-width:761px){.bnav .bn-pre{display:inline}}

@@ -35,8 +35,11 @@ function showDialog(id) { document.querySelectorAll('.ferr').forEach(e => e.hidd
 function fail(m) { const e = new Error(m); e.user = true; throw e; }
 function msgOf(e) { return e?.user ? e.message : '操作未完成，請稍後再試。'; }
 const canEdit = () => !!S.session;
+/* iPad：761–1180px，或觸控螢幕寬到 1400px（iPad Pro 橫放）。橫放時改成左右雙欄 */
+const TABLET_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse)';
+const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261113e';
+const APP_VER = '20261113f';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -515,7 +518,8 @@ function wire() {
     const next = {cabinet: b.dataset.cab, shelf: b.dataset.shelf || ''};
     S.filter = S.filter && S.filter.cabinet === next.cabinet && S.filter.shelf === next.shelf ? null : next;
     render();
-    if (S.filter && matchMedia('(max-width:760px)').matches) document.querySelector('.ledger').scrollIntoView({behavior: 'smooth'});
+    // 手機與 iPad 直放：酒款在下方，捲過去；iPad 橫放雙欄時右邊直接更新，不捲動
+    if (S.filter && matchMedia(TABLET_MQ).matches ? !matchMedia(SPLIT_MQ).matches : S.filter && matchMedia('(max-width:760px)').matches) document.querySelector('.ledger').scrollIntoView({behavior: 'smooth'});
   });
   $('list').addEventListener('click', e => {
     const o = e.target.closest('[data-open]'); if (!o) return;
