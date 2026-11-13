@@ -1567,18 +1567,25 @@
     }
    ],
    "origin": "Spain",
-   "photo": "",
+   "photo": "images/W056-1794535168974.jpg",
    "referencePrice": 1704,
-   "revision": 2,
+   "revision": 3,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-11-13T01:59:18.469Z",
+   "updatedAt": "2026-11-13T01:59:33.762Z",
    "updatedBy": "芝琦",
    "vintage": "2016",
    "volume": "750ml",
    "wineName": "Pam de Nas",
    "wineryRegion": "Trossos del Priorat",
-   "color": "red"
+   "color": "red",
+   "photos": [
+    {
+     "photo": "images/W056-1794535168974.jpg",
+     "thumb": "images/W056-1794535168974-t.jpg"
+    }
+   ],
+   "thumb": "images/W056-1794535168974-t.jpg"
   },
   "W057": {
    "createdAt": "",
@@ -1804,8 +1811,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 109,
- "updatedAt": "2026-11-13T01:59:18.469Z",
+ "rev": 110,
+ "updatedAt": "2026-11-13T01:59:33.762Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
