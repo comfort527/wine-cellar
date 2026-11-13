@@ -24,7 +24,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261113b" id="mainCss">
+<link rel="stylesheet" href="style.css?v=20261113c" id="mainCss">
 </head>
 <body>
 <header class="bar">
@@ -259,9 +259,25 @@
  <div class="dact"><button type="button" class="primary" data-close>完成</button></div>
 </div></dialog>
 
-<dialog id="adminModal" aria-labelledby="adminTitle"><div class="dh"><h2 id="adminTitle">管理</h2><button data-close aria-label="關閉">×</button></div>
-<div class="db">
- <div class="tabs"><button data-tab="audit" class="on">異動紀錄</button><button data-tab="outs">出庫紀錄</button><button data-tab="lib">搜尋</button><button data-tab="loc">櫃位／層位</button><button data-tab="ai">智慧辨識</button><button data-tab="keys" id="keysTab">裝置密碼</button></div>
+<dialog id="adminModal" class="adm-dlg" aria-labelledby="adminTitle"><div class="dh"><div class="adm-head"><button type="button" class="adm-back" id="admBack" aria-label="回到管理選單">‹ 管理</button><h2 id="adminTitle">管理</h2></div><button data-close aria-label="關閉">×</button></div>
+<div class="db adm" id="admBody" data-view="menu">
+ <nav class="adm-menu" id="admMenu" aria-label="管理選單">
+  <div class="adm-grp"><h5>查資料</h5><div class="menu">
+   <button type="button" class="mi" data-tab="lib"><span class="ic">🔍</span><span class="mt"><b>搜尋酒款</b><small>所有登錄過的酒・飲用紀錄・再買一次</small></span><span class="go">›</span></button>
+   <button type="button" class="mi" data-tab="outs"><span class="ic">🍷</span><span class="mt"><b>出庫紀錄</b><small>自飲、聚餐、送禮與已出清的酒</small></span><span class="go">›</span></button>
+   <button type="button" class="mi" data-tab="audit"><span class="ic">🕘</span><span class="mt"><b>異動紀錄</b><small>誰在什麼時候改了什麼</small></span><span class="go">›</span></button>
+  </div></div>
+  <div class="adm-grp"><h5>設定</h5><div class="menu">
+   <button type="button" class="mi" data-tab="loc"><span class="ic">🗄️</span><span class="mt"><b>櫃位／層位</b><small>名稱清單・各層還可放幾瓶</small></span><span class="go">›</span></button>
+   <button type="button" class="mi" data-tab="ai"><span class="ic">✨</span><span class="mt"><b>智慧辨識</b><small>你的 AI 金鑰（30 分鐘後自動清除）</small></span><span class="go">›</span></button>
+   <button type="button" class="mi" data-tab="keys" id="keysTab"><span class="ic">🔑</span><span class="mt"><b>裝置密碼</b><small>新增／刪除裝置・更換 GitHub 權杖</small></span><span class="go">›</span></button>
+  </div></div>
+  <div class="adm-grp"><h5>資料</h5><div class="menu">
+   <button type="button" class="mi" data-tab="export"><span class="ic">⬇️</span><span class="mt"><b>匯出 CSV</b><small>下載全部酒款給 Excel 使用</small></span><span class="go">›</span></button>
+   <button type="button" class="mi" data-tab="storage"><span class="ic">💾</span><span class="mt"><b>儲存空間</b><small id="storageSub">GitHub repo 已用空間</small></span><span class="go">›</span></button>
+  </div></div>
+ </nav>
+ <div class="adm-main" id="admMain">
  <section id="tab-audit"><p class="hint" style="margin-top:0" id="auditHint">每次異動都是一筆 GitHub commit，由新到舊。</p><div class="audit" id="auditList"></div><button class="small" id="moreAudit" hidden style="margin-top:10px">載入更多</button></section>
  <section id="tab-outs" hidden>
   <p class="hint" style="margin-top:0">每一次出庫（含送禮）都記在這裡，由新到舊。點一筆可以查看那款酒。</p>
@@ -323,15 +339,20 @@
   <div class="ferr" id="keysErr" hidden></div>
   <p><a id="repoLink" target="_blank" rel="noopener">開啟 GitHub repo</a></p>
  </section>
- <div class="admin-foot">
+ <section id="tab-export" hidden>
+  <p class="hint" style="margin-top:0">把全部酒款（含已出清）存成 CSV 檔，可以用 Excel 或 Numbers 打開。每個存放位置一列。</p>
+  <button type="button" class="primary" id="exportBtn">⇩ 下載 CSV</button>
+ </section>
+ <section id="tab-storage" hidden>
+  <p class="hint" style="margin-top:0">照片和資料都存在 GitHub repo，免費上限約 500 MB。快滿時請少換照片。</p>
   <div class="storage" id="storageBar" hidden><span class="txt"></span><div class="track"><div class="fill"></div></div></div>
-  <button class="ghost" id="exportBtn">⇩ 匯出 CSV</button>
+ </section>
  </div>
 </div></dialog>
 
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="config.js?v=20261113b"></script>
-<script src="app.js?v=20261113b"></script>
+<script src="config.js?v=20261113c"></script>
+<script src="app.js?v=20261113c"></script>
 </body>
 </html>

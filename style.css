@@ -1,4 +1,4 @@
-:root{--ver:"20261113b"}
+:root{--ver:"20261113c"}
 /* 酒窖：冷石灰與酒紅（淺色）／酒瓶玻璃墨綠（深色）。
    版面：頂列 → 總瓶數 → 酒櫃配置圖（每層一排瓶點）→ 帳冊式酒款清單；詳細資料從側邊（手機為底部）滑出。 */
 :root{
@@ -700,3 +700,35 @@ fieldset.colorpick{display:flex;flex-direction:row;flex-wrap:wrap;align-items:ce
 .out.in .q{color:#2f7a45}
 #jm_list{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,380px),1fr));gap:8px}
 #jm_list .lib{margin-bottom:0}
+
+/* 管理：手機分組清單＋子頁、平板／電腦左右兩欄 */
+.adm-head{display:flex;flex-direction:column;align-items:flex-start;min-width:0}
+.dh .adm-back{border:0!important;background:none!important;box-shadow:none!important;color:var(--wine);font:500 18px/1.3 var(--body)!important;padding:0;min-height:0!important;width:auto;height:auto;margin:0 0 2px}
+.adm-grp{margin:0 0 18px}
+.adm-grp h5{margin:0 0 6px 4px;font:600 14px var(--body);color:var(--muted);letter-spacing:.08em}
+.adm-menu .menu{border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);overflow:hidden}
+.adm-menu .mi{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:12px;width:100%;padding:12px 14px;border-top:1px solid var(--line);text-align:left}
+.adm-menu .mi:first-child{border-top:0}
+.adm-menu .mi[hidden]{display:none}
+.adm-menu .mi:hover{background:var(--surface-2)}
+.adm-menu .mi:focus-visible{outline:2px solid var(--wine);outline-offset:-2px}
+.adm-menu .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:22px;background:var(--wine-soft)}
+.adm-menu .mt b{display:block;font-size:18px;font-weight:600;color:var(--ink)}
+.adm-menu .mt small{display:block;color:var(--muted);font-size:14px;line-height:1.4}
+.adm-menu .go{color:var(--faint);font-size:24px}
+.adm-menu .mi.on{background:var(--wine-soft)}.adm-menu .mi.on .ic{background:var(--surface)}
+.adm[data-view="menu"] .adm-main{display:none}
+.adm[data-view="page"] .adm-menu{display:none}
+#tab-storage .storage{display:flex;flex-direction:column;gap:6px;margin:6px 0 0}
+#tab-storage .storage .track{width:100%;max-width:420px}
+@media (min-width:761px){
+  dialog.adm-dlg{width:min(1120px,calc(100vw - 40px))}
+  .adm{display:grid;grid-template-columns:minmax(240px,300px) minmax(0,1fr);padding:0!important;height:min(78vh,820px)}
+  .adm .adm-menu,.adm[data-view] .adm-menu{display:block;overflow:auto;padding:16px;background:var(--surface-2);border-right:1px solid var(--line)}
+  .adm .adm-main,.adm[data-view] .adm-main{display:block;overflow:auto;padding:18px 22px}
+  .adm-menu .mi{padding:10px}
+  .adm-menu .ic{width:38px;height:38px;font-size:19px}
+  .adm-menu .mt b{font-size:16px}
+  .adm-menu .mt small{display:none}
+  .dh .adm-back{display:none}
+}

@@ -36,7 +36,7 @@ function fail(m) { const e = new Error(m); e.user = true; throw e; }
 function msgOf(e) { return e?.user ? e.message : '操作未完成，請稍後再試。'; }
 const canEdit = () => !!S.session;
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261113b';
+const APP_VER = '20261113c';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -486,7 +486,10 @@ function wire() {
   $('logoutBtn').addEventListener('click', () => logout());
   $('addBtn').addEventListener('click', () => openWineForm(null));
   $('fab').addEventListener('click', () => openWineForm(null));
-  $('adminBtn').addEventListener('click', () => { showDialog('adminModal'); switchTab('audit'); checkStorage(); });
+  $('adminBtn').addEventListener('click', () => openAdmin());
+  $('admMenu').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) switchTab(b.dataset.tab); });
+  $('admBack').addEventListener('click', adminMenu);
+  matchMedia('(min-width: 761px)').addEventListener('change', () => { if (!$('adminModal').open) return; const cur = ADMIN_TABS.find(t => !$('tab-' + t).hidden); if (admWide()) switchTab(cur || 'lib'); else if (cur) switchTab(cur); });
   $('factPend').addEventListener('click', () => { showDialog('pendModal'); showErr('pendErr', ''); renderPendStrip(); renderPending(); });
   $('exportBtn').addEventListener('click', exportCsv);
   let fbRaf = 0; window.addEventListener('resize', () => { cancelAnimationFrame(fbRaf); fbRaf = requestAnimationFrame(fillBottles); });
@@ -521,7 +524,7 @@ function wire() {
     const ed = e.target.closest('[data-edit]'); if (ed) return openWineForm(byId(ed.dataset.edit));
     const gn = e.target.closest('[data-gnav]'); if (gn) { const sl = gn.parentElement.querySelector('.slides'); sl.scrollBy({left: Number(gn.dataset.gnav) * sl.clientWidth, behavior: 'smooth'}); return; }
     const ph = e.target.closest('[data-photo]'); if (ph) return openPhoto(byId(ph.dataset.photo));
-    const lg = e.target.closest('[data-log]'); if (lg) { showDialog('adminModal'); switchTab('audit', true); loadAudit(lg.dataset.log, 1); }
+    const lg = e.target.closest('[data-log]'); if (lg) { showDialog('adminModal'); switchTab('audit', true); loadAudit(lg.dataset.log, 1); checkStorage(); }
   });
   $('f_volumeChoice').addEventListener('change', e => { $('f_volumeOther').hidden = e.target.value !== '__other__'; });
   $('f_sourceChoice').addEventListener('change', e => { $('f_sourceOther').hidden = e.target.value !== '__other__'; });
@@ -576,7 +579,6 @@ function wire() {
   $('slotForm').addEventListener('submit', e => { e.preventDefault(); submit('slotForm', 'keysErr', addSlot); });
   $('tokenForm').addEventListener('submit', e => { e.preventDefault(); submit('tokenForm', 'keysErr', changeToken); });
   $('moreAudit').addEventListener('click', () => loadAudit(S.auditWine, S.auditPage + 1));
-  document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
   $('cabChips').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) removeCatalog('cabinets', b.dataset.rm); });
   $('shelfChips').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) removeCatalog('shelves', b.dataset.rm); });
   const openHist = e => { const h = e.target.closest('[data-hist]'); if (!h || (e.type === 'keydown' && e.key !== 'Enter')) return; h.closest('dialog')?.close(); openDrawer(h.dataset.hist); };
@@ -622,9 +624,25 @@ async function submit(formId, errId, fn) {
   try { await fn(); } catch (e) { showErr(errId, msgOf(e)); if (!e.user) console.error(e); }
   finally { delete form.dataset.busy; btns.forEach(b => b.disabled = false); }
 }
+const ADMIN_TABS = ['lib', 'outs', 'audit', 'loc', 'ai', 'keys', 'export', 'storage'];
+const admWide = () => matchMedia('(min-width: 761px)').matches;
+function adminMenu() {  // 手機：回到分組清單
+  $('admBody').dataset.view = 'menu'; $('adminTitle').textContent = '管理'; $('admBack').hidden = true;
+  $('keysTab').hidden = !isAdmin();
+  document.querySelectorAll('#admMenu [data-tab]').forEach(b => b.classList.remove('on'));
+}
+function openAdmin(name) {
+  showDialog('adminModal');
+  if (name || admWide()) switchTab(name || 'lib'); else adminMenu();
+  checkStorage();
+}
 function switchTab(name, noLoad) {
-  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
-  for (const t of ['audit', 'outs', 'lib', 'loc', 'ai', 'keys']) $('tab-' + t).hidden = t !== name;
+  document.querySelectorAll('#admMenu [data-tab]').forEach(b => { const on = b.dataset.tab === name; b.classList.toggle('on', on); b.setAttribute('aria-current', on ? 'page' : 'false'); });
+  for (const t of ADMIN_TABS) $('tab-' + t).hidden = t !== name;
+  $('admBody').dataset.view = 'page'; $('admBack').hidden = admWide();
+  const label = document.querySelector(`#admMenu [data-tab="${name}"] b`)?.textContent || '';
+  $('adminTitle').textContent = admWide() ? (label ? `管理 › ${label}` : '管理') : label || '管理';
+  $('admMain').scrollTop = 0;
   $('keysTab').hidden = !isAdmin();
   if (name === 'loc') renderAdmin();
   if (name === 'outs') renderHistory();
@@ -1444,6 +1462,7 @@ async function checkStorage() {
       el.hidden = false; el.classList.toggle('warn', pct >= .8);
       el.querySelector('.fill').style.width = Math.min(100, pct * 100).toFixed(1) + '%';
       el.querySelector('.txt').textContent = `儲存空間 ${mb < 10 ? mb.toFixed(1) : Math.round(mb)}／${STORAGE_LIMIT_MB} MB${pct >= .8 ? '　快滿了，請少換照片' : ''}`;
+      const sub = $('storageSub'); if (sub) sub.textContent = `已用 ${mb < 10 ? mb.toFixed(1) : Math.round(mb)}／${STORAGE_LIMIT_MB} MB${pct >= .8 ? '・快滿了' : ''}`;
     }
     return S.storage;
   } catch { return null; }
