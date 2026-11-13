@@ -24,7 +24,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261113m" id="mainCss">
+<link rel="stylesheet" href="style.css?v=20261113n" id="mainCss">
 </head>
 <body>
 <header class="bar">
@@ -71,7 +71,7 @@
  <section class="ledger" aria-labelledby="ledgerTitle">
   <div class="sec-h"><h2 id="ledgerTitle">酒款</h2><span class="hint" id="countText"></span></div>
   <div class="tools">
-   <label class="search"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="6"/><path d="m14 14 4 4"/></svg><input id="search" type="search" placeholder="搜尋酒名、酒莊、年份、產地、備註" aria-label="搜尋"><button type="button" id="clearSearch" aria-label="清除搜尋">×</button></label>
+   <label class="search" data-input="search" data-ph="搜尋酒名、酒莊、年份、產地、備註" data-label="搜尋" data-clear="clearSearch" data-clear-label="清除搜尋"></label>
    <select id="sortSel" aria-label="排序"><option value="loc">依位置</option><option value="id">依登錄先後</option><option value="vintage">年份：舊到新</option><option value="vintage-desc">年份：新到舊</option><option value="prio">飲用優先</option><option value="qty">瓶數：多到少</option><option value="name">依酒名</option></select>
    <div class="seg" role="group" aria-label="顯示方式"><button id="viewList" aria-pressed="false">清單</button><button id="viewGrid" class="on" aria-pressed="true">照片</button></div>
    <button class="primary" id="addBtn" hidden>＋ 新增酒款</button>
@@ -93,10 +93,10 @@
  <button type="button" data-nav="login" id="bnLogin"><i aria-hidden="true">🔑</i><span id="bnLoginT">登入</span></button>
 </nav>
 
-<dialog class="small" id="originModal" aria-labelledby="originTitle"><div class="dh"><h2 id="originTitle">依產地查看</h2><button data-close aria-label="關閉">×</button></div>
+<dialog class="small" id="originModal" aria-labelledby="originTitle" data-title="依產地查看">
 <div class="db"><div class="origins" id="originList"></div></div></dialog>
 
-<dialog id="journalView" class="wide" aria-labelledby="jvTitle"><div class="dh"><h2 id="jvTitle">飲酒日誌</h2><button data-close aria-label="關閉">×</button></div>
+<dialog id="journalView" class="wide" aria-labelledby="jvTitle" data-title="飲酒日誌">
 <div class="db" id="tab-hist">
   <div class="jtabs" id="jTabs" role="tablist"><button type="button" data-jt="cal" class="on" role="tab" aria-selected="true">日曆</button><button type="button" data-jt="search" role="tab" aria-selected="false">回憶</button></div>
   <div class="jr" id="jtCal">
@@ -113,18 +113,18 @@
    </div>
   </div>
   <section id="jtSearch" hidden>
-   <label class="search"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="6"/><path d="m14 14 4 4"/></svg><input id="js_q" type="search" placeholder="搜酒名、酒莊、場合、說明（例如 董事會、王董）" aria-label="搜尋飲用紀錄"><button type="button" id="js_clear" aria-label="清除">×</button></label>
+   <label class="search" data-input="js_q" data-ph="搜酒名、酒莊、場合、說明（例如 董事會、王董）" data-label="搜尋飲用紀錄" data-clear="js_clear" data-clear-label="清除"></label>
    <div class="chips2" id="js_type"><button type="button" data-v="" class="on">全部場合</button><button type="button" data-v="自飲">自飲</button><button type="button" data-v="聚餐">聚餐</button><button type="button" data-v="送禮">送禮</button><button type="button" data-v="其他">其他</button><button type="button" data-v="ext">非酒窖</button></div>
    <div class="chips2" id="js_when"><button type="button" data-v="year">今年</button><button type="button" data-v="3m">近 3 個月</button><button type="button" data-v="all" class="on">全部</button><button type="button" data-hi>★4 以上</button></div>
    <p class="rsum" id="js_sum"></p>
    <div id="js_list"></div>
   </section>
 </div></dialog>
-<dialog class="small" id="memModal" aria-labelledby="memTitle"><div class="dh"><h2 id="memTitle">酒款</h2><button data-close aria-label="關閉">×</button></div><div class="db" id="memBody"></div></dialog>
+<dialog class="small" id="memModal" aria-labelledby="memTitle" data-title="酒款"><div class="db" id="memBody"></div></dialog>
 
 <dialog class="drawer" id="drawer" aria-labelledby="dwName" tabindex="-1"><div id="drawerBody"></div></dialog>
 
-<dialog class="small" id="loginModal" aria-labelledby="loginTitle"><div class="dh"><h2 id="loginTitle">管理登入</h2><button data-close aria-label="關閉">×</button></div>
+<dialog class="small" id="loginModal" aria-labelledby="loginTitle" data-title="管理登入">
 <form class="db" id="loginForm" novalidate>
  <div class="field"><label for="g_slot">裝置</label><select id="g_slot"></select></div>
  <div class="field" style="margin-top:10px"><label for="g_pass">裝置密碼</label><input id="g_pass" type="password" autocomplete="current-password"></div>
@@ -134,7 +134,7 @@
  <div class="dact"><button type="submit" class="primary">登入</button></div>
 </form></dialog>
 
-<dialog class="small" id="setupModal" aria-labelledby="setupTitle"><div class="dh"><h2 id="setupTitle">初始設定</h2><button data-close aria-label="關閉">×</button></div>
+<dialog class="small" id="setupModal" aria-labelledby="setupTitle" data-title="初始設定">
 <form class="db" id="setupForm" novalidate>
  <p class="hint" style="margin-top:0">第一次使用：貼上 GitHub 權杖，並替這台裝置設定管理員密碼。權杖會加密後存進 repo，不會以明文保存。</p>
  <div class="field"><label for="u_token">GitHub 權杖（只授權這個 repo 的 Contents 讀寫）</label><input id="u_token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></div>
@@ -145,7 +145,7 @@
  <div class="dact"><button type="submit" class="primary">完成設定</button></div>
 </form></dialog>
 
-<dialog id="wineModal" aria-labelledby="wineTitle"><div class="dh"><h2 id="wineTitle">新增紅酒</h2><button data-close aria-label="關閉">×</button></div>
+<dialog id="wineModal" aria-labelledby="wineTitle" data-title="新增紅酒">
 <form class="db" id="wineForm" novalidate>
  <div class="form">
   <div class="rebuy-note span" id="rebuyNote" hidden></div>
@@ -161,13 +161,13 @@
   <div class="field"><label for="f_drinkWindow">適飲期</label><input id="f_drinkWindow" maxlength="200" placeholder="例如 2026–2035"></div>
   <div class="field span"><label for="f_grapeNotes">葡萄品種／備註</label><textarea id="f_grapeNotes" maxlength="2000"></textarea></div>
   <div class="field span"><span class="lbl" id="locLbl">存放位置與瓶數</span><div id="locInputs"></div><div><button type="button" class="small" id="addLoc">＋ 新增位置</button></div><p class="hint">櫃位、層位從清單選擇；要新增名稱請到「管理 → 櫃位／層位」。</p><p class="hint" id="locHint" hidden>要扣除瓶數請用「出庫」，才會留下原因；這裡的瓶數調整會記為「資料修正」。</p></div>
-  <div class="field span" id="newPhotoField"><span class="lbl">酒款照片（最多 4 張）</span><div class="photo-in"><label>📷 拍照<input type="file" id="f_camera" accept="image/*" capture="environment"></label><label>從相簿選擇（可多選）<input type="file" id="f_gallery" accept="image/*" multiple></label></div><div class="pstrip" id="f_strip"></div><div class="ai-row" id="aiRow" hidden><button type="button" class="ai-btn" id="aiBtn">✨ 智慧辨識</button><span class="hint" id="aiMsg"></span></div><span class="hint">照片會自動壓縮到 200 KB 以內，另存一張小縮圖。第一張是封面。</span></div>
+  <div class="field span" id="newPhotoField"><span class="lbl">酒款照片（最多 4 張）</span><div class="photo-in" data-picker="f"></div><div class="pstrip" id="f_strip"></div><div class="ai-row" id="aiRow" hidden><button type="button" class="ai-btn" id="aiBtn">✨ 智慧辨識</button><span class="hint" id="aiMsg"></span></div><span class="hint">照片會自動壓縮到 200 KB 以內，另存一張小縮圖。第一張是封面。</span></div>
  </div>
  <div class="ferr" id="wineErr" hidden></div>
  <div class="dact"><button type="button" data-close>取消</button><button type="submit" class="primary">儲存資料</button></div>
 </form></dialog>
 
-<dialog class="small" id="stockModal" aria-labelledby="stockTitle"><div class="dh"><h2 id="stockTitle">出庫</h2><button data-close aria-label="關閉">×</button></div>
+<dialog class="small" id="stockModal" aria-labelledby="stockTitle" data-title="出庫">
 <form class="db" id="stockForm" novalidate>
  <p id="stockWine" class="strong"></p>
  <fieldset class="locpick" id="s_loc"></fieldset>
@@ -184,7 +184,7 @@
  <div class="dact"><button type="button" data-close>取消</button><button type="submit" class="primary">確認出庫</button></div>
 </form></dialog>
 
-<dialog class="small" id="moveModal" aria-labelledby="moveTitle"><div class="dh"><h2 id="moveTitle">移動位置</h2><button data-close aria-label="關閉">×</button></div>
+<dialog class="small" id="moveModal" aria-labelledby="moveTitle" data-title="移動位置">
 <form class="db" id="moveForm" novalidate>
  <p id="moveWine" class="strong"></p>
  <fieldset class="locpick" id="m_from"></fieldset>
@@ -202,7 +202,7 @@
  <div class="dact"><button type="button" data-close>取消</button><button type="submit" class="primary">確認移動</button></div>
 </form></dialog>
 
-<dialog class="small" id="journalModal" aria-labelledby="jFormTitle"><div class="dh"><h2 id="jFormTitle">紀錄</h2><button data-close aria-label="關閉">×</button></div>
+<dialog class="small" id="journalModal" aria-labelledby="jFormTitle" data-title="紀錄">
 <form class="db" id="journalForm" novalidate>
  <fieldset class="types jsrc" id="j_srcSet"><legend>這瓶酒是 *</legend>
   <label><input type="radio" name="j_src" value="cellar"><span>酒窖</span></label>
@@ -239,33 +239,33 @@
   <div class="field"><span class="lbl">評分（選填）</span><span class="stars big" id="j_stars">
    <button type="button" data-jstar="1" aria-label="1 顆星">★</button><button type="button" data-jstar="2" aria-label="2 顆星">★</button><button type="button" data-jstar="3" aria-label="3 顆星">★</button><button type="button" data-jstar="4" aria-label="4 顆星">★</button><button type="button" data-jstar="5" aria-label="5 顆星">★</button>
   </span></div>
-  <div class="field" id="j_photoF"><span class="lbl">照片（選填）</span><div class="photo-in"><label>📷 拍照<input type="file" id="j_camera" accept="image/*" capture="environment"></label><label>從相簿選擇<input type="file" id="j_gallery" accept="image/*"></label></div><img class="prev" id="j_preview" alt="待上傳照片" hidden></div>
+  <div class="field" id="j_photoF"><span class="lbl">照片（選填）</span><div class="photo-in" data-picker="j" data-single></div><img class="prev" id="j_preview" alt="待上傳照片" hidden></div>
  </div>
  <div class="ferr" id="journalErr" hidden></div>
  <div class="dact"><button type="button" data-close>取消</button><button type="submit" class="primary" id="j_save">儲存</button></div>
 </form></dialog>
 
-<dialog id="viewerModal" class="viewer" aria-labelledby="viewerTitle"><div class="dh"><h2 id="viewerTitle">照片</h2><button data-close aria-label="關閉">×</button></div>
+<dialog id="viewerModal" class="viewer" aria-labelledby="viewerTitle" data-title="照片">
 <div class="db" id="viewerBody"></div></dialog>
 
-<dialog class="small" id="photoModal" aria-labelledby="photoTitle"><div class="dh"><h2 id="photoTitle">照片</h2><button data-close aria-label="關閉">×</button></div>
+<dialog class="small" id="photoModal" aria-labelledby="photoTitle" data-title="照片">
 <div class="db">
  <p id="photoWine" class="strong"></p>
  <p class="hint" style="margin-top:0">每瓶最多 4 張。第一張是封面，照片模式、選酒和日誌都顯示封面。照片會自動壓縮到 200 KB 以內。</p>
  <p class="hint" id="pDragHint" hidden>要調整順序：手機上<b>長按照片</b>、電腦上<b>按住照片</b>，拖到想要的位置再放開。</p>
  <div class="pgrid" id="pgrid"></div>
- <div class="photo-in" id="pAdd" style="margin-top:12px"><label>📷 拍照<input type="file" id="p_camera" accept="image/*" capture="environment"></label><label>從相簿選擇（可多選）<input type="file" id="p_gallery" accept="image/*" multiple></label></div>
+ <div class="photo-in" id="pAdd" style="margin-top:12px" data-picker="p"></div>
  <p class="hint" id="pCount"></p>
  <div class="ferr" id="photoErr" hidden></div>
  <div class="dact"><button type="button" class="primary" data-close>完成</button></div>
 </div></dialog>
 
 
-<dialog id="pendModal" aria-labelledby="pendTitle"><div class="dh"><h2 id="pendTitle">待入櫃</h2><button data-close aria-label="關閉">×</button></div>
+<dialog id="pendModal" aria-labelledby="pendTitle" data-title="待入櫃">
 <div class="db">
   <p class="hint" style="margin-top:0">先拍下酒標存起來（每瓶 1–4 張），資料之後再補。取得完整資料後按「編輯並加入酒櫃」，填好酒名與位置就會成為正式酒款。</p>
   <div class="pend-new">
-   <div class="photo-in" id="q_add"><label>📷 拍照<input type="file" id="q_camera" accept="image/*" capture="environment"></label><label>從相簿選擇（可多選）<input type="file" id="q_gallery" accept="image/*" multiple></label></div>
+   <div class="photo-in" id="q_add" data-picker="q"></div>
    <div class="pstrip" id="q_strip"></div>
    <div class="ferr" id="pendErr" hidden></div>
    <button type="button" class="primary" id="q_save" hidden>存入待入櫃</button>
@@ -278,21 +278,21 @@
 <div class="db adm" id="admBody" data-view="menu">
  <nav class="adm-menu" id="admMenu" aria-label="管理選單">
   <div class="adm-grp"><h5>查資料</h5><div class="menu">
-   <button type="button" class="mi" data-tab="lib"><span class="ic">🔍</span><span class="mt"><b>搜尋酒款</b><small>所有登錄過的酒・飲用紀錄・再買一次</small></span><span class="go">›</span></button>
-   <button type="button" class="mi" data-tab="outs"><span class="ic">🍷</span><span class="mt"><b>出庫紀錄</b><small>自飲、聚餐、送禮與已出清的酒</small></span><span class="go">›</span></button>
-   <button type="button" class="mi" data-tab="audit"><span class="ic">🕘</span><span class="mt"><b>異動紀錄</b><small>誰在什麼時候改了什麼</small></span><span class="go">›</span></button>
+   <button type="button" class="mi" data-tab="lib" data-ic="🔍" data-t="搜尋酒款" data-s="所有登錄過的酒・飲用紀錄・再買一次"></button>
+   <button type="button" class="mi" data-tab="outs" data-ic="🍷" data-t="出庫紀錄" data-s="自飲、聚餐、送禮與已出清的酒"></button>
+   <button type="button" class="mi" data-tab="audit" data-ic="🕘" data-t="異動紀錄" data-s="誰在什麼時候改了什麼"></button>
   </div></div>
   <div class="adm-grp"><h5>設定</h5><div class="menu">
-   <button type="button" class="mi" data-tab="loc"><span class="ic">🗄️</span><span class="mt"><b>櫃位／層位</b><small>名稱清單・各層還可放幾瓶</small></span><span class="go">›</span></button>
-   <button type="button" class="mi" data-tab="ai"><span class="ic">✨</span><span class="mt"><b>智慧辨識</b><small>你的 AI 金鑰（30 分鐘後自動清除）</small></span><span class="go">›</span></button>
-   <button type="button" class="mi" data-tab="keys" id="keysTab"><span class="ic">🔑</span><span class="mt"><b>裝置密碼</b><small>新增／刪除裝置・更換 GitHub 權杖</small></span><span class="go">›</span></button>
+   <button type="button" class="mi" data-tab="loc" data-ic="🗄️" data-t="櫃位／層位" data-s="名稱清單・各層還可放幾瓶"></button>
+   <button type="button" class="mi" data-tab="ai" data-ic="✨" data-t="智慧辨識" data-s="你的 AI 金鑰（30 分鐘後自動清除）"></button>
+   <button type="button" class="mi" data-tab="keys" id="keysTab" data-ic="🔑" data-t="裝置密碼" data-s="新增／刪除裝置・更換 GitHub 權杖"></button>
   </div></div>
   <div class="adm-grp"><h5>資料</h5><div class="menu">
-   <button type="button" class="mi" data-tab="export"><span class="ic">⬇️</span><span class="mt"><b>匯出 CSV</b><small>下載全部酒款給 Excel 使用</small></span><span class="go">›</span></button>
-   <button type="button" class="mi" data-tab="storage"><span class="ic">💾</span><span class="mt"><b>儲存空間</b><small id="storageSub">GitHub repo 已用空間</small></span><span class="go">›</span></button>
+   <button type="button" class="mi" data-tab="export" data-ic="⬇️" data-t="匯出 CSV" data-s="下載全部酒款給 Excel 使用"></button>
+   <button type="button" class="mi" data-tab="storage" data-ic="💾" data-t="儲存空間" data-s="GitHub repo 已用空間" data-sub-id="storageSub"></button>
   </div></div>
   <div class="adm-grp adm-phone"><h5>帳號</h5><div class="menu">
-   <button type="button" class="mi" data-act="logout"><span class="ic">🚪</span><span class="mt"><b>登出</b><small id="admWho">登出這台裝置</small></span><span class="go">›</span></button>
+   <button type="button" class="mi" data-act="logout" data-ic="🚪" data-t="登出" data-s="登出這台裝置" data-sub-id="admWho"></button>
   </div></div>
  </nav>
  <div class="adm-main" id="admMain">
@@ -312,7 +312,7 @@
   <div class="hist" id="histGone"></div>
  </section>
  <section id="tab-lib" hidden>
-   <label class="search"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="6"/><path d="m14 14 4 4"/></svg><input id="jm_q" type="search" placeholder="搜酒名、酒莊、年份" aria-label="搜尋酒款"><button type="button" id="jm_clear" aria-label="清除">×</button></label>
+   <label class="search" data-input="jm_q" data-ph="搜酒名、酒莊、年份" data-label="搜尋酒款" data-clear="jm_clear" data-clear-label="清除"></label>
    <div class="chips2" id="jm_sort"><button type="button" data-v="freq" class="on">最常喝</button><button type="button" data-v="recent">最近喝</button><button type="button" data-v="rating">評分高</button><button type="button" data-v="name">名稱</button></div>
    <div class="chips2" id="jm_group"><button type="button" data-v="all" class="on">全部</button><button type="button" data-v="have">酒窖還有</button><button type="button" data-v="gone">已喝完／非酒窖</button></div>
    <p class="rsum" id="jm_sum"></p>
@@ -370,7 +370,7 @@
 
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="config.js?v=20261113m"></script>
-<script src="app.js?v=20261113m"></script>
+<script src="config.js?v=20261113n"></script>
+<script src="app.js?v=20261113n"></script>
 </body>
 </html>

@@ -464,7 +464,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261113m";
+:root{--ver:"20261113n";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;

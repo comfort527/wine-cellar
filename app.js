@@ -40,7 +40,7 @@ const TABLET_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600p
 const DESK_MQ = '(min-width:1181px) and (pointer:fine), (min-width:1401px)';
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261113m';
+const APP_VER = '20261113n';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -259,7 +259,33 @@ function logout(silent) {
   render();
 }
 
+/* ---------- 重複的 HTML 結構：在 HTML 只寫內容，這裡展開成完整結構（啟動前先執行） ---------- */
+function expandTemplates(root = document) {
+  const take = (el, ...names) => names.map(n => { const v = el.getAttribute(n); el.removeAttribute(n); return v; });
+  // 對話框標題列：<dialog aria-labelledby="xTitle" data-title="標題">
+  for (const d of root.querySelectorAll('dialog[data-title]')) {
+    const [title] = take(d, 'data-title');
+    d.insertAdjacentHTML('afterbegin', `<div class="dh"><h2 id="${d.getAttribute('aria-labelledby')}">${title}</h2><button data-close aria-label="關閉">×</button></div>`);
+  }
+  // 拍照／從相簿選擇：<div class="photo-in" data-picker="f">，data-single 表示相簿只能選一張
+  for (const el of root.querySelectorAll('[data-picker]')) {
+    const single = el.hasAttribute('data-single'), [id] = take(el, 'data-picker', 'data-single');
+    el.innerHTML = `<label>📷 拍照<input type="file" id="${id}_camera" accept="image/*" capture="environment"></label><label>從相簿選擇${single ? '' : '（可多選）'}<input type="file" id="${id}_gallery" accept="image/*"${single ? '' : ' multiple'}></label>`;
+  }
+  // 搜尋框：放大鏡＋輸入框＋清除鍵
+  for (const el of root.querySelectorAll('label.search[data-input]')) {
+    const [id, ph, label, clear, clearLabel] = take(el, 'data-input', 'data-ph', 'data-label', 'data-clear', 'data-clear-label');
+    el.innerHTML = `<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="6"/><path d="m14 14 4 4"/></svg><input id="${id}" type="search" placeholder="${ph}" aria-label="${label}"><button type="button" id="${clear}" aria-label="${clearLabel}">×</button>`;
+  }
+  // 管理選單項目：圖示、標題、說明
+  for (const el of root.querySelectorAll('.mi[data-t]')) {
+    const [ic, t, sub, subId] = take(el, 'data-ic', 'data-t', 'data-s', 'data-sub-id');
+    el.innerHTML = `<span class="ic">${ic}</span><span class="mt"><b>${t}</b><small${subId ? ` id="${subId}"` : ''}>${sub}</small></span><span class="go">›</span>`;
+  }
+}
+
 /* ---------- 啟動 ---------- */
+expandTemplates();
 start();
 async function start() {
   if (!CFG.owner || CFG.owner === 'YOUR_GITHUB_ACCOUNT') { notice('尚未設定資料 repo：請在 config.js 填入 GitHub 帳號與 repo 名稱。', true); render(); return; }
