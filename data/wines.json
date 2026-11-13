@@ -1693,25 +1693,22 @@
    "drinkWindow": "",
    "entryDate": "",
    "grapeNotes": "酒商直購",
-   "locations": [
-    {
-     "cabinet": "8樓右LB櫃",
-     "quantity": 2,
-     "shelf": "第5層"
-    }
-   ],
+   "locations": [],
    "origin": "",
    "photo": "",
    "referencePrice": 825,
-   "revision": 1,
+   "revision": 2,
    "source": "購",
-   "status": "active",
-   "updatedAt": "2026-09-30T04:45:48.186Z",
-   "updatedBy": "comfort527",
+   "status": "archived",
+   "updatedAt": "2026-11-13T02:01:49.261Z",
+   "updatedBy": "芝琦",
    "vintage": "2020",
    "volume": "750ml",
    "wineName": "VITICCIO CHIANTI CLASSCIO 55(金鑰匙)",
-   "wineryRegion": "VITICCIO/CHIANTI CLASSCIO"
+   "wineryRegion": "VITICCIO/CHIANTI CLASSCIO",
+   "color": "red",
+   "archivedAt": "2026-11-13T02:01:49.261Z",
+   "archivedBy": "芝琦"
   },
   "W061": {
    "createdAt": "",
@@ -1818,8 +1815,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 112,
- "updatedAt": "2026-11-13T02:01:21.474Z",
+ "rev": 113,
+ "updatedAt": "2026-11-13T02:01:49.261Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
