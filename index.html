@@ -24,7 +24,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261113f" id="mainCss">
+<link rel="stylesheet" href="style.css?v=20261113g" id="mainCss">
 </head>
 <body>
 <header class="bar">
@@ -34,6 +34,13 @@
    <span class="mark-t">酒窖</span>
   </a>
   <span class="sync" id="sync"><span class="dot"></span><span id="syncText">讀取中</span></span>
+  <nav class="tnav" id="tnav" aria-label="主要功能">
+   <button type="button" data-nav="home" class="on">🍷 酒窖</button>
+   <button type="button" data-nav="journal">📖 飲酒日誌</button>
+   <button type="button" data-nav="pend" id="tnPend" hidden>📷 待入櫃 <span class="bdot" id="tnPendN" hidden></span></button>
+   <button type="button" data-nav="admin" id="tnAdmin" hidden>⚙️ 管理</button>
+   <button type="button" data-nav="add" class="tadd" id="tnAdd" hidden>＋ 新增紅酒</button>
+  </nav>
   <div class="who">
    <span class="pill" id="whoPill">訪客</span>
    <button class="ghost" id="loginBtn">管理登入</button>
@@ -363,7 +370,7 @@
 
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="config.js?v=20261113f"></script>
-<script src="app.js?v=20261113f"></script>
+<script src="config.js?v=20261113g"></script>
+<script src="app.js?v=20261113g"></script>
 </body>
 </html>

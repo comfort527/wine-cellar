@@ -1,4 +1,4 @@
-:root{--ver:"20261113f"}
+:root{--ver:"20261113g"}
 /* 酒窖：冷石灰與酒紅（淺色）／酒瓶玻璃墨綠（深色）。
    版面：頂列 → 總瓶數 → 酒櫃配置圖（每層一排瓶點）→ 帳冊式酒款清單；詳細資料從側邊（手機為底部）滑出。 */
 :root{
@@ -735,7 +735,6 @@ fieldset.colorpick{display:flex;flex-direction:row;flex-wrap:wrap;align-items:ce
 
 /* 手機底部導覽列 */
 .bnav{display:none}
-.adm-phone{display:none}
 @media (max-width:760px){
   .bnav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(var(--n,5),1fr);align-items:end;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--surface) 94%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-top:1px solid var(--line)}
   .bnav[data-n="3"]{--n:3}.bnav[data-n="4"]{--n:4}.bnav[data-n="5"]{--n:5}
@@ -781,3 +780,26 @@ fieldset.colorpick{display:flex;flex-direction:row;flex-wrap:wrap;align-items:ce
 }
 .bn-pre{display:none}
 @media (min-width:761px){.bnav .bn-pre{display:inline}}
+
+/* 電腦版（C）：功能放在上方列；酒櫃固定在左、酒款在右 */
+.tnav{display:none}
+@media (min-width:1181px) and (pointer:fine), (min-width:1401px){
+  .bar-in{max-width:none}
+  .tnav{display:flex;align-items:center;gap:4px;flex:1;min-width:0;margin-left:18px}
+  .tnav button{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:999px;font:600 18px var(--body);color:var(--muted);white-space:nowrap}
+  .tnav button[hidden]{display:none}
+  .tnav button:hover{background:var(--surface-2);color:var(--ink)}
+  .tnav button.on{background:var(--wine-soft);color:var(--wine)}
+  .tnav button:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
+  .tnav .tadd{margin-left:auto;background:var(--wine);color:var(--on-wine);padding:9px 20px}
+  .tnav .tadd:hover{background:var(--wine);color:var(--on-wine);filter:brightness(1.1)}
+  .tnav .bdot{min-width:20px;padding:0 6px;border-radius:999px;background:var(--wine);color:#fff;font:700 12px/20px var(--body);text-align:center}
+  #adminBtn,#logoutBtn,#addBtn,#factJournal,#factPend{display:none!important}
+  .page{max-width:1880px;display:grid;grid-template-columns:minmax(360px,420px) minmax(0,1fr);gap:20px 32px;align-items:start}
+  .page > .notice,.summary{grid-column:1/-1}
+  .map-wrap{grid-column:1;position:sticky;top:84px;max-height:calc(100vh - 100px);overflow:auto;overscroll-behavior:contain;padding-right:4px}
+  .map-wrap .map{grid-template-columns:1fr}
+  .map-wrap .fridge{max-width:none}
+  .ledger,.foot{grid-column:2}
+  .rows.grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+}

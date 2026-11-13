@@ -39,7 +39,7 @@ const canEdit = () => !!S.session;
 const TABLET_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse)';
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261113f';
+const APP_VER = '20261113g';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -274,6 +274,8 @@ function render() {
   $('bnAdd').hidden = $('bnPend').hidden = !canEdit(); $('bnAdmin').hidden = !S.session; $('bnLogin').hidden = !!S.session || !S.data;
   $('bnLoginT').textContent = setup ? '設定' : '登入';
   $('bnPendN').hidden = !pn; $('bnPendN').textContent = pn;
+  $('tnAdd').hidden = $('tnPend').hidden = !canEdit(); $('tnAdmin').hidden = !S.session;
+  $('tnPendN').hidden = !pn; $('tnPendN').textContent = pn;
   $('bnav').dataset.n = document.querySelectorAll('#bnav button:not([hidden])').length;
   $('admWho').textContent = S.session ? `目前是「${S.session.label}」` : '';
   $('viewList').classList.toggle('on', S.view !== 'grid'); $('viewList').setAttribute('aria-pressed', S.view !== 'grid');
@@ -498,7 +500,7 @@ function wire() {
   $('fab').addEventListener('click', () => openWineForm(null));
   $('adminBtn').addEventListener('click', () => openAdmin());
   $('admMenu').addEventListener('click', e => { if (e.target.closest('[data-act=logout]')) return logout(); const b = e.target.closest('[data-tab]'); if (b) switchTab(b.dataset.tab); });
-  $('bnav').addEventListener('click', e => {
+  const onNav = e => {
     const b = e.target.closest('[data-nav]'); if (!b) return;
     const n = b.dataset.nav;
     if (n === 'home') { S.filter = null; S.search = ''; if ($('search')) $('search').value = ''; render(); window.scrollTo({top: 0, behavior: 'smooth'}); }
@@ -507,7 +509,8 @@ function wire() {
     else if (n === 'pend') $('factPend').click();
     else if (n === 'admin') openAdmin();
     else if (n === 'login') $('loginBtn').click();
-  });
+  };
+  $('bnav').addEventListener('click', onNav); $('tnav').addEventListener('click', onNav);
   $('admBack').addEventListener('click', adminMenu);
   matchMedia('(min-width: 761px)').addEventListener('change', () => { if (!$('adminModal').open) return; const cur = ADMIN_TABS.find(t => !$('tab-' + t).hidden); if (admWide()) switchTab(cur || 'lib'); else if (cur) switchTab(cur); });
   $('factPend').addEventListener('click', () => { showDialog('pendModal'); showErr('pendErr', ''); renderPendStrip(); renderPending(); });
