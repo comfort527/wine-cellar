@@ -37,9 +37,10 @@ function msgOf(e) { return e?.user ? e.message : '操作未完成，請稍後再
 const canEdit = () => !!S.session;
 /* iPad：761–1180px，或觸控螢幕寬到 1400px（iPad Pro 橫放）。橫放時改成左右雙欄 */
 const TABLET_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse)';
+const DESK_MQ = '(min-width:1181px) and (pointer:fine), (min-width:1401px)';
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261113g';
+const APP_VER = '20261113h';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -306,7 +307,19 @@ function renderMap(list) {
     if (l.quantity > 0) { cur[isWhite(w) ? 'white' : 'red'] += l.quantity; cur.wines++; }
     sh.set(l.shelf, cur);
   }
-  const html = [...cabs].filter(([, sh]) => sh.size).map(([cab, sh]) => {
+  const all = [...cabs].filter(([, sh]) => sh.size);
+  // 電腦版櫃子 3 個以上：先顯示全部櫃子的縮圖總覽，點進去才看完整酒櫃
+  const overview = all.length >= 3 && matchMedia(DESK_MQ).matches;
+  if (!overview || !all.some(([c]) => c === S.cabOpen)) S.cabOpen = overview ? null : S.cabOpen;
+  if (overview && !S.cabOpen) {
+    $('map').classList.add('mini-mode');
+    $('map').innerHTML = all.map(([cab, sh]) => miniCabHtml(cab, sh)).join('');
+    if (!$('mapLegend')) $('map').insertAdjacentHTML('afterend', '<div class="map-legend" id="mapLegend"><span><i class="lg-r"></i>紅酒</span><span><i class="lg-w"></i>白酒</span></div>');
+    return;
+  }
+  $('map').classList.remove('mini-mode');
+  const back = overview ? `<button type="button" class="cab-back" data-cabback>‹ 全部 ${all.length} 個櫃子</button>` : '';
+  const html = back + all.filter(([cab]) => !overview || cab === S.cabOpen).map(([cab, sh]) => {
     const sum = [...sh.values()].reduce((a, s) => a + s.red + s.white, 0);
     const on = S.filter?.cabinet === cab;
     const shelves = [...sh].sort((a, b) => shelfNo(a[0]) - shelfNo(b[0])).map(([name, s]) => {
@@ -320,6 +333,17 @@ function renderMap(list) {
   $('map').innerHTML = html ? html + '' : '<p class="hint">還沒有存放位置。</p>';
   fillBottles();
   if (html && !$('mapLegend')) $('map').insertAdjacentHTML('afterend', '<div class="map-legend" id="mapLegend"><span><i class="lg-r"></i>紅酒</span><span><i class="lg-w"></i>白酒</span></div>');
+}
+function miniCabHtml(cab, sh) {
+  const rows = [...sh].sort((a, b) => shelfNo(a[0]) - shelfNo(b[0])).map(([name, s]) => ({name, ...s, n: s.red + s.white, free: freeAt(cab, name, s.red + s.white)}));
+  const scale = Math.max(1, ...rows.map(r => r.n + (r.free || 0)));
+  const sum = rows.reduce((a, r) => a + r.n, 0), frees = rows.filter(r => r.free !== null), freeSum = frees.reduce((a, r) => a + r.free, 0);
+  const on = S.filter?.cabinet === cab;
+  const bars = rows.map(r => {
+    const sel = on && S.filter.shelf === r.name;
+    return `<button type="button" class="sb ${sel ? 'on' : ''}" data-cab="${esc(cab)}" data-shelf="${esc(r.name)}" aria-pressed="${sel}" aria-label="${esc(cab)} ${esc(r.name)}：${r.n} 瓶${r.free !== null ? `，可再放 ${r.free}` : ''}"><span class="sn">${shelfNo(r.name) < 999 ? shelfNo(r.name) : esc(r.name)}</span><span class="bar"><i class="r" style="width:${r.red / scale * 100}%"></i><i class="w" style="width:${r.white / scale * 100}%"></i>${r.free ? `<i class="f" style="width:${r.free / scale * 100}%"></i>` : ''}</span><span class="sc">${r.n}${r.free === 0 ? '<em class="full">滿</em>' : ''}</span></button>`;
+  }).join('');
+  return `<div class="mc ${on ? 'on' : ''}"><button type="button" class="mc-h" data-cabopen="${esc(cab)}" aria-label="打開 ${esc(cab)}：${sum} 瓶"><span class="mc-n">${esc(cab)}</span><span class="mc-led">${sum}</span></button>${bars}<button type="button" class="mc-f" data-cabopen="${esc(cab)}"><span>${rows.length} 層・看整櫃 ›</span>${frees.length ? `<em>${freeSum ? `空位 ${freeSum}` : '已滿'}</em>` : ''}</button></div>`;
 }
 /* ---------- 各層容量：存「現有＋還可放」，空位＝容量−目前瓶數，出入庫後自動更新 ---------- */
 const capOf = (cab, sh) => { const v = S.data?.capacity?.[cab]?.[sh]; return Number.isFinite(v) ? v : null; };
@@ -503,13 +527,14 @@ function wire() {
   const onNav = e => {
     const b = e.target.closest('[data-nav]'); if (!b) return;
     const n = b.dataset.nav;
-    if (n === 'home') { S.filter = null; S.search = ''; if ($('search')) $('search').value = ''; render(); window.scrollTo({top: 0, behavior: 'smooth'}); }
+    if (n === 'home') { S.filter = null; S.cabOpen = null; S.search = ''; if ($('search')) $('search').value = ''; render(); window.scrollTo({top: 0, behavior: 'smooth'}); }
     else if (n === 'journal') $('factJournal').click();
     else if (n === 'add') openWineForm(null);
     else if (n === 'pend') $('factPend').click();
     else if (n === 'admin') openAdmin();
     else if (n === 'login') $('loginBtn').click();
   };
+  matchMedia(DESK_MQ).addEventListener('change', () => render());
   $('bnav').addEventListener('click', onNav); $('tnav').addEventListener('click', onNav);
   $('admBack').addEventListener('click', adminMenu);
   matchMedia('(min-width: 761px)').addEventListener('change', () => { if (!$('adminModal').open) return; const cur = ADMIN_TABS.find(t => !$('tab-' + t).hidden); if (admWide()) switchTab(cur || 'lib'); else if (cur) switchTab(cur); });
@@ -517,6 +542,9 @@ function wire() {
   $('exportBtn').addEventListener('click', exportCsv);
   let fbRaf = 0; window.addEventListener('resize', () => { cancelAnimationFrame(fbRaf); fbRaf = requestAnimationFrame(fillBottles); });
   $('map').addEventListener('click', e => {
+    const op = e.target.closest('[data-cabopen]');
+    if (op) { S.cabOpen = op.dataset.cabopen; S.filter = {cabinet: S.cabOpen, shelf: ''}; render(); return; }
+    if (e.target.closest('[data-cabback]')) { S.cabOpen = null; if (S.filter?.cabinet) S.filter = null; render(); return; }
     const b = e.target.closest('[data-cab]'); if (!b) return;
     const next = {cabinet: b.dataset.cab, shelf: b.dataset.shelf || ''};
     S.filter = S.filter && S.filter.cabinet === next.cabinet && S.filter.shelf === next.shelf ? null : next;

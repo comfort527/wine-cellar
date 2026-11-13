@@ -1,4 +1,4 @@
-:root{--ver:"20261113g"}
+:root{--ver:"20261113h"}
 /* 酒窖：冷石灰與酒紅（淺色）／酒瓶玻璃墨綠（深色）。
    版面：頂列 → 總瓶數 → 酒櫃配置圖（每層一排瓶點）→ 帳冊式酒款清單；詳細資料從側邊（手機為底部）滑出。 */
 :root{
@@ -803,3 +803,26 @@ fieldset.colorpick{display:flex;flex-direction:row;flex-wrap:wrap;align-items:ce
   .ledger,.foot{grid-column:2}
   .rows.grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
 }
+
+/* 電腦版：櫃子 3 個以上時的縮圖總覽 */
+.map.mini-mode{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+.mc{background:#0b0b0b;border-radius:12px;padding:10px 10px 6px;color:#e9e6e1;box-shadow:0 8px 18px -10px rgba(0,0,0,.5)}
+.mc.on{box-shadow:0 0 0 3px #ffcf8a,0 8px 18px -10px rgba(0,0,0,.5)}
+.mc button{all:unset;box-sizing:border-box;cursor:pointer}
+.mc button:focus-visible{outline:2px solid #ffcf8a;outline-offset:1px;border-radius:6px}
+.mc .mc-h{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;margin-bottom:6px}
+.mc-n{font:600 16px var(--body);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mc-led{font:600 18px ui-monospace,Menlo,Consolas,monospace;color:#7dff9b;background:#020302;border:1px solid #2a2a2a;border-radius:4px;padding:2px 8px}
+.mc .sb{display:grid;grid-template-columns:18px 1fr 54px;align-items:center;gap:7px;width:100%;padding:3px 2px;border-radius:5px;font:600 13px var(--body);color:#c9b79c}
+.mc .sb:hover{background:#1c1a17}
+.mc .sb.on{background:#3a2e1f;color:#ffe1b5}
+.mc .bar{height:11px;border-radius:3px;background:#2d2924;overflow:hidden;display:flex}
+.mc .bar i{display:block;height:100%}.mc .bar i.r{background:#8a2638}.mc .bar i.w{background:#a3ad5c}
+.mc .bar i.f{background:repeating-linear-gradient(90deg,#4f8a5c 0 3px,transparent 3px 6px)}
+.mc .sc{text-align:right;white-space:nowrap}
+.mc .sc .full{font-style:normal;margin-left:4px;padding:0 5px;border-radius:999px;background:#9b2335;color:#fff;font-size:11px}
+.mc .mc-f{display:flex;justify-content:space-between;gap:8px;width:100%;margin-top:6px;padding:4px 2px;font:500 13px var(--body);color:#9a968f;white-space:nowrap}
+.mc .mc-f:hover span{color:#ffe1b5}
+.mc .mc-f em{font-style:normal;color:#7dff9b}
+.cab-back{all:unset;cursor:pointer;display:inline-block;margin:0 0 10px;color:var(--wine);font:600 18px var(--body)}
+.cab-back:focus-visible{outline:2px solid var(--wine);outline-offset:2px;border-radius:6px}
