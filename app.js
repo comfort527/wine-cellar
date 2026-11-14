@@ -72,7 +72,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261114b';
+const APP_VER = '20261114c';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -501,7 +501,7 @@ const freeAt = (cab, sh, n) => { const c = capOf(cab, sh); return c === null ? n
 /* 每層最多畫兩排：下排排滿，上排少一瓶、疊在兩瓶之間；放不下的以「+n」表示，紅白依比例 */
 function fillBottles(fromRender) {
   // 手機上視窗蓋住酒櫃時先不播，等視窗關掉、看得到酒櫃時再播（見 wireMotion）
-  const covered = fromRender === true && !!S.mapShown && motionOK() && !!document.querySelector('dialog[open]');
+  const covered = fromRender === true && !!S.mapShown && motionOK() && mapCovered();
   const prev = fromRender === true && !covered ? S.mapShown : null, cur = new Map();
   for (const el of document.querySelectorAll('#map .fr-btl')) {
     const red = Number(el.dataset.r) || 0, white = Number(el.dataset.w) || 0, n = red + white, cs = getComputedStyle(el);
@@ -533,7 +533,7 @@ function replay(el, cls) { el.classList.remove(cls); void el.offsetWidth; el.cla
 function setNum(el, v) {
   const t = String(v), old = el.textContent; el.textContent = t;
   if (old === t || !/^\d+$/.test(old) || !/^\d+$/.test(t)) return;
-  if (motionOK() && document.querySelector('dialog[open]')) S.numPending = true; else replay(el, 'bump');
+  if (motionOK() && mapCovered()) S.numPending = true; else replay(el, 'bump');
 }
 // 年份由舊到新（沒有年份的排最後），同年份依登錄先後
 const oldestFirst = (a, b) => (Number(a.vintage) || 9999) - (Number(b.vintage) || 9999) || a.wineId.localeCompare(b.wineId);
@@ -657,7 +657,10 @@ function renderDrawer() {
 async function syncNow() { try { await loadData(true); render(); toast('已同步。'); } catch (e) { toast(msgOf(e)); } }
 
 /* ---------- 手機動畫與手勢 ---------- */
-const motionOK = () => matchMedia('(max-width:760px), ' + PHL_MQ).matches && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+const TOUCH_MQ = '(max-width:760px), ' + PHL_MQ + ', ' + TABLET_MQ;   // 手機與 iPad
+const motionOK = () => matchMedia(TOUCH_MQ).matches && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+// 酒櫃圖現在是不是被視窗蓋住：手機任何視窗都算；iPad 橫放時右側的詳細資料不會蓋到左邊的酒櫃
+const mapCovered = () => { const ds = [...document.querySelectorAll('dialog[open]')]; return ds.some(d => d.id !== 'drawer') || (ds.length > 0 && !matchMedia(SPLIT_MQ).matches); };
 /* 照片放大：點照片卡時，卡片上的照片飛到詳細資料的大照片位置；關閉時飛回卡片。
    飛行中的照片放在最上層（popover），瀏覽器不支援時維持一般的開關動畫。 */
 const slideIdx = sl => sl ? Math.round(sl.scrollLeft / Math.max(1, sl.clientWidth)) : 0;
@@ -669,6 +672,13 @@ function heroFly(src, from, to, r0, r1) {
   const end = () => c.remove(); setTimeout(end, 600);
   return a.finished.then(end, end);
 }
+// 大照片實際顯示的範圍：滿版裁切 (cover) 就是整個框；完整顯示 (contain) 則依照片比例置中
+function heroBox(gal, img, ref) {
+  const r = gal.getBoundingClientRect();
+  if (getComputedStyle(img).objectFit !== 'contain' || !ref.naturalWidth) return {rect: r, radius: getComputedStyle(gal).borderRadius, fit: 'cover'};
+  const k = ref.naturalWidth / ref.naturalHeight, w = k > r.width / r.height ? r.width : r.height * k, h = w / k;
+  return {rect: {left: r.left + (r.width - w) / 2, top: r.top + (r.height - h) / 2, width: w, height: h}, radius: '0px', fit: 'contain'};
+}
 function heroPair() {
   const dw = $('drawer'), gal = dw.querySelector('.gal'), card = [...document.querySelectorAll('#list .card')].find(c => c.dataset.open === S.drawer);
   const box = card?.querySelector('.phbox.photo'); if (!gal || !box) return null;
@@ -679,9 +689,10 @@ function heroOpen(card) {
   if (!motionOK() || !('popover' in HTMLElement.prototype) || !card.classList.contains('card')) return;
   const h = heroPair(); if (!h || !h.cimg?.complete || !h.cimg.naturalWidth) return;
   const dw = $('drawer'); dw.classList.add('hero');
-  h.gimg.style.background = `url("${h.cimg.currentSrc || h.cimg.src}") center/cover no-repeat`;   // 大圖還沒載完時先墊縮圖
+  const to = heroBox(h.gal, h.gimg, h.cimg), src = h.cimg.currentSrc || h.cimg.src;
+  h.gimg.style.backgroundImage = `url("${src}")`; h.gimg.style.backgroundPosition = 'center'; h.gimg.style.backgroundRepeat = 'no-repeat'; h.gimg.style.backgroundSize = to.fit;   // 大圖還沒載完時先墊縮圖
   h.gal.style.visibility = 'hidden';
-  heroFly(h.cimg.currentSrc || h.cimg.src, h.box.getBoundingClientRect(), h.gal.getBoundingClientRect(), '12px', getComputedStyle(h.gal).borderRadius)
+  heroFly(src, h.box.getBoundingClientRect(), to.rect, '12px', to.radius)
     .then(() => { h.gal.style.visibility = ''; });
 }
 function heroClose() {
@@ -689,8 +700,9 @@ function heroClose() {
   if (!motionOK() || !('popover' in HTMLElement.prototype) || dw.scrollTop > 40 || document.querySelector('dialog[open]:not(#drawer)')) return;
   const h = heroPair(); if (!h) return;
   const to = h.box.getBoundingClientRect(); if (to.top < 0 || to.bottom > innerHeight || !to.width) return;
+  const from = heroBox(h.gal, h.gimg, h.gimg.naturalWidth ? h.gimg : h.cimg);
   dw.classList.add('hero'); h.gal.style.visibility = 'hidden';
-  heroFly(h.gimg.complete && h.gimg.naturalWidth ? h.gimg.currentSrc || h.gimg.src : h.cimg.src, h.gal.getBoundingClientRect(), to, getComputedStyle(h.gal).borderRadius, '12px');
+  heroFly(h.gimg.complete && h.gimg.naturalWidth ? h.gimg.currentSrc || h.gimg.src : h.cimg.src, from.rect, to, from.radius, '12px');
 }
 function wireMotion() {
   // 從這個元素往上到 stop 為止，有沒有已經往下捲的區塊（有的話手指往下是在捲內容，不是拖視窗）
@@ -702,27 +714,32 @@ function wireMotion() {
     const t = e.target, p = e.touches[0], dlg = t.closest?.('dialog[open]');
     if (!t.closest || t.closest('input,textarea,select,#pgrid,[data-nodrag]')) return;
     if (dlg) {
-      // 視窗往下滑關閉：手機直放的底部視窗；從頂端橫槓／標題列拖，或內容已在最上面時往下拖
-      if (!matchMedia(PHONE_MQ).matches || isClosing(dlg)) return;
-      const off = p.clientY - dlg.getBoundingClientRect().top; if (off < 0) return;   // 點在視窗外的暗色區
+      // 視窗往下滑關閉：手機直放的底部視窗與 iPad 的中間視窗；從頂端橫槓／標題列拖，或內容已在最上面時往下拖。
+      // iPad 的詳細資料在右側，改成往右滑關閉（照片輪播上不算，那是在換照片）
+      const tablet = matchMedia(TABLET_MQ).matches;
+      if ((!tablet && !matchMedia(PHONE_MQ).matches) || isClosing(dlg)) return;
+      const r = dlg.getBoundingClientRect(), off = p.clientY - r.top;
+      if (off < 0 || p.clientY > r.bottom || p.clientX < r.left || p.clientX > r.right) return;   // 點在視窗外的暗色區
+      const base = {kind: 'sheet', el: dlg, x: p.clientX, y: p.clientY, t: e.timeStamp, on: false, dy: 0};
+      if (tablet && dlg.id === 'drawer') { if (!t.closest('.slides')) g = {...base, axis: 'x'}; return; }
       const top = off < 56 || !!t.closest('.dh');
-      if (top || !scrolled(t, dlg)) g = {kind: 'sheet', el: dlg, x: p.clientX, y: p.clientY, t: e.timeStamp, on: false, dy: 0};
-    } else if (S.data && !S.ptrBusy && matchMedia('(max-width:760px), ' + PHL_MQ).matches && scrollY <= 0 && !scrolled(t, document.body)) {
+      if (top || !scrolled(t, dlg)) g = base;
+    } else if (S.data && !S.ptrBusy && matchMedia(TOUCH_MQ).matches && scrollY <= 0 && !scrolled(t, document.body)) {
       g = {kind: 'ptr', x: p.clientX, y: p.clientY, on: false, dy: 0};   // 在最上面往下拉：立即同步
     }
   }, {passive: true});
   document.addEventListener('touchmove', e => {
     if (!g) return;
-    const p = e.touches[0], dx = p.clientX - g.x, dy = p.clientY - g.y;
+    const p = e.touches[0], horiz = g.axis === 'x', dx = p.clientX - g.x, dy = p.clientY - g.y, main = horiz ? dx : dy, cross = horiz ? dy : dx;
     if (!g.on) {
       if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
-      if (dy <= 0 || dy < Math.abs(dx) * 1.3) { g = null; return; }
-      g.on = true; g.y = p.clientY; g.t = e.timeStamp; if (g.kind === 'ptr') ptr.classList.add('show');
+      if (main <= 0 || main < Math.abs(cross) * 1.3) { g = null; return; }
+      g.on = true; g.x = p.clientX; g.y = p.clientY; g.t = e.timeStamp; if (g.kind === 'ptr') ptr.classList.add('show');
       return;
     }
     if (e.cancelable) e.preventDefault();
-    g.dy = Math.max(0, dy);
-    if (g.kind === 'sheet') { g.el.style.transition = 'none'; g.el.style.transform = `translateY(${g.dy}px)`; }
+    g.dy = Math.max(0, main);   // 沿著關閉方向拖了多遠
+    if (g.kind === 'sheet') { g.el.style.transition = 'none'; g.el.style.transform = `translate${horiz ? 'X' : 'Y'}(${g.dy}px)`; }
     else { const y = Math.min(96, g.dy * .5); ptr.style.transform = `translate(-50%,${y}px)`; ptr.firstChild.style.transform = `rotate(${y * 3.6}deg)`; ptr.classList.toggle('ready', y >= 64); }
   }, {passive: false});
   const end = e => {
@@ -738,14 +755,15 @@ function wireMotion() {
     const el = cur.el, v = cur.dy / Math.max(1, e.timeStamp - cur.t), close = e.type === 'touchend' && (cur.dy > 110 || (cur.dy > 36 && v > .6));
     const reset = () => { el.style.transition = ''; el.style.transform = ''; };
     if (!close) { el.style.transition = 'transform .2s ease-out'; el.style.transform = ''; setTimeout(reset, 220); return; }
-    const a = el.animate([{transform: `translateY(${cur.dy}px)`}, {transform: 'translateY(100%)'}], {duration: 170, easing: 'ease-in', fill: 'forwards'});
+    const ax = cur.axis === 'x' ? 'X' : 'Y', far = ax === 'X' ? '110%' : `${innerHeight}px`;
+    const a = el.animate([{transform: `translate${ax}(${cur.dy}px)`}, {transform: `translate${ax}(${far})`}], {duration: 170, easing: 'ease-in', fill: 'forwards'});
     const done = () => { if (el.open) dlgClose.call(el); el.classList.remove('hero'); a.cancel(); reset(); };
     a.finished.then(done, done);
   };
   document.addEventListener('touchend', end); document.addEventListener('touchcancel', end);
   // 視窗都關掉後，補播剛才被蓋住的酒櫃與瓶數變化
   document.addEventListener('close', () => {
-    if ((!S.mapPending && !S.numPending) || document.querySelector('dialog[open]')) return;
+    if ((!S.mapPending && !S.numPending) || mapCovered()) return;
     if (S.mapPending) { S.mapPending = false; renderMap(active()); }
     if (S.numPending) { S.numPending = false; replay($('sumBottles'), 'bump'); }
   }, true);

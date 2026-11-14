@@ -462,7 +462,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261114b";
+:root{--ver:"20261114c";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
@@ -851,10 +851,13 @@ i[data-icon],.bnav button i,.tnav button i{font-style:normal;display:inline-flex
   .adm{height:calc(100dvh - 16px - 72px)}
 }
 
-/* ---------- 手機動畫（只在手機；系統設定「減少動態效果」時全部關閉） ---------- */
+/* ---------- 手機與 iPad 的動畫（電腦版沒有；系統設定「減少動態效果」時全部關閉） ---------- */
 .skel,.ptr{display:none}
 .hero-fly{position:fixed;inset:auto;margin:0;padding:0;border:0;background:none;max-width:none;max-height:none;object-fit:cover;overflow:hidden;pointer-events:none}
 @keyframes sheetDown{to{transform:translateY(100%)}}
+@keyframes slideOut{to{transform:translateX(105%)}}
+@keyframes popIn{from{opacity:0;transform:scale(.97)}}
+@keyframes popOut{to{opacity:0;transform:scale(.97)}}
 @keyframes fadeOut{to{opacity:0}}
 @keyframes fadeIn{from{opacity:0}}
 @keyframes bump{35%{transform:scale(1.3)}}
@@ -864,7 +867,7 @@ i[data-icon],.bnav button i,.tnav button i{font-style:normal;display:inline-flex
 @keyframes shelfLit{0%{filter:brightness(1.9)}100%{filter:none}}
 @keyframes shimmer{to{background-position:-200% 0}}
 @keyframes ptrSpin{to{transform:rotate(360deg)}}
-@media (max-width:760px), (orientation:landscape) and (max-height:500px) and (max-width:1000px){
+@media (max-width:760px), (orientation:landscape) and (max-height:500px) and (max-width:1000px), (min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse){
   html,body{overscroll-behavior-y:contain}
   dialog{overscroll-behavior:contain}
   /* 讀取中：先畫出灰色輪廓 */
@@ -879,7 +882,9 @@ i[data-icon],.bnav button i,.tnav button i{font-style:normal;display:inline-flex
   .ptr.busy{transform:translate(-50%,84px);transition:transform .15s ease-out}
 }
 @media (orientation:landscape) and (max-height:500px) and (max-width:1000px){.ptr{left:calc(50% + 39px)}}
-@media (max-width:760px) and (prefers-reduced-motion:no-preference), (orientation:landscape) and (max-height:500px) and (max-width:1000px) and (prefers-reduced-motion:no-preference){
+@media (min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse){.loading .skel{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}.loading .map:empty{height:480px}}
+@media (prefers-reduced-motion:no-preference){
+@media (max-width:760px), (orientation:landscape) and (max-height:500px) and (max-width:1000px), (min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse){
   .loading .skel i,.loading .map:empty{animation:shimmer 1.3s linear infinite}
   .ptr.busy i{animation:ptrSpin .7s linear infinite}
   /* 按下去的回饋 */
@@ -900,7 +905,16 @@ i[data-icon],.bnav button i,.tnav button i{font-style:normal;display:inline-flex
   .drawer.hero[open]{animation:fadeIn .26s ease-out}
   .drawer.hero[open].closing{animation:fadeOut .24s ease-in forwards}
 }
-@media (max-width:760px) and (orientation:portrait) and (prefers-reduced-motion:no-preference), (max-width:760px) and (min-height:501px) and (prefers-reduced-motion:no-preference){
+/* 手機直放：底部視窗往下收回 */
+@media (max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px){
   dialog[open].closing{animation:sheetDown .2s ease-in forwards}
   .drawer.hero[open].closing{animation:fadeOut .24s ease-in forwards}
+}
+/* iPad：右側的詳細資料往右收回；中間的視窗輕輕浮現、淡出 */
+@media (min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse){
+  .drawer[open].closing{animation:slideOut .2s ease-in forwards}
+  dialog:not(.drawer)[open]{animation:popIn .18s ease-out}
+  dialog:not(.drawer)[open].closing{animation:popOut .15s ease-in forwards}
+  .drawer.hero[open].closing{animation:fadeOut .24s ease-in forwards}
+}
 }
