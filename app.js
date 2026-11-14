@@ -32,6 +32,36 @@ function toast(m) { $('toast').textContent = m; $('toast').hidden = false; clear
 function notice(m, bad) { const n = $('notice'); n.textContent = m || ''; n.hidden = !m; n.classList.toggle('bad', !!bad); }
 function showErr(id, m) { const e = $(id); e.textContent = m || ''; e.hidden = !m; if (m) e.scrollIntoView({block: 'nearest'}); }  // 手機的按鈕固定在底部，錯誤訊息要捲到看得見
 function showDialog(id) { document.querySelectorAll('.ferr').forEach(e => e.hidden = true); $(id).showModal(); }
+/* 關閉視窗時先播收回動畫：動畫由 CSS 的 dialog.closing 決定（目前只有手機有），沒有動畫就直接關。
+   收回途中又要打開同一個視窗時，取消關閉、維持開啟。 */
+const dlgClose = HTMLDialogElement.prototype.close, dlgShow = HTMLDialogElement.prototype.showModal;
+const isClosing = d => d.classList.contains('closing'), dlgStack = [];   // dlgStack：視窗打開的先後順序
+HTMLDialogElement.prototype.showModal = function () {
+  if (this.open && isClosing(this)) { this.classList.remove('closing'); return; }
+  dlgShow.call(this);
+  const i = dlgStack.indexOf(this); if (i >= 0) dlgStack.splice(i, 1); dlgStack.push(this);
+};
+HTMLDialogElement.prototype.close = function (v) {
+  if (!this.open || isClosing(this)) return;
+  const before = getComputedStyle(this).animationName;
+  if (this.id === 'drawer') heroClose();
+  this.classList.add('closing');
+  const cs = getComputedStyle(this);
+  if (cs.animationName === 'none' || cs.animationName === before || !parseFloat(cs.animationDuration)) { this.classList.remove('closing', 'hero'); return dlgClose.call(this, v); }
+  const done = () => { clearTimeout(timer); this.removeEventListener('animationend', onEnd); if (!isClosing(this)) return; this.classList.remove('closing', 'hero'); dlgClose.call(this, v); };
+  const onEnd = e => { if (e.target === this) done(); };
+  this.addEventListener('animationend', onEnd);
+  const timer = setTimeout(done, 450);
+  this.finishClose = done;
+};
+// Esc／返回鍵：也走收回動畫；上一個視窗還在收回時又按一次，就直接收完並關下一個
+document.addEventListener('cancel', e => {
+  const d = e.target; if (!(d instanceof HTMLDialogElement)) return;
+  e.preventDefault();
+  if (!isClosing(d)) return d.close();
+  d.finishClose?.();
+  [...dlgStack].reverse().find(x => x.open && !isClosing(x))?.close();
+}, true);
 function fail(m) { const e = new Error(m); e.user = true; throw e; }
 function msgOf(e) { return e?.user ? e.message : '操作未完成，請稍後再試。'; }
 const canEdit = () => !!S.session;
@@ -42,7 +72,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261114a';
+const APP_VER = '20261114b';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -398,13 +428,17 @@ function render() {
   renderSync();
   const list = active();
   // 總覽
-  $('sumBottles').textContent = S.data ? list.reduce((a, w) => a + total(w), 0) : '—';
+  setNum($('sumBottles'), S.data ? list.reduce((a, w) => a + total(w), 0) : '—');
   $('sumWines').textContent = S.data ? list.length + ' 款' : '—';
   const origins = new Set(list.map(countryOf).filter(o => o !== '未填產地'));
   if (S.data) { const ym = today().slice(0, 7); $('sumJournal').innerHTML = `${sumQty(journalEntries().filter(e => (e.date || '').startsWith(ym)))} <small>瓶／本月</small>`; }
   $('sumOrigins').textContent = origins.size ? origins.size + ' 國' : '—';
+  // 篩選條件換了（或第一次有資料）：酒卡依序淡入、選到的那一層亮一下
+  const fk = JSON.stringify(S.filter), fchg = !!S.data && S.fk !== fk; if (S.data) S.fk = fk;
   renderMap(list);
-  renderList(list);
+  if (fchg) $('map').querySelector('.fr-shelf.on, .fridge.on')?.classList.add('lit');
+  renderList(list, fchg);
+  if (S.data) document.body.classList.remove('loading');
   if ($('drawer').open && S.drawer) renderDrawer();
   if ($('journalView').open || ($('adminModal').open && !$('tab-outs').hidden)) renderHistory();
   if ($('adminModal').open && !$('tab-lib').hidden) renderMem();
@@ -446,7 +480,7 @@ function renderMap(list) {
     return `<div class="fridge ${on && !S.filter.shelf ? 'on' : ''}"><button class="fr-top" data-cab="${esc(cab)}" aria-pressed="${on && !S.filter.shelf}" aria-label="${esc(cab)}：${sum} 瓶，${sh.size} 層${frees.length ? `，空位 ${freeSum}` : ''}"><span class="fr-name">${esc(cab)}</span><span class="fr-led">${sum}</span><span class="fr-sub">${frees.length ? `<span class="cap-top ${freeSum ? '' : 'full'}">${freeSum ? `空位 <b>${freeSum}</b>` : '已滿'}</span>` : `${sh.size} 層`}</span></button><div class="fr-door"><div class="fr-in">${shelves}</div></div><span class="fr-feet"></span></div>`;
   }).join('');
   $('map').innerHTML = html ? html + '' : '<p class="hint">還沒有存放位置。</p>';
-  fillBottles();
+  fillBottles(true);
   if (html && !$('mapLegend')) $('map').insertAdjacentHTML('afterend', '<div class="map-legend" id="mapLegend"><span><i class="lg-r"></i>紅酒</span><span><i class="lg-w"></i>白酒</span></div>');
 }
 function miniCabHtml(cab, sh) {
@@ -465,7 +499,10 @@ const capOf = (cab, sh) => { const v = S.data?.capacity?.[cab]?.[sh]; return Num
 const qtyAt = (cab, sh) => bottlesAt(active(), cab, sh);
 const freeAt = (cab, sh, n) => { const c = capOf(cab, sh); return c === null ? null : Math.max(0, c - n); };
 /* 每層最多畫兩排：下排排滿，上排少一瓶、疊在兩瓶之間；放不下的以「+n」表示，紅白依比例 */
-function fillBottles() {
+function fillBottles(fromRender) {
+  // 手機上視窗蓋住酒櫃時先不播，等視窗關掉、看得到酒櫃時再播（見 wireMotion）
+  const covered = fromRender === true && !!S.mapShown && motionOK() && !!document.querySelector('dialog[open]');
+  const prev = fromRender === true && !covered ? S.mapShown : null, cur = new Map();
   for (const el of document.querySelectorAll('#map .fr-btl')) {
     const red = Number(el.dataset.r) || 0, white = Number(el.dataset.w) || 0, n = red + white, cs = getComputedStyle(el);
     const bs = parseFloat(cs.getPropertyValue('--bs')) || 30, gap = parseFloat(cs.getPropertyValue('--gap')) || 3;
@@ -474,9 +511,29 @@ function fillBottles() {
     const show = n > cap ? cap - 1 : n;   // 放不下時，最後一格改放「+n」
     let wh = white, r = red;
     if (n > cap) { wh = white ? Math.min(white, Math.max(1, Math.round(show * white / n))) : 0; r = show - wh; }
+    const sh = el.closest('.fr-shelf'), id = sh.dataset.cab + '\n' + sh.dataset.shelf, was = prev?.get(id);
+    cur.set(id, {n, show});
     const key = `${r}|${wh}|${n}`; if (el.dataset.k === key) continue; el.dataset.k = key;
     el.innerHTML = '<i></i>'.repeat(r) + '<i class="w"></i>'.repeat(wh) + (n > show ? `<b class="fr-more" title="還有 ${n - show} 瓶">+${n - show}</b>` : '');
+    // 出庫、入庫、移動後：這一層的瓶數跳一下，多出來的瓶子冒出來、少掉的瓶子淡出
+    if (!was || was.n === n) continue;
+    sh.classList.add('chg');
+    const bottles = el.querySelectorAll('i');
+    if (show > was.show) [...bottles].slice(-Math.min(3, show - was.show)).forEach(b => b.classList.add('in'));
+    else if (show < was.show) for (let k = Math.min(3, was.show - show); k > 0; k--) {
+      const g = document.createElement('i'); g.className = 'ghost' + (r ? '' : ' w');
+      g.addEventListener('animationend', () => g.remove()); setTimeout(() => g.remove(), 900);
+      (el.querySelector('.fr-more') || {before: n2 => el.append(n2)}).before(g);
+    }
   }
+  if (covered) S.mapPending = true; else if (fromRender === true) S.mapShown = cur;
+}
+// 數字有變時跳一下（第一次填入不跳）
+function replay(el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+function setNum(el, v) {
+  const t = String(v), old = el.textContent; el.textContent = t;
+  if (old === t || !/^\d+$/.test(old) || !/^\d+$/.test(t)) return;
+  if (motionOK() && document.querySelector('dialog[open]')) S.numPending = true; else replay(el, 'bump');
 }
 // 年份由舊到新（沒有年份的排最後），同年份依登錄先後
 const oldestFirst = (a, b) => (Number(a.vintage) || 9999) - (Number(b.vintage) || 9999) || a.wineId.localeCompare(b.wineId);
@@ -493,7 +550,7 @@ function sortWines(rows) {
     return a.wineId.localeCompare(b.wineId);
   });
 }
-function renderList(list) {
+function renderList(list, stagger) {
   $('filterBar').hidden = !S.filter;
   if (S.filter) $('filterText').textContent = S.filter.origin ? `只顯示產地：${S.filter.origin}` : `只顯示 ${S.filter.cabinet}${S.filter.shelf ? ' · ' + S.filter.shelf : ''}`;
   const q = S.search.trim().toLowerCase();
@@ -507,6 +564,7 @@ function renderList(list) {
   const el = $('list');
   el.className = 'rows' + (S.view === 'grid' ? ' grid' : '');
   el.innerHTML = rows.map(w => S.view === 'grid' ? cardHtml(w) : rowHtml(w)).join('');
+  if (stagger) { el.classList.add('stagger'); [...el.children].slice(0, 12).forEach((c, i) => { c.style.animationDelay = i * 28 + 'ms'; }); }
   el.hidden = !rows.length;
   const empty = $('empty');
   empty.hidden = !!rows.length;
@@ -543,12 +601,14 @@ function cardHtml(w) {
 }
 
 /* ---------- 詳細資料抽屜 ---------- */
-function openDrawer(id, fromHash) {
+function openDrawer(id, fromHash, card) {
   if (!byId(id)) return;
   const changed = S.drawer !== id || !$('drawer').open;
   S.drawer = id; renderDrawer();
-  if (!$('drawer').open) { $('drawer').showModal(); $('drawer').focus({preventScroll: true}); }
+  const fresh = !$('drawer').open;
+  if (fresh || isClosing($('drawer'))) { $('drawer').showModal(); if (fresh) $('drawer').focus({preventScroll: true}); }
   if (changed) $('drawer').scrollTop = 0;
+  if (fresh && card) heroOpen(card);
   if (!fromHash && location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
 }
 function closeDrawer() { if ($('drawer').open) $('drawer').close(); }
@@ -590,6 +650,105 @@ function renderDrawer() {
     <div class="dw-meta">${w.createdAt ? `建立 ${fmtTime(w.createdAt)}（${esc(nameOf(w.createdBy))}）<br>` : ''}最後修改 ${fmtTime(w.updatedAt)}（${esc(nameOf(w.updatedBy))}）${archived ? `<br>出清 ${fmtTime(w.archivedAt)}（${esc(nameOf(w.archivedBy))}）` : ''}</div>
    </div>`;
   if (keep) { const sl = $('drawerBody').querySelector('.slides'); if (sl) { sl.scrollLeft = keep; sl.dispatchEvent(new Event('scroll')); } }
+  if (S.dwQty && S.dwQty.id === w.wineId && S.dwQty.t !== t) replay($('drawerBody').querySelector('.dw-stock .sum b'), 'bump');
+  S.dwQty = {id: w.wineId, t};
+}
+
+async function syncNow() { try { await loadData(true); render(); toast('已同步。'); } catch (e) { toast(msgOf(e)); } }
+
+/* ---------- 手機動畫與手勢 ---------- */
+const motionOK = () => matchMedia('(max-width:760px), ' + PHL_MQ).matches && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* 照片放大：點照片卡時，卡片上的照片飛到詳細資料的大照片位置；關閉時飛回卡片。
+   飛行中的照片放在最上層（popover），瀏覽器不支援時維持一般的開關動畫。 */
+const slideIdx = sl => sl ? Math.round(sl.scrollLeft / Math.max(1, sl.clientWidth)) : 0;
+function heroFly(src, from, to, r0, r1) {
+  const c = document.createElement('img'); c.className = 'hero-fly'; c.alt = ''; c.src = src; c.popover = 'manual';
+  document.body.append(c); c.showPopover();
+  const box = (r, rad) => ({left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px', borderRadius: rad});
+  const a = c.animate([box(from, r0), box(to, r1)], {duration: 300, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'forwards'});
+  const end = () => c.remove(); setTimeout(end, 600);
+  return a.finished.then(end, end);
+}
+function heroPair() {
+  const dw = $('drawer'), gal = dw.querySelector('.gal'), card = [...document.querySelectorAll('#list .card')].find(c => c.dataset.open === S.drawer);
+  const box = card?.querySelector('.phbox.photo'); if (!gal || !box) return null;
+  const ci = slideIdx(box.querySelector('.slides')), gi = slideIdx(gal.querySelector('.slides'));
+  return ci === gi ? {gal, box, cimg: box.querySelectorAll('img')[ci], gimg: gal.querySelectorAll('img')[gi]} : null;
+}
+function heroOpen(card) {
+  if (!motionOK() || !('popover' in HTMLElement.prototype) || !card.classList.contains('card')) return;
+  const h = heroPair(); if (!h || !h.cimg?.complete || !h.cimg.naturalWidth) return;
+  const dw = $('drawer'); dw.classList.add('hero');
+  h.gimg.style.background = `url("${h.cimg.currentSrc || h.cimg.src}") center/cover no-repeat`;   // 大圖還沒載完時先墊縮圖
+  h.gal.style.visibility = 'hidden';
+  heroFly(h.cimg.currentSrc || h.cimg.src, h.box.getBoundingClientRect(), h.gal.getBoundingClientRect(), '12px', getComputedStyle(h.gal).borderRadius)
+    .then(() => { h.gal.style.visibility = ''; });
+}
+function heroClose() {
+  const dw = $('drawer'); dw.classList.remove('hero');
+  if (!motionOK() || !('popover' in HTMLElement.prototype) || dw.scrollTop > 40 || document.querySelector('dialog[open]:not(#drawer)')) return;
+  const h = heroPair(); if (!h) return;
+  const to = h.box.getBoundingClientRect(); if (to.top < 0 || to.bottom > innerHeight || !to.width) return;
+  dw.classList.add('hero'); h.gal.style.visibility = 'hidden';
+  heroFly(h.gimg.complete && h.gimg.naturalWidth ? h.gimg.currentSrc || h.gimg.src : h.cimg.src, h.gal.getBoundingClientRect(), to, getComputedStyle(h.gal).borderRadius, '12px');
+}
+function wireMotion() {
+  // 從這個元素往上到 stop 為止，有沒有已經往下捲的區塊（有的話手指往下是在捲內容，不是拖視窗）
+  const scrolled = (el, stop) => { for (; el && el !== stop.parentElement; el = el.parentElement) if (el.scrollTop > 0) return true; return false; };
+  const ptr = document.createElement('div'); ptr.className = 'ptr'; ptr.setAttribute('aria-hidden', 'true'); ptr.innerHTML = '<i></i>'; document.body.append(ptr);
+  let g = null;   // 進行中的手勢：{kind:'sheet'|'ptr', el, x, y, t, on, dy}
+  document.addEventListener('touchstart', e => {
+    g = null; if (e.touches.length !== 1) return;
+    const t = e.target, p = e.touches[0], dlg = t.closest?.('dialog[open]');
+    if (!t.closest || t.closest('input,textarea,select,#pgrid,[data-nodrag]')) return;
+    if (dlg) {
+      // 視窗往下滑關閉：手機直放的底部視窗；從頂端橫槓／標題列拖，或內容已在最上面時往下拖
+      if (!matchMedia(PHONE_MQ).matches || isClosing(dlg)) return;
+      const off = p.clientY - dlg.getBoundingClientRect().top; if (off < 0) return;   // 點在視窗外的暗色區
+      const top = off < 56 || !!t.closest('.dh');
+      if (top || !scrolled(t, dlg)) g = {kind: 'sheet', el: dlg, x: p.clientX, y: p.clientY, t: e.timeStamp, on: false, dy: 0};
+    } else if (S.data && !S.ptrBusy && matchMedia('(max-width:760px), ' + PHL_MQ).matches && scrollY <= 0 && !scrolled(t, document.body)) {
+      g = {kind: 'ptr', x: p.clientX, y: p.clientY, on: false, dy: 0};   // 在最上面往下拉：立即同步
+    }
+  }, {passive: true});
+  document.addEventListener('touchmove', e => {
+    if (!g) return;
+    const p = e.touches[0], dx = p.clientX - g.x, dy = p.clientY - g.y;
+    if (!g.on) {
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      if (dy <= 0 || dy < Math.abs(dx) * 1.3) { g = null; return; }
+      g.on = true; g.y = p.clientY; g.t = e.timeStamp; if (g.kind === 'ptr') ptr.classList.add('show');
+      return;
+    }
+    if (e.cancelable) e.preventDefault();
+    g.dy = Math.max(0, dy);
+    if (g.kind === 'sheet') { g.el.style.transition = 'none'; g.el.style.transform = `translateY(${g.dy}px)`; }
+    else { const y = Math.min(96, g.dy * .5); ptr.style.transform = `translate(-50%,${y}px)`; ptr.firstChild.style.transform = `rotate(${y * 3.6}deg)`; ptr.classList.toggle('ready', y >= 64); }
+  }, {passive: false});
+  const end = e => {
+    const cur = g; g = null; if (!cur || !cur.on) return;
+    if (cur.kind === 'ptr') {
+      const go = e.type === 'touchend' && cur.dy * .5 >= 64;
+      ptr.style.transform = ''; ptr.firstChild.style.transform = ''; ptr.classList.remove('ready');
+      if (!go) { ptr.classList.remove('show'); return; }
+      ptr.classList.add('busy'); S.ptrBusy = true;
+      syncNow().finally(() => { S.ptrBusy = false; ptr.classList.remove('show', 'busy'); });
+      return;
+    }
+    const el = cur.el, v = cur.dy / Math.max(1, e.timeStamp - cur.t), close = e.type === 'touchend' && (cur.dy > 110 || (cur.dy > 36 && v > .6));
+    const reset = () => { el.style.transition = ''; el.style.transform = ''; };
+    if (!close) { el.style.transition = 'transform .2s ease-out'; el.style.transform = ''; setTimeout(reset, 220); return; }
+    const a = el.animate([{transform: `translateY(${cur.dy}px)`}, {transform: 'translateY(100%)'}], {duration: 170, easing: 'ease-in', fill: 'forwards'});
+    const done = () => { if (el.open) dlgClose.call(el); el.classList.remove('hero'); a.cancel(); reset(); };
+    a.finished.then(done, done);
+  };
+  document.addEventListener('touchend', end); document.addEventListener('touchcancel', end);
+  // 視窗都關掉後，補播剛才被蓋住的酒櫃與瓶數變化
+  document.addEventListener('close', () => {
+    if ((!S.mapPending && !S.numPending) || document.querySelector('dialog[open]')) return;
+    if (S.mapPending) { S.mapPending = false; renderMap(active()); }
+    if (S.numPending) { S.numPending = false; replay($('sumBottles'), 'bump'); }
+  }, true);
 }
 
 /* ---------- 事件 ---------- */
@@ -627,7 +786,8 @@ function wire() {
     $('originModal').close(); render(); toLedger();
   });
   $('sortSel').addEventListener('change', e => { S.sort = e.target.value; try { localStorage.setItem('cellarSort', S.sort); } catch {} render(); });
-  $('reloadBtn').addEventListener('click', async () => { try { await loadData(true); render(); toast('已同步。'); } catch (e) { toast(msgOf(e)); } });
+  $('reloadBtn').addEventListener('click', syncNow);
+  wireMotion();
   $('viewList').addEventListener('click', () => setView('list'));
   $('viewGrid').addEventListener('click', () => setView('grid'));
   $('homeLink').addEventListener('click', e => { e.preventDefault(); S.filter = null; S.search = ''; $('search').value = ''; closeDrawer(); scrollTo({top: 0, behavior: 'smooth'}); render(); });
@@ -673,7 +833,7 @@ function wire() {
   });
   $('list').addEventListener('click', e => {
     const o = e.target.closest('[data-open]'); if (!o) return;
-    openDrawer(o.dataset.open);
+    openDrawer(o.dataset.open, false, o);
   });
   onKeyActivate($('list'), 'div[data-open]', o => openDrawer(o.dataset.open));
   // 照片輪播：捲動時更新小圓點
@@ -1751,7 +1911,7 @@ function renderMem() {
     return `<div class="lib" data-mem="${esc(it.key)}" role="button" tabindex="0">${ph}<div><div class="t">${esc(it.name)}${it.vintage ? ` <span class="v">${esc(it.vintage)}</span>` : ''}</div><div class="s">${memLine(it)}${last ? '<br>' + last : ''}　${stockBadge(it)}</div></div></div>`;
   }).join('') || '<p class="hint">沒有符合的酒款。</p>';
 }
-function openMem(key) { S.memKey = key; renderMemDetail(); if (!$('memModal').open) showDialog('memModal'); }
+function openMem(key) { S.memKey = key; renderMemDetail(); if (!$('memModal').open || isClosing($('memModal'))) showDialog('memModal'); }
 function renderMemDetail() {
   const it = memItems().find(i => i.key === S.memKey); if (!it) { $('memModal').close(); return; }
   $('memTitle').textContent = [it.name, it.vintage].filter(Boolean).join(' ');

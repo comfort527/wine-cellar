@@ -462,7 +462,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261114a";
+:root{--ver:"20261114b";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
@@ -849,4 +849,58 @@ i[data-icon],.bnav button i,.tnav button i{font-style:normal;display:inline-flex
   dialog:not(.drawer) .dact button{flex:0 0 170px;min-height:48px}
   dialog .ferr{scroll-margin-bottom:80px}
   .adm{height:calc(100dvh - 16px - 72px)}
+}
+
+/* ---------- 手機動畫（只在手機；系統設定「減少動態效果」時全部關閉） ---------- */
+.skel,.ptr{display:none}
+.hero-fly{position:fixed;inset:auto;margin:0;padding:0;border:0;background:none;max-width:none;max-height:none;object-fit:cover;overflow:hidden;pointer-events:none}
+@keyframes sheetDown{to{transform:translateY(100%)}}
+@keyframes fadeOut{to{opacity:0}}
+@keyframes fadeIn{from{opacity:0}}
+@keyframes bump{35%{transform:scale(1.3)}}
+@keyframes cardIn{from{opacity:0;transform:translateY(14px)}}
+@keyframes bottleIn{from{opacity:0;transform:scale(.2)}60%{transform:scale(1.2)}}
+@keyframes bottleOut{0%{opacity:1;transform:scale(1);width:var(--bs)}60%{opacity:0;transform:scale(.25);width:var(--bs)}100%{opacity:0;transform:scale(.25);width:0;margin-left:calc(var(--gap) * -1)}}
+@keyframes shelfLit{0%{filter:brightness(1.9)}100%{filter:none}}
+@keyframes shimmer{to{background-position:-200% 0}}
+@keyframes ptrSpin{to{transform:rotate(360deg)}}
+@media (max-width:760px), (orientation:landscape) and (max-height:500px) and (max-width:1000px){
+  html,body{overscroll-behavior-y:contain}
+  dialog{overscroll-behavior:contain}
+  /* 讀取中：先畫出灰色輪廓 */
+  .loading .skel{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .loading .skel i{aspect-ratio:3/5;border-radius:var(--r);background:linear-gradient(100deg,var(--sunk) 35%,var(--surface-2) 50%,var(--sunk) 65%) 0 0/200% 100%}
+  .loading .map:empty{height:360px;border-radius:14px;background:linear-gradient(100deg,var(--sunk) 35%,var(--surface-2) 50%,var(--sunk) 65%) 0 0/200% 100%}
+  /* 下拉同步的指示圈 */
+  .ptr{display:grid;place-items:center;position:fixed;left:50%;top:calc(-52px + env(safe-area-inset-top,0px));z-index:40;width:44px;height:44px;border-radius:50%;background:var(--surface);box-shadow:var(--shadow-lg);transform:translate(-50%,0);opacity:0;transition:transform .2s ease-out,opacity .2s}
+  .ptr.show{opacity:1;transition:none}
+  .ptr i{width:22px;height:22px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--wine)}
+  .ptr.ready i{border-color:var(--wine);border-right-color:transparent}
+  .ptr.busy{transform:translate(-50%,84px);transition:transform .15s ease-out}
+}
+@media (orientation:landscape) and (max-height:500px) and (max-width:1000px){.ptr{left:calc(50% + 39px)}}
+@media (max-width:760px) and (prefers-reduced-motion:no-preference), (orientation:landscape) and (max-height:500px) and (max-width:1000px) and (prefers-reduced-motion:no-preference){
+  .loading .skel i,.loading .map:empty{animation:shimmer 1.3s linear infinite}
+  .ptr.busy i{animation:ptrSpin .7s linear infinite}
+  /* 按下去的回饋 */
+  .bnav button i,.card,.row,.fact,.dact button,.dw-act button{transition:transform .12s ease-out}
+  .bnav button:active i{transform:scale(.84)}
+  .card:active,.row:active,.fact:active,.dact button:active,.dw-act button:active{transform:scale(.96)}
+  /* 數字變動、酒瓶進出、篩選淡入 */
+  .bump{animation:bump .45s ease-out}
+  .total .num.bump{transform-origin:left bottom}
+  .fr-shelf.chg .fr-rail em{animation:bump .5s ease-out}
+  .fr-btl i.in{animation:bottleIn .45s ease-out both}
+  .fr-btl i.ghost{animation:bottleOut .6s ease-in forwards}
+  .fr-shelf.lit,.fridge.lit .fr-top{animation:shelfLit .5s ease-out}
+  .rows.stagger>*{animation:cardIn .32s ease-out both;animation-delay:336ms}
+  /* 視窗收回 */
+  dialog[open].closing{animation:fadeOut .16s ease-in forwards}
+  dialog[open].closing::backdrop{animation:fadeOut .2s ease-in forwards}
+  .drawer.hero[open]{animation:fadeIn .26s ease-out}
+  .drawer.hero[open].closing{animation:fadeOut .24s ease-in forwards}
+}
+@media (max-width:760px) and (orientation:portrait) and (prefers-reduced-motion:no-preference), (max-width:760px) and (min-height:501px) and (prefers-reduced-motion:no-preference){
+  dialog[open].closing{animation:sheetDown .2s ease-in forwards}
+  .drawer.hero[open].closing{animation:fadeOut .24s ease-in forwards}
 }
