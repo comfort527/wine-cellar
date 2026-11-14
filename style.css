@@ -176,7 +176,6 @@ legend{font-size:20px;color:var(--muted);padding:0 6px}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;z-index:100;max-width:90vw;font-size:21px;box-shadow:var(--shadow-lg)}
 .fab{position:fixed;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));width:72px;height:72px;border-radius:50%;background:var(--wine);border:0;color:var(--on-wine);font-size:45px;line-height:1;box-shadow:var(--shadow-lg);z-index:15;display:none}
 
-@keyframes sheetUp{from{transform:translateY(40px);opacity:.5}to{transform:none;opacity:1}}
 /* ---------- 手機 ---------- */
 @keyframes sheetUp{from{transform:translateY(40px);opacity:.5}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.drawer[open]{animation:none}}
@@ -463,7 +462,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261113s";
+:root{--ver:"20261114a";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
@@ -605,7 +604,7 @@ fieldset.colorpick{display:flex;flex-direction:row;flex-wrap:wrap;align-items:ce
 /* 手機底部導覽列 */
 .bnav{display:none}
 /* 手機與 iPad 共用：底部導覽列的外框，以及改由導覽列取代的上方按鈕 */
-@media (max-width:760px), (min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse){
+@media (max-width:760px), (min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse), (orientation:landscape) and (max-height:500px) and (max-width:1000px){
   .bnav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--surface) 94%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-top:1px solid var(--line)}
   .bnav button{-webkit-tap-highlight-color:transparent}
   .bnav button[hidden]{display:none}
@@ -613,7 +612,7 @@ fieldset.colorpick{display:flex;flex-direction:row;flex-wrap:wrap;align-items:ce
   .fab:not([hidden]),#adminBtn,#logoutBtn,#loginBtn,#addBtn,#factJournal,#factPend{display:none!important}
   .adm-phone{display:block}
 }
-@media (max-width:760px){
+@media (max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px){
   .facts{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 10px;width:100%}
   .fact{padding:8px 10px;border-color:var(--line);background:var(--surface)}
   .sync #syncText{display:none}
@@ -695,7 +694,7 @@ fieldset.colorpick{display:flex;flex-direction:row;flex-wrap:wrap;align-items:ce
   .rows.grid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
 }
 .bn-pre{display:none}
-@media (min-width:761px){
+@media (min-width:761px), (orientation:landscape) and (max-height:500px) and (max-width:1000px){
   dialog.adm-dlg{width:min(1120px,calc(100vw - 40px))}
   .adm{display:grid;grid-template-columns:minmax(240px,300px) minmax(0,1fr);padding:0!important;height:min(78vh,820px)}
   .adm .adm-menu,.adm[data-view] .adm-menu{display:block;overflow:auto;padding:16px;background:var(--surface-2);border-right:1px solid var(--line)}
@@ -763,7 +762,7 @@ i[data-icon],.bnav button i,.tnav button i{font-style:normal;display:inline-flex
 .adm-menu .ic{color:var(--wine)}
 
 /* 手機：酒款詳細資料 — 照片滿版在最上面、頂端小橫槓、浮動關閉鍵 */
-@media (max-width:760px){
+@media (max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px){
   .drawer .dw-top{position:sticky;top:0;height:0;padding:0;border:0;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;overflow:visible;z-index:3}
   .drawer .dw-top .id{display:none}
   .drawer .dw-top .id.gone{display:block;position:absolute;left:14px;top:18px;padding:3px 12px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);font-size:16px;letter-spacing:.04em}
@@ -779,7 +778,7 @@ i[data-icon],.bnav button i,.tnav button i{font-style:normal;display:inline-flex
   .drawer .dw .gal .sdots{bottom:12px}
 }
 /* 手機：所有視窗從底部升起、左右滿版；取消／儲存固定在底部 */
-@media (max-width:760px){
+@media (max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px){
   dialog:not(.drawer){inset:auto 0 0 0;margin:0;width:100vw;max-width:100vw;max-height:calc(100dvh - 64px);border-radius:20px 20px 0 0}
   dialog:not(.drawer)[open]{animation:sheetUp .24s ease-out}
   dialog:not(.drawer) .dh{padding-top:24px;border-radius:20px 20px 0 0}
@@ -790,4 +789,64 @@ i[data-icon],.bnav button i,.tnav button i{font-style:normal;display:inline-flex
   dialog:not(.drawer) .dact .primary{flex:2 1 0}
   dialog .ferr{scroll-margin-bottom:104px}
 }
-@media (max-width:760px) and (prefers-reduced-motion:reduce){dialog:not(.drawer)[open]{animation:none}}
+@media (max-width:760px) and (orientation:portrait) and (prefers-reduced-motion:reduce), (max-width:760px) and (min-height:501px) and (prefers-reduced-motion:reduce){dialog:not(.drawer)[open]{animation:none}}
+
+/* 手機橫放（B）：功能鍵在左邊直排；酒櫃在左、酒款在右；詳細資料照片在左、資料在右 */
+@media (orientation:landscape) and (max-height:500px) and (max-width:1000px){
+  body{padding-left:calc(78px + env(safe-area-inset-left,0px));padding-bottom:env(safe-area-inset-bottom,0px)}
+  .bnav{display:flex;flex-direction:column;justify-content:center;gap:4px;top:0;right:auto;bottom:0;width:calc(78px + env(safe-area-inset-left,0px));padding:8px 6px 8px calc(6px + env(safe-area-inset-left,0px));background:var(--surface);border-top:0;border-right:1px solid var(--line);-webkit-backdrop-filter:none;backdrop-filter:none}
+  .bnav button{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:0;padding:7px 0;border-radius:12px;font:600 13px var(--body);color:var(--muted);white-space:nowrap}
+  .bnav button i{font-style:normal;font-size:22px;line-height:1}
+  .bnav button.on{color:var(--wine);background:var(--wine-soft)}
+  .bnav .add i{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--wine);color:var(--on-wine)}
+  .bnav .add i .ico{width:24px;height:24px}
+  .bnav .bdot{position:absolute;top:2px;right:4px;padding:0 5px}
+  .bnav .bn-pre{display:none}
+  .toast{left:calc(50% + 39px)}
+  .bar-in{max-width:none;gap:10px;padding:6px max(16px,env(safe-area-inset-right,0px)) 6px 16px}
+  .mark svg{width:26px;height:26px}.mark-t{font-size:22px}
+  .page{max-width:none;display:grid;grid-template-columns:minmax(280px,42%) minmax(0,1fr);align-items:start;gap:12px 20px;padding:10px max(16px,env(safe-area-inset-right,0px)) 32px 16px}
+  .page > .notice,.summary{grid-column:1/-1}
+  .summary{flex-wrap:nowrap;align-items:center;gap:16px;padding-bottom:10px}
+  .total .num{font-size:52px}.total .unit{font-size:18px}
+  .facts{grid-template-columns:repeat(2,auto);gap:4px 6px;width:auto}
+  .fact{padding:2px 12px}.fact .k{font-size:14px}.fact .v{font-size:24px}
+  .sec-h{margin-bottom:8px}.sec-h h2{font-size:18px}.sec-h .hint{font-size:16px}
+  .map-wrap{grid-column:1;position:sticky;top:calc(50px + env(safe-area-inset-top,0px));max-height:calc(100dvh - 62px);overflow:auto;overscroll-behavior:contain;padding-right:4px}
+  .map-wrap .map{grid-template-columns:1fr;gap:16px}
+  .map-wrap .fridge{max-width:none;--bs:26px}
+  .ledger,.foot{grid-column:2}
+  .ledger{scroll-margin-top:calc(54px + env(safe-area-inset-top,0px))}
+  .tools .search{flex-basis:100%}.tools select{flex:1 1 auto}
+  .rows.grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"vin qt" "nm nm" "lc lc";padding:12px 14px;gap:4px 12px}
+  .row .vin{grid-area:vin;align-self:center;padding-top:0;font-size:26px}.row .vin.nv{font-size:21px}
+  .row .nm{grid-area:nm}.row .lc{grid-area:lc}
+  .row .qt{grid-area:qt;display:flex;align-items:baseline;gap:8px;font-size:30px}.row .qt small{display:inline;margin:0}
+  .row .nm b{font-size:24px}
+  .row .lc span{display:inline;white-space:normal}.row .lc span+span::before{content:"、"}
+  /* 詳細資料：滿版，照片固定在左、資料在右 */
+  .drawer{inset:0;margin:0;width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0}
+  .drawer .dw-top{position:sticky;top:0;height:0;padding:0;border:0;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;overflow:visible;z-index:3}
+  .drawer .dw-top .id{display:none}
+  .drawer .dw-top .x{position:absolute;right:calc(12px + env(safe-area-inset-right,0px));top:10px;width:46px;height:46px;min-height:0;padding:0;border-radius:50%;display:grid;place-items:center;font-size:30px;background:var(--surface-2);color:var(--ink)}
+  .drawer .dw-top.over .x{background:rgba(255,255,255,.92);color:#222;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+  .drawer .dw-top .id.gone{display:block;position:absolute;right:calc(70px + env(safe-area-inset-right,0px));top:18px;padding:3px 12px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);font-size:16px;letter-spacing:.04em}
+  .drawer .dw{display:grid;grid-template-columns:minmax(0,1fr);row-gap:18px;padding:16px max(24px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) calc(24px + env(safe-area-inset-left,0px))}
+  .drawer .dw>.dw-head{padding-right:64px}
+  .drawer .dw:not(.no-ph){grid-template-columns:minmax(0,38%) minmax(0,1fr);column-gap:24px;padding-top:0;padding-left:0}
+  .drawer .dw:not(.no-ph)>*{grid-column:2}
+  .drawer .dw:not(.no-ph)>.dw-head{padding-top:16px}
+  .drawer .dw>.gal{grid-column:1;grid-row:1/span 40;position:sticky;top:0;align-self:start;height:100dvh;border-radius:0}
+  .drawer .dw>.gal .slides,.drawer .dw>.gal .slides>img{height:100dvh;max-height:none}
+  .drawer .dw>.gal .slides>img{object-fit:cover}
+  .drawer .dw>.gal .sdots{bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+  .dw-head h2{font-size:34px}
+  /* 其他視窗：中間大卡片，用到最高；取消／儲存固定在底部 */
+  dialog:not(.drawer){width:min(780px,calc(100vw - 32px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px)));max-height:calc(100dvh - 16px)}
+  dialog:not(.drawer) .dh{padding-top:10px;padding-bottom:10px}
+  dialog:not(.drawer) .dact{position:sticky;bottom:0;z-index:2;flex-wrap:nowrap;margin:14px -22px -22px;padding:10px 22px;background:var(--surface);border-top:1px solid var(--line)}
+  dialog:not(.drawer) .dact button{flex:0 0 170px;min-height:48px}
+  dialog .ferr{scroll-margin-bottom:80px}
+  .adm{height:calc(100dvh - 16px - 72px)}
+}

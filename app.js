@@ -38,9 +38,11 @@ const canEdit = () => !!S.session;
 /* iPad：761–1180px，或觸控螢幕寬到 1400px（iPad Pro 橫放）。橫放時改成左右雙欄 */
 const TABLET_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse)';
 const DESK_MQ = '(min-width:1181px) and (pointer:fine), (min-width:1401px)';
+const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:1000px)'; // 手機橫放
+const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261113s';
+const APP_VER = '20261114a';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -654,7 +656,7 @@ function wire() {
   matchMedia(DESK_MQ).addEventListener('change', () => render());
   $('bnav').addEventListener('click', onNav); $('tnav').addEventListener('click', onNav);
   $('admBack').addEventListener('click', adminMenu);
-  matchMedia('(min-width: 761px)').addEventListener('change', () => { if (!$('adminModal').open) return; const cur = ADMIN_TABS.find(t => !$('tab-' + t).hidden); if (admWide()) switchTab(cur || 'lib'); else if (cur) switchTab(cur); });
+  matchMedia('(min-width: 761px), ' + PHL_MQ).addEventListener('change', () => { if (!$('adminModal').open) return; const cur = ADMIN_TABS.find(t => !$('tab-' + t).hidden); if (admWide()) switchTab(cur || 'lib'); else if (cur) switchTab(cur); });
   $('factPend').addEventListener('click', () => { showDialog('pendModal'); showErr('pendErr', ''); renderPendStrip(); renderPending(); });
   $('exportBtn').addEventListener('click', exportCsv);
   let fbRaf = 0; window.addEventListener('resize', () => { cancelAnimationFrame(fbRaf); fbRaf = requestAnimationFrame(fillBottles); });
@@ -667,7 +669,7 @@ function wire() {
     S.filter = S.filter && S.filter.cabinet === next.cabinet && S.filter.shelf === next.shelf ? null : next;
     render();
     // 手機與 iPad 直放：酒款在下方，捲過去；iPad 橫放雙欄時右邊直接更新，不捲動
-    if (S.filter && matchMedia(TABLET_MQ).matches ? !matchMedia(SPLIT_MQ).matches : S.filter && matchMedia('(max-width:760px)').matches) document.querySelector('.ledger').scrollIntoView({behavior: 'smooth'});
+    if (S.filter && matchMedia(TABLET_MQ).matches ? !matchMedia(SPLIT_MQ).matches : S.filter && matchMedia(PHONE_MQ).matches) document.querySelector('.ledger').scrollIntoView({behavior: 'smooth'});
   });
   $('list').addEventListener('click', e => {
     const o = e.target.closest('[data-open]'); if (!o) return;
@@ -794,7 +796,7 @@ async function submit(formId, errId, fn) {
   finally { delete form.dataset.busy; btns.forEach(b => b.disabled = false); }
 }
 const ADMIN_TABS = ['lib', 'outs', 'audit', 'loc', 'ai', 'keys', 'export', 'storage'];
-const admWide = () => matchMedia('(min-width: 761px)').matches;
+const admWide = () => matchMedia('(min-width: 761px), ' + PHL_MQ).matches;
 function adminMenu() {  // 手機：回到分組清單
   $('admBody').dataset.view = 'menu'; $('adminTitle').textContent = '管理'; $('admBack').hidden = true;
   $('keysTab').hidden = !isAdmin();
