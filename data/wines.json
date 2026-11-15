@@ -1925,17 +1925,17 @@
    "locations": [
     {
      "cabinet": "8樓外冰箱",
-     "quantity": 1,
-     "shelf": "第1層"
+     "shelf": "最下層",
+     "quantity": 1
     }
    ],
    "origin": "France",
    "photo": "images/W063-1794712027200.jpg",
    "referencePrice": 450,
-   "revision": 2,
+   "revision": 3,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-11-15T03:07:11.494Z",
+   "updatedAt": "2026-11-15T03:24:04.940Z",
    "updatedBy": "芝琦",
    "vintage": "2023",
    "volume": "750ml",
@@ -1947,7 +1947,8 @@
      "thumb": "images/W063-1794712027200-t.jpg"
     }
    ],
-   "thumb": "images/W063-1794712027200-t.jpg"
+   "thumb": "images/W063-1794712027200-t.jpg",
+   "color": "red"
   },
   "W064": {
    "createdAt": "",
@@ -2064,8 +2065,8 @@
    "revision": 2
   }
  },
- "rev": 157,
- "updatedAt": "2026-11-15T03:23:55.480Z",
+ "rev": 158,
+ "updatedAt": "2026-11-15T03:24:04.940Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
