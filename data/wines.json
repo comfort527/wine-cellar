@@ -1950,7 +1950,7 @@
    "wineryRegion": "Shaw + Smith"
   },
   "W065": {
-   "wineName": "INSIGNIA",
+   "wineName": "INSIGNIA-Claire借放",
    "wineryRegion": "JOSEPH PHELPS",
    "vintage": "2021",
    "entryDate": "",
@@ -1983,13 +1983,13 @@
    "status": "active",
    "createdAt": "2026-11-15T02:34:35.501Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-15T02:34:49.801Z",
+   "updatedAt": "2026-11-15T02:35:26.850Z",
    "updatedBy": "芝琦",
-   "revision": 2
+   "revision": 3
   }
  },
- "rev": 139,
- "updatedAt": "2026-11-15T02:34:49.801Z",
+ "rev": 140,
+ "updatedAt": "2026-11-15T02:35:26.850Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
