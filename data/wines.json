@@ -1687,17 +1687,24 @@
     }
    ],
    "origin": "Spain",
-   "photo": "",
+   "photo": "images/W058-1794708654882.jpg",
    "referencePrice": 960,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-09-30T04:46:22.471Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-15T02:11:03.575Z",
+   "updatedBy": "芝琦",
    "vintage": "2022",
    "volume": "750ml",
    "wineName": "Abracadabra",
-   "wineryRegion": "Trossos del Priorat"
+   "wineryRegion": "Trossos del Priorat",
+   "photos": [
+    {
+     "photo": "images/W058-1794708654882.jpg",
+     "thumb": "images/W058-1794708654882-t.jpg"
+    }
+   ],
+   "thumb": "images/W058-1794708654882-t.jpg"
   },
   "W059": {
    "createdAt": "",
@@ -1868,8 +1875,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 121,
- "updatedAt": "2026-11-15T02:10:40.517Z",
+ "rev": 122,
+ "updatedAt": "2026-11-15T02:11:03.575Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
