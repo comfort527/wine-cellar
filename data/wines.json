@@ -991,17 +991,24 @@
     }
    ],
    "origin": "Italy",
-   "photo": "",
+   "photo": "images/W031-1794709602259.jpg",
    "referencePrice": 15500,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-09-29T14:26:44.127Z",
-   "updatedBy": "zickyfu",
+   "updatedAt": "2026-11-15T02:26:48.073Z",
+   "updatedBy": "芝琦",
    "vintage": "2011",
    "volume": "750ml",
    "wineName": "Sorì Tildìn (Barbaresco) Langhe",
-   "wineryRegion": "GAJA/Barbaresco歌雅酒莊★"
+   "wineryRegion": "GAJA/Barbaresco歌雅酒莊★",
+   "photos": [
+    {
+     "photo": "images/W031-1794709602259.jpg",
+     "thumb": "images/W031-1794709602259-t.jpg"
+    }
+   ],
+   "thumb": "images/W031-1794709602259-t.jpg"
   },
   "W032": {
    "createdAt": "",
@@ -1932,8 +1939,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 132,
- "updatedAt": "2026-11-15T02:26:25.244Z",
+ "rev": 133,
+ "updatedAt": "2026-11-15T02:26:48.073Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
