@@ -166,6 +166,13 @@ legend{font-size:20px;color:var(--muted);padding:0 6px}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 6px 4px 12px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);font-size:20px}
 .chip button{border:0;background:transparent;padding:0 4px;color:var(--muted)}
+.chip small{font-size:15px;color:var(--muted)}
+.chip button:disabled{opacity:.3}
+.chip button.arm{color:var(--bad);font-size:15px;font-weight:700}
+.locdel{border:1px solid var(--line);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:10px;background:var(--surface)}
+.locdel-h{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.locdel-h .small{margin-left:auto}
+.locdel-h .small:disabled{opacity:.4}
 .inline{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-top:12px}
 .inline .field{flex:1 1 160px}
 .slot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border-radius:var(--r-sm);background:var(--surface-2);margin-bottom:8px}
@@ -462,7 +469,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261115d";
+:root{--ver:"20261115e";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;

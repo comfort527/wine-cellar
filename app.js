@@ -82,7 +82,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261115d';
+const APP_VER = '20261115e';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -940,8 +940,12 @@ function wire() {
   onSubmit('slotForm', 'keysErr', addSlot);
   onSubmit('tokenForm', 'keysErr', changeToken);
   $('moreAudit').addEventListener('click', () => loadAudit(S.auditWine, S.auditPage + 1));
-  $('cabChips').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) removeCatalog('cabinets', b.dataset.rm); });
+  $('cabChips').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b && !confirmTap(b, '確定刪除？')) removeCatalog('cabinets', b.dataset.rm); });
   $('shelfChips').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) removeCatalog('shelves', b.dataset.rm); });
+  $('locDelList').addEventListener('click', e => {
+    const c = e.target.closest('[data-delcab]'); if (c && !c.disabled) { if (!confirmTap(c, '確定刪除整櫃？')) deleteLoc(c.dataset.delcab, ''); return; }
+    const s = e.target.closest('[data-delsh]'); if (s && !s.disabled && !confirmTap(s, '確定？')) deleteLoc(s.dataset.cab, s.dataset.delsh);
+  });
   const openHist = e => { const h = e.target.closest('[data-hist]'); if (!h || (e.type === 'keydown' && e.key !== 'Enter')) return; h.closest('dialog')?.close(); openDrawer(h.dataset.hist); };
   for (const id of ['histList', 'histGone']) { $(id).addEventListener('click', openHist); $(id).addEventListener('keydown', openHist); }
   $('jPrev').addEventListener('click', () => shiftMonth(-1));
@@ -1112,7 +1116,14 @@ async function changeToken() {
 }
 
 /* ---------- 新增／編輯酒款 ---------- */
-function locOptions(kind) { const names = new Set(S.data?.catalog?.[kind] || []); for (const w of wines()) for (const l of w.locations || []) names.add(kind === 'cabinets' ? l.cabinet : l.shelf); return [...names].filter(Boolean).sort(); }
+/* 工程人員刪掉的櫃位／層位記在 catalog.removed（[{cabinet, shelf}]，shelf 空白＝整櫃）：出庫、移動的歷史裡還有這些名字，
+   但選單與空位設定不再列出；之後若又有酒放進去，就會再出現 */
+const isRemoved = (cab, sh) => (S.data?.catalog?.removed || []).some(r => r.cabinet === cab && (!r.shelf || r.shelf === sh));
+const hasBottles = (cab, sh) => active().some(w => (w.locations || []).some(l => l.cabinet === cab && (!sh || l.shelf === sh) && l.quantity > 0));
+function locOptions(kind) {
+  const names = new Set(S.data?.catalog?.[kind] || []); for (const w of wines()) for (const l of w.locations || []) names.add(kind === 'cabinets' ? l.cabinet : l.shelf);
+  return [...names].filter(n => n && (kind !== 'cabinets' || !isRemoved(n, '') || hasBottles(n, ''))).sort();
+}
 /* 櫃位／層位一律用下拉選單：選項來自「管理 → 櫃位／層位」與目前資料裡用過的名稱 */
 const byShelf = (a, b) => shelfNo(a) - shelfNo(b) || a.localeCompare(b);
 function shelvesOf(cab) {  // 這個櫃子用過的層位（含已出清、出庫與移動紀錄）
@@ -1122,7 +1133,7 @@ function shelvesOf(cab) {  // 這個櫃子用過的層位（含已出清、出�
     for (const o of w.outs || []) if (o.cabinet === cab && o.shelf) set.add(o.shelf);
     for (const m of w.moves || []) for (const x of [m.from, m.to]) if (x?.cabinet === cab && x.shelf) set.add(x.shelf);
   }
-  return [...set].sort(byShelf);
+  return [...set].filter(sh => !isRemoved(cab, sh) || hasBottles(cab, sh)).sort(byShelf);
 }
 function cabOptionsHtml(val) {
   const names = locOptions('cabinets'); if (val && !names.includes(val)) names.push(val);
@@ -1875,9 +1886,10 @@ async function saveCapacity() {
 function renderAdmin() {
   renderCapForm();
   const cat = S.data?.catalog || {cabinets: [], shelves: []};
-  const chip = n => `<span class="chip">${esc(n)}<button data-rm="${esc(n)}" aria-label="移除 ${esc(n)}">×</button></span>`;
-  $('cabChips').innerHTML = cat.cabinets.map(chip).join('') || '<span class="hint">尚未建立。</span>';
+  const eng = isEng(), chip = n => `<span class="chip">${esc(n)}${eng ? `<button data-rm="${esc(n)}" aria-label="移除 ${esc(n)}">×</button>` : ''}</span>`;
+  $('cabChips').innerHTML = cat.cabinets.filter(c => !isRemoved(c, '')).map(chip).join('') || '<span class="hint">尚未建立。</span>';
   $('shelfChips').innerHTML = cat.shelves.map(chip).join('') || '<span class="hint">尚未建立。</span>';
+  renderLocDel();
   renderHistory();
 }
 const OUT_TYPES = ['自飲', '聚餐', '送禮', '其他'];
@@ -2307,10 +2319,52 @@ async function saveCatalog() {
     d.catalog = d.catalog || {cabinets: [], shelves: []};
     if (d.catalog[kind].includes(name)) fail('這個名稱已存在。');
     d.catalog[kind].push(name);
+    if (kind === 'cabinets' && d.catalog.removed) d.catalog.removed = d.catalog.removed.filter(r => r.cabinet !== name);
   }, `新增${kind === 'cabinets' ? '櫃位' : '層位'} ${name}`);
   $('l_name').value = ''; renderAdmin(); toast('已新增 ' + name + '。');
 }
+/* 工程人員：刪除某一櫃或某一櫃的某一層。裡面還有酒就不能刪（先移走或出庫） */
+function renderLocDel() {
+  const box = $('locDel'); box.hidden = !isEng(); if (box.hidden) return;
+  const cabs = locOptions('cabinets').map(cab => {
+    const shs = new Set(shelvesOf(cab)); for (const sh of Object.keys(S.data?.capacity?.[cab] || {})) shs.add(sh);
+    return [cab, [...shs].sort(byShelf)];
+  });
+  $('locDelList').innerHTML = cabs.map(([cab, shs]) => {
+    const n = shs.reduce((a, sh) => a + qtyAt(cab, sh), 0);
+    const shelf = sh => { const q = qtyAt(cab, sh); return `<span class="chip ${q ? 'full' : ''}">${esc(sh)}<small>${q ? `${q} 瓶` : '空'}</small><button type="button" data-delsh="${esc(sh)}" data-cab="${esc(cab)}" ${q ? 'disabled title="還有酒，要先移走或出庫才能刪除"' : ''} aria-label="刪除 ${esc(cab)} ${esc(sh)}">×</button></span>`; };
+    return `<div class="locdel"><div class="locdel-h"><b>${esc(cab)}</b><span class="hint">${n ? `${n} 瓶` : '空櫃'}</span><button type="button" class="small danger" data-delcab="${esc(cab)}" ${n ? 'disabled title="還有酒，要先移走或出庫才能刪除"' : ''}>刪除這一櫃</button></div><div class="chips">${shs.map(shelf).join('') || '<span class="hint">沒有層位。</span>'}</div></div>`;
+  }).join('') || '<p class="hint">還沒有櫃位。</p>';
+}
+function confirmTap(btn, label) {   // 按第一次變成「確定刪除？」，4 秒內再按一次才執行
+  if (btn.dataset.confirm === '1') return false;
+  const orig = btn.textContent; btn.dataset.confirm = '1'; btn.textContent = label; btn.classList.add('arm');
+  setTimeout(() => { if (btn.isConnected) { btn.dataset.confirm = ''; btn.textContent = orig; btn.classList.remove('arm'); } }, 4000);
+  return true;
+}
+async function deleteLoc(cab, sh) {
+  if (!isEng()) return;
+  showErr('locErr', '');
+  try {
+    await mutate(d => {
+      const left = Object.values(d.wines).filter(w => w.status !== 'archived').reduce((a, w) => a + (w.locations || []).filter(l => l.cabinet === cab && (!sh || l.shelf === sh)).reduce((b, l) => b + (Number(l.quantity) || 0), 0), 0);
+      if (left) fail(`${cab}${sh ? ' ' + sh : ''} 還有 ${left} 瓶，要先移走或出庫才能刪除。`);
+      for (const w of Object.values(d.wines)) if (w.locations) w.locations = w.locations.filter(l => !(l.cabinet === cab && (!sh || l.shelf === sh)));
+      if (d.capacity?.[cab]) { if (sh) delete d.capacity[cab][sh]; else delete d.capacity[cab]; if (d.capacity[cab] && !Object.keys(d.capacity[cab]).length) delete d.capacity[cab]; }
+      d.catalog = d.catalog || {cabinets: [], shelves: []};
+      const rm = (d.catalog.removed || []).filter(r => r.cabinet !== cab || (sh && r.shelf !== sh));
+      rm.push(sh ? {cabinet: cab, shelf: sh} : {cabinet: cab});
+      d.catalog.removed = rm;
+      if (!sh) d.catalog.cabinets = (d.catalog.cabinets || []).filter(n => n !== cab);
+    }, sh ? `刪除層位 ${cab} ${sh}` : `刪除櫃位 ${cab}`);
+    if (S.filter?.cabinet === cab && (!sh || S.filter.shelf === sh)) S.filter = null;
+    if (!sh && S.cabOpen === cab) S.cabOpen = null;
+    render(); renderAdmin(); toast(sh ? `已刪除 ${cab} 的 ${sh}。` : `已刪除 ${cab}。`);
+  } catch (e) { showErr('locErr', msgOf(e)); }
+}
 async function removeCatalog(kind, name) {
+  if (!isEng()) return;
+  if (kind === 'cabinets') return deleteLoc(name, '');
   showErr('locErr', '');
   try {
     await mutate(d => { d.catalog[kind] = d.catalog[kind].filter(n => n !== name); }, `移除${kind === 'cabinets' ? '櫃位' : '層位'} ${name}`);
