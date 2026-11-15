@@ -1164,17 +1164,24 @@
     }
    ],
    "origin": "Italy",
-   "photo": "",
+   "photo": "images/W040-1794708463809.jpg",
    "referencePrice": 1217,
-   "revision": 1,
+   "revision": 2,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-09-30T04:25:47.821Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-15T02:07:53.220Z",
+   "updatedBy": "芝琦",
    "vintage": "2019",
    "volume": "750ml",
    "wineName": "Ser Lapo",
-   "wineryRegion": "Mazzei/Chianti Classico Riserva DOCG"
+   "wineryRegion": "Mazzei/Chianti Classico Riserva DOCG",
+   "photos": [
+    {
+     "photo": "images/W040-1794708463809.jpg",
+     "thumb": "images/W040-1794708463809-t.jpg"
+    }
+   ],
+   "thumb": "images/W040-1794708463809-t.jpg"
   },
   "W041": {
    "createdAt": "",
@@ -1829,8 +1836,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 115,
- "updatedAt": "2026-11-15T02:07:24.116Z",
+ "rev": 116,
+ "updatedAt": "2026-11-15T02:07:53.220Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
