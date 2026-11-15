@@ -963,13 +963,13 @@
      "quantity": 2
     }
    ],
-   "origin": "美國",
+   "origin": "",
    "photo": "images/W030-1794142303511.jpg",
    "referencePrice": 1000,
-   "revision": 3,
+   "revision": 4,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-11-15T03:12:16.485Z",
+   "updatedAt": "2026-11-15T03:12:35.353Z",
    "updatedBy": "芝琦",
    "vintage": "2023",
    "volume": "750ml",
@@ -2017,8 +2017,8 @@
    "revision": 3
   }
  },
- "rev": 145,
- "updatedAt": "2026-11-15T03:12:16.485Z",
+ "rev": 146,
+ "updatedAt": "2026-11-15T03:12:35.353Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
