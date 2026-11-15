@@ -2017,10 +2017,52 @@
    "updatedAt": "2026-11-15T03:15:43.781Z",
    "updatedBy": "芝琦",
    "revision": 4
+  },
+  "W066": {
+   "wineName": "Cabernet Sauvignon Ice Wine",
+   "wineryRegion": "Koenig Vineyards/Idaho,Snake River Valley",
+   "vintage": "2018",
+   "entryDate": "",
+   "origin": "Unites States",
+   "drinkWindow": "",
+   "grapeNotes": "Cabernet Sauvignon",
+   "volume": "750ml",
+   "source": "",
+   "color": "red",
+   "referencePrice": 900,
+   "locations": [
+    {
+     "cabinet": "8樓外冰箱",
+     "shelf": "第1層",
+     "quantity": 1
+    }
+   ],
+   "photo": "images/new-1794712855032.jpg",
+   "thumb": "images/new-1794712855032-t.jpg",
+   "photos": [
+    {
+     "photo": "images/new-1794712855032.jpg",
+     "thumb": "images/new-1794712855032-t.jpg"
+    },
+    {
+     "photo": "images/new-1794712860334.jpg",
+     "thumb": "images/new-1794712860334-t.jpg"
+    },
+    {
+     "photo": "images/new-1794712865135.jpg",
+     "thumb": "images/new-1794712865135-t.jpg"
+    }
+   ],
+   "status": "active",
+   "createdAt": "2026-11-15T03:21:10.283Z",
+   "createdBy": "芝琦",
+   "updatedAt": "2026-11-15T03:21:10.283Z",
+   "updatedBy": "芝琦",
+   "revision": 1
   }
  },
- "rev": 150,
- "updatedAt": "2026-11-15T03:18:18.526Z",
+ "rev": 151,
+ "updatedAt": "2026-11-15T03:21:10.283Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
