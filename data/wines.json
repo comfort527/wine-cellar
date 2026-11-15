@@ -959,23 +959,24 @@
    "locations": [
     {
      "cabinet": "8樓右LB櫃",
-     "quantity": 2,
-     "shelf": "第1層"
+     "shelf": "第1層",
+     "quantity": 2
     }
    ],
-   "origin": "",
+   "origin": "美國",
    "photo": "images/W030-1794142303511.jpg",
    "referencePrice": 1000,
-   "revision": 2,
+   "revision": 3,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-11-08T12:51:48.588Z",
-   "updatedBy": "廖炎鴻",
+   "updatedAt": "2026-11-15T03:12:16.485Z",
+   "updatedBy": "芝琦",
    "vintage": "2023",
    "volume": "750ml",
    "wineName": "Diamond Collection Black Label Claret",
    "wineryRegion": "Francis Ford Coppola",
-   "thumb": "images/W030-1794142303511-q60-t.jpg"
+   "thumb": "images/W030-1794142303511-q60-t.jpg",
+   "color": "red"
   },
   "W031": {
    "createdAt": "",
@@ -2016,8 +2017,8 @@
    "revision": 3
   }
  },
- "rev": 144,
- "updatedAt": "2026-11-15T03:07:26.568Z",
+ "rev": 145,
+ "updatedAt": "2026-11-15T03:12:16.485Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
