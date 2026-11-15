@@ -623,17 +623,24 @@
     }
    ],
    "origin": "France",
-   "photo": "",
+   "photo": "images/W019-1794709554737.jpg",
    "referencePrice": 1352,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-09-29T13:50:10.592Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-15T02:26:01.636Z",
+   "updatedBy": "芝琦",
    "vintage": "1994",
    "volume": "750ml",
    "wineName": "Margaux",
-   "wineryRegion": "Château Segonnes"
+   "wineryRegion": "Château Segonnes",
+   "photos": [
+    {
+     "photo": "images/W019-1794709554737.jpg",
+     "thumb": "images/W019-1794709554737-t.jpg"
+    }
+   ],
+   "thumb": "images/W019-1794709554737-t.jpg"
   },
   "W020": {
    "createdAt": "",
@@ -1918,8 +1925,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 130,
- "updatedAt": "2026-11-15T02:25:31.997Z",
+ "rev": 131,
+ "updatedAt": "2026-11-15T02:26:01.636Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
