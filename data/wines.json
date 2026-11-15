@@ -789,22 +789,22 @@
    "locations": [
     {
      "cabinet": "8樓右LB櫃",
-     "quantity": 7,
-     "shelf": "第2層"
+     "shelf": "第2層",
+     "quantity": 7
     },
     {
      "cabinet": "8樓右LB櫃",
-     "quantity": 5,
-     "shelf": "第3層"
+     "shelf": "第3層",
+     "quantity": 5
     }
    ],
-   "origin": "",
+   "origin": "France",
    "photo": "images/W024-1794286899564.jpg",
    "referencePrice": 1485,
-   "revision": 2,
+   "revision": 3,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-11-10T05:02:11.572Z",
+   "updatedAt": "2026-11-15T03:17:00.416Z",
    "updatedBy": "芝琦",
    "vintage": "2020",
    "volume": "750ml",
@@ -816,7 +816,8 @@
      "thumb": "images/W024-1794286899564-t.jpg"
     }
    ],
-   "thumb": "images/W024-1794286899564-t.jpg"
+   "thumb": "images/W024-1794286899564-t.jpg",
+   "color": "red"
   },
   "W026": {
    "createdAt": "",
@@ -2017,8 +2018,8 @@
    "revision": 4
   }
  },
- "rev": 147,
- "updatedAt": "2026-11-15T03:15:43.781Z",
+ "rev": 148,
+ "updatedAt": "2026-11-15T03:17:00.416Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
