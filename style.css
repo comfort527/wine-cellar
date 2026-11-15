@@ -112,7 +112,7 @@ button.fact .k::after{content:" ›";color:var(--wine)}
 .card .cb span{font-size:15px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .empty{padding:48px 20px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:var(--r)}
 .empty h3{font:700 26px var(--serif-tc);color:var(--ink);margin-bottom:6px}
-.foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:20px;color:var(--muted);padding-top:8px;border-top:1px solid var(--line)}
+.foot{display:flex;justify-content:flex-end;gap:12px;flex-wrap:wrap;font-size:20px;color:var(--muted);padding-top:8px;border-top:1px solid var(--line)}
 
 /* ---------- 詳細資料抽屜 ---------- */
 dialog{color:var(--ink);background:var(--surface);border:0;padding:0}
@@ -485,7 +485,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261115m";
+:root{--ver:"20261115n";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
