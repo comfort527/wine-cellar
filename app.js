@@ -82,7 +82,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261115q';
+const APP_VER = '20261115r';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -618,7 +618,11 @@ function renderList(list, stagger) {
   else if (!list.length) empty.innerHTML = canEdit() ? '<h3>酒窖還是空的</h3><p>按「＋ 新增酒款」登記第一瓶。</p>' : '<h3>酒窖還是空的</h3>';
   else empty.innerHTML = '<h3>沒有符合的酒款</h3><p>換個關鍵字，或按「顯示全部」。</p>';
 }
-function vinHtml(w) { const v = String(w.vintage || '').trim(); return /^\d{4}$/.test(v) ? `<span class="vin">${v}</span>` : `<span class="vin nv">${esc(v || 'NV')}</span>`; }
+// 年份；清單模式前面加酒種圓點（紅酒紅點、白酒綠點、甜酒／貴腐橘點、清酒白點）
+function vinHtml(w, dot) {
+  const v = String(w.vintage || '').trim(), k = dot ? `<i class="kd kd-${kindOf(w)}" role="img" aria-label="${colorName(w)}"></i>` : '';
+  return /^\d{4}$/.test(v) ? `<span class="vin">${k}${v}</span>` : `<span class="vin nv">${k}${esc(v || 'NV')}</span>`;
+}
 /* 篩選某櫃／某層時，卡片與清單顯示「這層／這櫃」的瓶數，總數另外標示 */
 function hereQty(w) {
   const f = S.filter; if (!f?.cabinet) return null;
@@ -628,8 +632,8 @@ const hereWord = () => S.filter?.shelf ? '這層' : '這櫃';
 function rowHtml(w) {
   const t = total(w), h = hereQty(w), part = h !== null && h !== t;
   const locs = (w.locations || []).filter(l => l.quantity > 0).map(l => `<span>${esc(l.cabinet)} · ${esc(l.shelf)}${(w.locations || []).filter(x => x.quantity > 0).length > 1 ? ` ×${l.quantity}` : ''}</span>`).join('');
-  return `<button class="row rk-${kindOf(w)}" data-open="${esc(w.wineId)}">
-   ${vinHtml(w)}
+  return `<button class="row" data-open="${esc(w.wineId)}">
+   ${vinHtml(w, true)}
    <span class="nm"><b>${esc(w.wineName)}${prioOf(w) ? ' ' + pdots(prioOf(w), 'sm') : ''}</b><span>${esc(w.wineryRegion || '')}${w.wineryRegion && w.origin ? ' · ' : ''}${esc(w.origin || '')}</span></span>
    <span class="lc">${locs || '<span>無庫存</span>'}</span>
    <span class="qt">${part ? h : t}<small>${part ? `${hereWord()}・全部共 ${t} 瓶` : esc(w.volume || '瓶')}</small></span></button>`;

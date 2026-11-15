@@ -89,13 +89,11 @@ button.fact .k::after{content:" ›";color:var(--wine)}
 .row{display:grid;grid-template-columns:104px minmax(0,1fr) minmax(0,240px) 84px;align-items:center;gap:6px 18px;width:100%;padding:12px 18px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;text-align:left;white-space:normal}
 .row:last-child{border-bottom:0}
 .row:hover{background:var(--surface-2)}
-/* 清單模式：依酒種上淡底色（紅酒淺粉紅、白酒淺綠、甜酒／貴腐淺橘、清酒淺淺灰），深色模式自動變暗 */
-.row.rk-red{--rk:color-mix(in srgb,var(--frame-red) 13%,var(--surface))}
-.row.rk-white{--rk:color-mix(in srgb,var(--frame-white) 15%,var(--surface))}
-.row.rk-sweet{--rk:color-mix(in srgb,var(--frame-sweet) 15%,var(--surface))}
-.row.rk-sake{--rk:color-mix(in srgb,#8d959b 8%,var(--surface))}
-.row[class*="rk-"]{background:var(--rk)}
-.row[class*="rk-"]:hover{background:color-mix(in srgb,var(--rk) 88%,var(--ink))}
+/* 清單模式：年份前的酒種實心圓點（紅、綠、橘、白；白點加一圈淡灰邊才看得到） */
+.row .vin:has(.kd){white-space:nowrap}
+.row .kd{display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:7px;vertical-align:.18em;background:var(--kd);box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.kd-red{--kd:var(--frame-red)}.kd-white{--kd:var(--frame-white)}.kd-sweet{--kd:var(--frame-sweet)}
+.kd-sake{--kd:#ffffff;box-shadow:inset 0 0 0 1.5px #b9c0bc!important}
 .row .vin{font:600 39px/1 var(--display);color:var(--brass);font-variant-numeric:lining-nums tabular-nums}
 .row .vin.nv{font-size:28px;letter-spacing:.06em}
 .row .nm{min-width:0}
@@ -485,7 +483,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261115q";
+:root{--ver:"20261115r";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
