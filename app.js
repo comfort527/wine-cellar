@@ -64,7 +64,17 @@ document.addEventListener('cancel', e => {
 }, true);
 function fail(m) { const e = new Error(m); e.user = true; throw e; }
 function msgOf(e) { return e?.user ? e.message : '操作未完成，請稍後再試。'; }
-const canEdit = () => !!S.session;
+/* 身分（存在裝置設定裡的代號不變，只改顯示名稱）：
+   admin＝工程人員：全部功能，含管理裝置密碼、新增／刪除人員、更換權杖
+   editor＝管理員：除了上面三項以外都可以
+   user＝使用者：只能對已建好的酒款出庫、移動，拍照放進待入櫃，記錄飲酒日誌（只能改、刪自己的紀錄）
+   沒登入的訪客：只看得到酒窖 */
+const ROLE_NAMES = {user: '使用者', editor: '管理員', admin: '工程人員'};
+const roleName = r => ROLE_NAMES[r] || '管理員';
+const canUse = () => !!S.session;                                  // 有登入
+const canEdit = () => !!S.session && S.session.role !== 'user';    // 管理員以上
+const mine = by => !!S.session && by === S.session.label;          // 是不是自己記的
+const canModEntry = e => canEdit() || mine(e.by);                  // 可以改、刪、評分這筆飲酒紀錄
 /* iPad：761–1180px，或觸控螢幕寬到 1400px（iPad Pro 橫放）。橫放時改成左右雙欄 */
 const TABLET_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse)';
 const DESK_MQ = '(min-width:1181px) and (pointer:fine), (min-width:1401px)';
@@ -72,14 +82,14 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261115b';
+const APP_VER = '20261115c';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
   const link = document.getElementById('mainCss') || document.querySelector('link[rel=stylesheet][href*="style.css"]');
   if (link) link.href = 'style.css?v=' + APP_VER + '&t=' + Date.now();
 })();
-const isAdmin = () => S.session?.role === 'admin';
+const isEng = () => S.session?.role === 'admin';   // 工程人員
 const wines = () => S.data ? Object.entries(S.data.wines).map(([wineId, w]) => ({...w, wineId})).sort((a, b) => a.wineId < b.wineId ? -1 : 1) : [];
 const active = () => wines().filter(w => w.status !== 'archived');
 const byId = id => { const w = S.data?.wines[id]; return w ? {...w, wineId: id} : null; };
@@ -406,7 +416,7 @@ function renderSync() {
 }
 function render() {
   const setup = !!S.data && !S.keys && S.keysSure;
-  $('whoPill').innerHTML = S.session ? `<b>${esc(S.session.label)}</b> · ${isAdmin() ? '管理員' : '編輯者'}` : '訪客瀏覽';
+  $('whoPill').innerHTML = S.session ? `<b>${esc(S.session.label)}</b> · ${roleName(S.session.role)}` : '訪客瀏覽';
   $('loginBtn').hidden = !!S.session || !S.data;
   $('loginBtn').textContent = setup ? '初始設定' : '管理登入';
   $('logoutBtn').hidden = !S.session;
@@ -415,10 +425,13 @@ function render() {
   $('fab').hidden = !canEdit();
   // 手機底部導覽列：訪客只有 酒窖／日誌／登入
   const pn = (S.data?.pending || []).length;
-  $('bnAdd').hidden = $('bnPend').hidden = !canEdit(); $('bnAdmin').hidden = !S.session; $('bnLogin').hidden = !!S.session || !S.data;
+  $('bnAdd').hidden = !canEdit(); $('bnPend').hidden = !canUse(); $('bnAdmin').hidden = !S.session; $('bnLogin').hidden = !!S.session || !S.data;
+  // 訪客只看得到酒窖：飲酒日誌也要登入
+  for (const b of document.querySelectorAll('#bnav [data-nav=journal], #tnav [data-nav=journal]')) b.hidden = !S.session;
+  $('factJournal').hidden = !S.session;
   $('bnLoginT').textContent = setup ? '設定' : '登入';
   $('bnPendN').hidden = !pn; $('bnPendN').textContent = pn;
-  $('tnAdd').hidden = $('tnPend').hidden = !canEdit(); $('tnAdmin').hidden = !S.session;
+  $('tnAdd').hidden = !canEdit(); $('tnPend').hidden = !canUse(); $('tnAdmin').hidden = !S.session;
   $('tnPendN').hidden = !pn; $('tnPendN').textContent = pn;
   $('bnav').dataset.n = document.querySelectorAll('#bnav button:not([hidden])').length;
   $('admWho').textContent = S.session ? `目前是「${S.session.label}」` : '';
@@ -630,7 +643,7 @@ function galleryHtml(w) {
 }
 function renderDrawer() {
   const w = byId(S.drawer); if (!w) { closeDrawer(); return; }
-  const ed = canEdit(), t = total(w), archived = w.status === 'archived';
+  const ed = canEdit(), use = canUse(), t = total(w), archived = w.status === 'archived';
   const facts = `<div><dt>紅酒／白酒</dt><dd>${colorName(w)}</dd></div>` + [['wineryRegion', '酒莊／產區'], ['origin', '產地'], ['volume', '容量'], ['source', '來源'], ['referencePrice', '參考價格'], ['entryDate', '入庫日期'], ['drinkWindow', '適飲期']]
     .map(([k, l]) => `<div><dt>${l}</dt><dd>${k === 'referencePrice' ? fmtPrice(w[k]) : esc(w[k] || '—')}</dd></div>`).join('');
   const locs = (w.locations || []).map(l => `<div class="dw-loc ${S.filter?.cabinet === l.cabinet && (!S.filter.shelf || S.filter.shelf === l.shelf) ? 'here' : ''}"><span class="where">${esc(l.cabinet)} <small>· ${esc(l.shelf)}</small></span><span class="n">${l.quantity}</span></div>`).join('');
@@ -643,10 +656,10 @@ function renderDrawer() {
     ${galleryHtml(w)}
     <div class="dw-stock"><div class="sum"><span>目前庫存</span><b>${t} <small style="font-size:22px">瓶</small></b></div>${locs || '<div class="dw-loc"><span class="where hint">沒有存放位置</span></div>'}</div>
     <div class="dw-prio"><span class="lbl">飲用優先</span>${ed ? `<span class="pdots big" role="group" aria-label="設定飲用優先">${[1, 2, 3, 4].map(i => `<button class="${i <= prioOf(w) ? 'on' : ''}" data-prio="${i}" aria-label="優先 ${i}" aria-pressed="${i === prioOf(w)}">${i}</button>`).join('')}</span>` : pdots(prioOf(w), 'big num')}<span class="hint">${prioOf(w) ? `${prioOf(w)}／4` : '未設定'}${ed ? '　點數字設定等級，4 最優先；再點一次取消' : ''}</span></div>
-    <div class="dw-act">${ed ? `${archived ? '' : `<button class="primary" data-stockany="${esc(w.wineId)}" ${t ? '' : 'disabled'}>出庫</button><button class="primary" data-moveany="${esc(w.wineId)}" ${t ? '' : 'disabled'}>移動</button>`}<button class="primary" data-edit="${esc(w.wineId)}">編輯</button><button data-photo="${esc(w.wineId)}">照片（${photosOf(w).length}/${MAX_PHOTOS}）</button>` : ''}${ed ? `<button data-log="${esc(w.wineId)}">異動紀錄</button>` : ''}</div>
-    ${ed ? (archived ? '<p class="hint" style="margin:0">這款酒已全部出庫。要補回庫存，請按「編輯」填入瓶數，它會回到目前酒款。</p>' : '') : '<p class="hint" style="margin:0">登入管理後可以出庫、移動與編輯這款酒。</p>'}
+    <div class="dw-act">${use && !archived ? `<button class="primary" data-stockany="${esc(w.wineId)}" ${t ? '' : 'disabled'}>出庫</button><button class="primary" data-moveany="${esc(w.wineId)}" ${t ? '' : 'disabled'}>移動</button>` : ''}${ed ? `<button class="primary" data-edit="${esc(w.wineId)}">編輯</button><button data-photo="${esc(w.wineId)}">照片（${photosOf(w).length}/${MAX_PHOTOS}）</button><button data-log="${esc(w.wineId)}">異動紀錄</button>` : ''}</div>
+    ${ed ? (archived ? '<p class="hint" style="margin:0">這款酒已全部出庫。要補回庫存，請按「編輯」填入瓶數，它會回到目前酒款。</p>' : '') : use ? (archived ? '<p class="hint" style="margin:0">這款酒已全部出庫。</p>' : '') : '<p class="hint" style="margin:0">登入後可以出庫與移動這款酒。</p>'}
     <dl class="dw-facts">${facts}${w.grapeNotes ? `<div class="wide"><dt>葡萄品種／備註</dt><dd class="note">${esc(w.grapeNotes)}</dd></div>` : ''}</dl>
-    ${outsHtml(w)}
+    ${use ? outsHtml(w) : ''}
     <div class="dw-meta">${w.createdAt ? `建立 ${fmtTime(w.createdAt)}（${esc(nameOf(w.createdBy))}）<br>` : ''}最後修改 ${fmtTime(w.updatedAt)}（${esc(nameOf(w.updatedBy))}）${archived ? `<br>出清 ${fmtTime(w.archivedAt)}（${esc(nameOf(w.archivedBy))}）` : ''}</div>
    </div>`;
   if (keep) { const sl = $('drawerBody').querySelector('.slides'); if (sl) { sl.scrollLeft = keep; sl.dispatchEvent(new Event('scroll')); } }
@@ -824,8 +837,8 @@ function wire() {
     const b = e.target.closest('[data-nav]'); if (!b) return;
     const n = b.dataset.nav;
     if (n === 'home') { S.filter = null; S.cabOpen = null; S.search = ''; if ($('search')) $('search').value = ''; render(); window.scrollTo({top: 0, behavior: 'smooth'}); }
-    else if (n === 'journal') $('factJournal').click();
-    else if (n === 'add') openWineForm(null);
+    else if (n === 'journal') { if (S.session) $('factJournal').click(); }
+    else if (n === 'add') { if (canEdit()) openWineForm(null); }
     else if (n === 'pend') $('factPend').click();
     else if (n === 'admin') openAdmin();
     else if (n === 'login') $('loginBtn').click();
@@ -973,10 +986,19 @@ async function submit(formId, errId, fn) {
   finally { delete form.dataset.busy; btns.forEach(b => b.disabled = false); }
 }
 const ADMIN_TABS = ['lib', 'outs', 'audit', 'loc', 'ai', 'keys', 'export', 'storage'];
+// 這個身分看得到哪些管理分頁：使用者只有搜尋與自己的紀錄；裝置密碼只有工程人員
+const tabOK = t => !S.session ? false : S.session.role === 'user' ? ['lib', 'outs', 'audit'].includes(t) : t !== 'keys' || isEng();
+function admMenuShow() {
+  document.querySelectorAll('#admMenu [data-tab]').forEach(b => { b.hidden = !tabOK(b.dataset.tab); });
+  document.querySelectorAll('#admMenu .adm-grp').forEach(g => { g.hidden = !g.querySelector('.mi:not([hidden])'); });
+  const own = S.session?.role === 'user';
+  document.querySelector('#admMenu [data-tab=outs] small').textContent = own ? '你自己記的出庫' : '自飲、聚餐、送禮與已出清的酒';
+  document.querySelector('#admMenu [data-tab=audit] small').textContent = own ? '你自己做過的異動' : '誰在什麼時候改了什麼';
+}
 const admWide = () => matchMedia('(min-width: 761px), ' + PHL_MQ).matches;
 function adminMenu() {  // 手機：回到分組清單
   $('admBody').dataset.view = 'menu'; $('adminTitle').textContent = '管理'; $('admBack').hidden = true;
-  $('keysTab').hidden = !isAdmin();
+  admMenuShow();
   document.querySelectorAll('#admMenu [data-tab]').forEach(b => b.classList.remove('on'));
 }
 function openAdmin(name) {
@@ -985,13 +1007,14 @@ function openAdmin(name) {
   checkStorage();
 }
 function switchTab(name, noLoad) {
+  if (!tabOK(name)) name = 'lib';
+  admMenuShow();
   document.querySelectorAll('#admMenu [data-tab]').forEach(b => { const on = b.dataset.tab === name; b.classList.toggle('on', on); b.setAttribute('aria-current', on ? 'page' : 'false'); });
   for (const t of ADMIN_TABS) $('tab-' + t).hidden = t !== name;
   $('admBody').dataset.view = 'page'; $('admBack').hidden = admWide();
   const label = document.querySelector(`#admMenu [data-tab="${name}"] b`)?.textContent || '';
   $('adminTitle').textContent = admWide() ? (label ? `管理 › ${label}` : '管理') : label || '管理';
   $('admMain').scrollTop = 0;
-  $('keysTab').hidden = !isAdmin();
   if (name === 'loc') renderAdmin();
   if (name === 'outs') renderHistory();
   if (name === 'keys') renderSlots();
@@ -1004,7 +1027,7 @@ function switchTab(name, noLoad) {
 function openLogin() {
   let last = ''; try { last = localStorage.getItem('cellarSlot') || ''; } catch {}
   const sel = $('g_slot');
-  sel.innerHTML = (S.keys?.slots || []).map(s => `<option value="${esc(s.id)}">${esc(s.label)}（${s.role === 'admin' ? '管理員' : '編輯者'}）</option>`).join('');
+  sel.innerHTML = (S.keys?.slots || []).map(s => `<option value="${esc(s.id)}">${esc(s.label)}（${roleName(s.role)}）</option>`).join('');
   if (last && S.keys.slots.some(s => s.id === last)) sel.value = last;
   $('g_pass').value = '';
   showDialog('loginModal'); $('g_pass').focus();
@@ -1043,29 +1066,30 @@ async function doSetup() {
 }
 function renderSlots() {
   const slots = S.keys?.slots || [];
-  $('slotList').innerHTML = slots.map(s => `<div class="slot"><span><b>${esc(s.label)}</b><span class="role ${s.role === 'admin' ? 'admin' : ''}">${s.role === 'admin' ? '管理員' : '編輯者'}</span>${s.id === S.session?.slotId ? ' <span class="hint">（目前這台）</span>' : ''}<br><span class="hint">建立於 ${fmtTime(s.createdAt)}</span></span><button class="small danger" data-delslot="${esc(s.id)}">刪除</button></div>`).join('') || '<p class="hint">沒有裝置。</p>';
+  $('slotList').innerHTML = slots.map(s => `<div class="slot"><span><b>${esc(s.label)}</b><span class="role ${s.role === 'admin' ? 'admin' : s.role === 'user' ? 'user' : ''}">${roleName(s.role)}</span>${s.id === S.session?.slotId ? ' <span class="hint">（目前這台）</span>' : ''}<br><span class="hint">建立於 ${fmtTime(s.createdAt)}</span></span><button class="small danger" data-delslot="${esc(s.id)}">刪除</button></div>`).join('') || '<p class="hint">沒有裝置。</p>';
 }
 async function addSlot() {
-  if (!isAdmin()) fail('只有管理員可以新增裝置。');
+  if (!isEng()) fail('只有工程人員可以新增人員。');
   const label = $('k_label').value.trim(), role = $('k_role').value, pass = $('k_pass').value;
+  if (!ROLE_NAMES[role]) fail('請選擇身分。');
   if (!label) fail('請填寫裝置名稱。');
   checkPass(pass);
   await loadKeys();
   if (S.keys.slots.some(s => s.label === label)) fail('已有同名裝置，請換個名稱。');
   const keys = structuredClone(S.keys);
   keys.slots.push(await makeSlot(label, role, pass, b64d(S.session.dataKey)));
-  await saveKeys(keys, `新增裝置 ${label}（${role === 'admin' ? '管理員' : '編輯者'}）`);
+  await saveKeys(keys, `新增裝置 ${label}（${roleName(role)}）`);
   $('k_label').value = ''; $('k_pass').value = ''; renderSlots();
   toast(`已新增 ${label}。請把密碼告訴使用那台裝置的人。`);
 }
 async function deleteSlot(btn) {
-  if (!isAdmin()) return;
+  if (!isEng()) return;
   if (armDelete(btn)) return;
   showErr('keysErr', '');
   try {
     await loadKeys();
     const target = S.keys.slots.find(s => s.id === btn.dataset.delslot); if (!target) return renderSlots();
-    if (target.role === 'admin' && S.keys.slots.filter(s => s.role === 'admin').length <= 1) fail('不能刪除最後一位管理員。');
+    if (target.role === 'admin' && S.keys.slots.filter(s => s.role === 'admin').length <= 1) fail('不能刪除最後一位工程人員。');
     const keys = structuredClone(S.keys); keys.slots = keys.slots.filter(s => s.id !== target.id);
     await saveKeys(keys, '刪除裝置 ' + target.label);
     renderSlots(); toast(`已刪除 ${target.label}。如果那台裝置遺失，建議也更換 GitHub 權杖。`);
@@ -1073,7 +1097,7 @@ async function deleteSlot(btn) {
   } catch (e) { showErr('keysErr', msgOf(e)); }
 }
 async function changeToken() {
-  if (!isAdmin()) fail('只有管理員可以更換權杖。');
+  if (!isEng()) fail('只有工程人員可以更換權杖。');
   const token = $('t_token').value.trim(); if (!token) fail('請貼上新權杖。');
   await checkToken(token);
   await loadKeys();
@@ -1143,6 +1167,7 @@ function renderNewStrip() {
   renderAiRow();
 }
 function openWineForm(w, pend, rb) {
+  if (!canEdit()) return;
   document.querySelectorAll('#wineForm .ai-filled, #wineForm .ai-guess').forEach(el => el.classList.remove('ai-filled', 'ai-guess'));
   $('aiMsg').textContent = '';
   S.editing = w; S.fromPend = !w && pend || null; S.rebuy = !w && !pend && rb || null;
@@ -1553,12 +1578,12 @@ function renderPending() {
   $('sumPend').innerHTML = `${n} <small>瓶</small>` + (n ? `<span class="pend-mini">${list.filter(p => p.photos?.length).slice(-3).reverse().map(p => `<img src="${esc(fileUrl(p.photos[0].thumb || p.photos[0].photo))}" alt="">`).join('')}</span>` : '');
   if (!$('pendModal').open) return;
   const html = n ? list.slice().reverse().map(p => {
-    const busy = S.pendAdding === p.id, room = MAX_PHOTOS - p.photos.length, one = p.photos.length < 2;
+    const busy = S.pendAdding === p.id, room = MAX_PHOTOS - p.photos.length, ed = canEdit(), one = p.photos.length < 2 || !ed;
     return `<article class="pend" data-pid="${esc(p.id)}">
     <div class="pend-ph">${p.photos.map((ph, i) => `<span class="pth"><a href="${esc(fileUrl(ph.photo))}" target="_blank" rel="noopener"><img src="${esc(fileUrl(ph.thumb || ph.photo))}" alt="第 ${i + 1} 張" loading="lazy"></a>${i === 0 ? '<em>封面</em>' : ''}${one || busy ? '' : `<button type="button" data-pprm="${esc(ph.photo)}" aria-label="移除第 ${i + 1} 張">×</button>`}</span>`).join('')}</div>
-    <div class="pend-add">${busy ? '<span class="hint">上傳中…</span>' : room > 0 ? `<label>📷 加拍<input type="file" accept="image/*" capture="environment" data-padd></label><label>從相簿加入<input type="file" accept="image/*" multiple data-padd></label>` : ''}<span class="hint">${p.photos.length}／${MAX_PHOTOS} 張</span></div>
+    <div class="pend-add">${busy ? '<span class="hint">上傳中…</span>' : room > 0 && ed ? `<label>📷 加拍<input type="file" accept="image/*" capture="environment" data-padd></label><label>從相簿加入<input type="file" accept="image/*" multiple data-padd></label>` : ''}<span class="hint">${p.photos.length}／${MAX_PHOTOS} 張</span></div>
     <p class="pend-meta">${esc(p.by || '')}・${fmtTime(p.at)}</p>
-    <div class="pend-act"><button type="button" class="primary" data-pedit="${esc(p.id)}" ${busy ? 'disabled' : ''}>編輯並加入酒櫃</button><button type="button" class="danger" data-pdelq="${esc(p.id)}" ${busy ? 'disabled' : ''}>刪除</button></div>
+    ${ed ? `<div class="pend-act"><button type="button" class="primary" data-pedit="${esc(p.id)}" ${busy ? 'disabled' : ''}>編輯並加入酒櫃</button><button type="button" class="danger" data-pdelq="${esc(p.id)}" ${busy ? 'disabled' : ''}>刪除</button></div>` : ''}
   </article>`;
   }).join('') : '<p class="hint pend-empty">目前沒有待入櫃的酒。</p>';
   // 內容沒變就不重畫：避免定時同步把正在開啟的相機／相簿選擇器換掉
@@ -1567,7 +1592,7 @@ function renderPending() {
 /* 待入櫃的酒之後再補拍第 2、3、4 張 */
 async function addPendPhotos(id, fileList) {
   const files = [...fileList], item = (S.data?.pending || []).find(x => x.id === id);
-  if (!item || !files.length || S.pendAdding) return;
+  if (!item || !files.length || S.pendAdding || !canEdit()) return;
   const room = MAX_PHOTOS - item.photos.length;
   showErr('pendErr', files.length > room ? `每瓶最多 ${MAX_PHOTOS} 張，只加入前 ${room} 張。` : '');
   if (room <= 0) return;
@@ -1587,7 +1612,7 @@ async function addPendPhotos(id, fileList) {
   finally { S.pendAdding = null; renderPending(); checkStorage(); }
 }
 async function removePendPhoto(id, path) {
-  if (S.pendAdding) return;
+  if (S.pendAdding || !canEdit()) return;
   showErr('pendErr', '');
   try {
     const gone = await mutate(d => {
@@ -1612,10 +1637,12 @@ async function savePending() {
   finally { S.pendSaving = false; $('q_save').disabled = false; renderPendStrip(); renderPending(); checkStorage(); }
 }
 function editPending(id) {
+  if (!canEdit()) return;
   const p = (S.data?.pending || []).find(x => x.id === id); if (!p) return;
   $('pendModal').close(); openWineForm(null, p);
 }
 async function deletePending(btn) {
+  if (!canEdit()) return;
   if (armDelete(btn)) return;
   const id = btn.dataset.pdelq; btn.disabled = true; showErr('pendErr', '');
   try {
@@ -1644,7 +1671,7 @@ async function deleteFiles(paths, id) {
     } catch {}
   }
 }
-function openPhoto(w) { if (!w) return; S.photo = w.wineId; showErr('photoErr', ''); renderPhotoMgr(); showDialog('photoModal'); }
+function openPhoto(w) { if (!w || !canEdit()) return; S.photo = w.wineId; showErr('photoErr', ''); renderPhotoMgr(); showDialog('photoModal'); }
 function renderPhotoMgr() {
   const w = byId(S.photo); if (!w) return;
   const ps = photosOf(w);
@@ -1977,14 +2004,14 @@ function drinkRecords() {
   const out = [];
   for (const w of wines()) for (const o of w.outs || []) out.push({kind: 'cellar', key: `o|${w.wineId}|${o.at || ''}`, mem: 'w:' + w.wineId, wineId: w.wineId,
     date: o.date || '', at: o.at || '', name: w.wineName, vintage: w.vintage || '', winery: w.wineryRegion || '', qty: Number(o.qty) || 1,
-    type: OUT_TYPES.includes(o.type) ? o.type : '其他', note: o.reason || '', where: [o.cabinet, o.shelf].filter(Boolean).join(' · '), rating: Number(o.rating) || 0, photo: thumbUrl(w)});
+    type: OUT_TYPES.includes(o.type) ? o.type : '其他', note: o.reason || '', where: [o.cabinet, o.shelf].filter(Boolean).join(' · '), rating: Number(o.rating) || 0, photo: thumbUrl(w), by: o.by});
   for (const j of S.data?.journal || []) out.push({kind: 'ext', key: `j|${j.id}`, mem: 'x:' + normKey(j.name) + '|' + normKey(j.vintage), id: j.id,
     date: j.date || '', at: j.at || '', name: j.name, vintage: j.vintage || '', winery: '', qty: Number(j.qty) || 1, type: '', source: j.source,
-    note: j.note || '', who: j.who || '', where: '', rating: Number(j.rating) || 0, photo: j.thumb ? fileUrl(j.thumb) : j.photo ? fileUrl(j.photo) : '', j});
+    note: j.note || '', who: j.who || '', where: '', rating: Number(j.rating) || 0, photo: j.thumb ? fileUrl(j.thumb) : j.photo ? fileUrl(j.photo) : '', by: j.by, j});
   return out;
 }
 function starsHtml(e) {
-  const ed = canEdit();
+  const ed = canModEntry(e);
   return `<span class="stars" ${ed ? 'role="group"' : 'role="img"'} aria-label="評分 ${e.rating}／5">${[1, 2, 3, 4, 5].map(i => ed
     ? `<button type="button" class="${i <= e.rating ? 'on' : ''}" data-rate="${i}" data-key="${esc(e.key)}" aria-label="${i} 顆星">★</button>`
     : `<i class="${i <= e.rating ? 'on' : ''}">★</i>`).join('')}</span>`;
@@ -1994,7 +2021,7 @@ function entryHtml(e) {
   const meta = e.kind === 'cellar'
     ? `<span class="badge c">酒窖</span>${esc(e.type)} · ${e.qty} 瓶${e.where ? ' · ' + esc(e.where) : ''}`
     : `<span class="badge e">非酒窖${e.source && e.source !== '非酒窖' ? ' · ' + esc(e.source) : ''}</span>${e.qty} 瓶${e.who ? ' · ' + esc(e.who) : ''}`;
-  const tools = e.kind === 'ext' && canEdit() ? `<span class="etools"><button type="button" class="small" data-jedit="${esc(e.id)}">編輯</button><button type="button" class="small danger" data-jdel="${esc(e.id)}">刪除</button></span>` : '';
+  const tools = e.kind === 'ext' && canModEntry(e) ? `<span class="etools"><button type="button" class="small" data-jedit="${esc(e.id)}">編輯</button><button type="button" class="small danger" data-jdel="${esc(e.id)}">刪除</button></span>` : '';
   const open = e.kind === 'cellar' ? `data-hist="${esc(e.wineId)}" role="button" tabindex="0"` : '';
   return `<div class="entry ${e.kind}" ${open}>${ph}<div class="eb"><div class="t">${esc(e.name)}${e.vintage ? ` <span class="v">${esc(e.vintage)}</span>` : ''}</div><div class="m">${meta}</div>${e.note ? `<div class="note">${esc(e.note)}</div>` : ''}<div class="erow">${starsHtml(e)}${tools}</div></div></div>`;
 }
@@ -2022,15 +2049,15 @@ function renderJournal() {
   $('jDayTitle').textContent = `${dd.getMonth() + 1} 月 ${dd.getDate()} 日（星期${WEEK[dd.getDay()]}）`;
   $('jDayCount').textContent = list.length ? `${sumQty(list)} 瓶` : '';
   $('jDayList').innerHTML = list.map(entryHtml).join('') || '<div class="empty-day">這天沒有紀錄。</div>';
-  $('jAdd').hidden = !canEdit() || S.jDay > t;
+  $('jAdd').hidden = !canUse() || S.jDay > t;
 }
 function shiftMonth(n) {
   const [y, m] = S.jMonth.split('-').map(Number), d = new Date(y, m - 1 + n, 1);
   S.jMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; S.jDay = null; renderJournal();
 }
 async function setRating(key, n) {
-  if (!canEdit() || S.rateBusy) return;
-  const e = journalEntries().find(x => x.key === key); if (!e) return;
+  if (!canUse() || S.rateBusy) return;
+  const e = journalEntries().find(x => x.key === key); if (!e || !canModEntry(e)) return;
   const next = n === e.rating ? 0 : n;
   S.rateBusy = true;
   try {
@@ -2043,10 +2070,11 @@ async function setRating(key, n) {
   finally { S.rateBusy = false; renderJournal(); }
 }
 function openJournal(editId) {
-  if (!canEdit()) return;
+  if (!canUse()) return;
+  const j = editId ? (S.data.journal || []).find(x => x.id === editId) : null;
+  if (editId && (!j || !canModEntry(j))) return;
   ensureLists(); S.jEdit = editId || null; S.jPhoto = null;
   S.jf = {src: '', cab: '', shelf: '', wineId: '', miss: false};
-  const j = editId ? (S.data.journal || []).find(x => x.id === editId) : null;
   $('jFormTitle').textContent = j ? '編輯紀錄' : '紀錄';
   $('j_srcSet').hidden = !!j;
   document.querySelectorAll('input[name=j_src]').forEach(r => r.checked = !!j && r.value === 'ext');
@@ -2071,7 +2099,7 @@ function renderPicker() {
     $('j_missBtn').hidden = true; $('j_miss').hidden = false;
     return;
   }
-  $('j_missBtn').hidden = false; $('j_miss').hidden = true;
+  $('j_missBtn').hidden = !canEdit(); $('j_miss').hidden = true;   // 「酒窖裡找不到這瓶」會新建酒款，管理員以上才有
   const crumb = (step, label, on) => `<button type="button" data-jstep="${step}" class="${on ? 'on' : ''}">${esc(label)}</button>`;
   const sel = f.wineId ? byId(f.wineId) : null;
   $('j_path').innerHTML = [crumb('cab', f.cab || '① 選櫃位', !f.cab), f.cab ? crumb('shelf', f.shelf || '② 選層位', !f.shelf) : '', f.shelf ? crumb('wine', sel ? sel.wineName : '③ 選酒', !f.wineId) : ''].filter(Boolean).join('<span class="sep">›</span>');
@@ -2134,6 +2162,7 @@ function journalPick(e) {
   $('j_path').scrollIntoView({block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
 }
 function startMissing() {
+  if (!canEdit()) return;
   const f = S.jf; f.miss = true; f.wineId = '';
   fillLocPair($('j_cab'), $('j_shelf'), f.cab || '', f.shelf || '');
   syncJournalForm(); $('j_mname').focus();
@@ -2143,7 +2172,8 @@ async function saveJournal() {
   const date = $('j_date').value, qty = Number($('j_qty').value), note = $('j_note').value.trim(), rating = S.jRating || 0;
   const type = document.querySelector('input[name=j_type]:checked')?.value || '';
   if (!src) fail('請先選擇「酒窖」或「非酒窖」。');
-  if (src === 'cellar' && !f.wineId && !f.miss) fail('請依序點選櫃位、層位和酒；找不到的話按「補登一筆」。');
+  if (f.miss && !canEdit()) fail('補登新酒款需要管理員；可以改記成「非酒窖」。');
+  if (src === 'cellar' && !f.wineId && !f.miss) fail(canEdit() ? '請依序點選櫃位、層位和酒；找不到的話按「補登一筆」。' : '請依序點選櫃位、層位和酒；酒窖裡找不到的話，可以改記成「非酒窖」。');
   checkDate(date);
   checkQty(qty);
   if (src === 'cellar' && !type) fail('請選擇類型：自飲、聚餐或其他。');
@@ -2196,7 +2226,7 @@ async function saveJournal() {
 }
 async function deleteJournal(btn) {
   if (armDelete(btn)) return;
-  const id = btn.dataset.jdel, j = (S.data.journal || []).find(x => x.id === id); if (!j) return;
+  const id = btn.dataset.jdel, j = (S.data.journal || []).find(x => x.id === id); if (!j || !canModEntry(j)) return;
   try {
     await mutate(d => { d.journal = (d.journal || []).filter(x => x.id !== id); }, `刪除飲酒紀錄 ${j.name}\n\n日期：${j.date}`);
     toast('已刪除這筆飲酒紀錄。');
@@ -2207,8 +2237,11 @@ function renderHistory() {
   renderJournal();
   if ($('journalView').open) renderJTab();
   const all = [];
-  for (const w of wines()) for (const o of w.outs || []) all.push({...o, wineId: w.wineId, wineName: w.wineName, vintage: w.vintage, gone: w.status === 'archived'});
+  const own = !canEdit();   // 使用者只看自己記的出庫
+  for (const w of wines()) for (const o of w.outs || []) if (!own || mine(o.by)) all.push({...o, wineId: w.wineId, wineName: w.wineName, vintage: w.vintage, gone: w.status === 'archived'});
   all.sort(byNewest);
+  $('histIntro').textContent = own ? '你自己記的每一次出庫（含送禮），由新到舊。點一筆可以查看那款酒。' : '每一次出庫（含送禮）都記在這裡，由新到舊。點一筆可以查看那款酒。';
+  $('histGoneBox').hidden = own;
   const years = [...new Set(all.map(o => (o.date || '').slice(0, 4)).filter(Boolean))].sort().reverse();
   if (S.histYear && !years.includes(S.histYear)) S.histYear = '';
   $('h_year').innerHTML = `<option value="">全部年份</option>` + years.map(y => `<option value="${y}" ${y === S.histYear ? 'selected' : ''}>${y} 年</option>`).join('');
@@ -2239,10 +2272,11 @@ async function loadAudit(wineId, page) {
   S.auditLoadedFor = wineId;
   S.auditWine = wineId; S.auditPage = page;
   if (page === 1) S.audit = [];
-  $('auditHint').textContent = wineId ? `「${byId(wineId)?.wineName || ''}」的異動紀錄，由新到舊。` : '每次異動都是一筆 GitHub commit，由新到舊。';
+  const own = !canEdit(), me = '操作者：' + (S.session?.label || '');   // 使用者只看自己做的異動
+  $('auditHint').textContent = wineId ? `「${byId(wineId)?.wineName || ''}」的異動紀錄，由新到舊。` : own ? '你自己做過的異動，由新到舊。' : '每次異動都是一筆 GitHub commit，由新到舊。';
   $('auditList').innerHTML = page === 1 ? '<p class="hint">讀取中…</p>' : $('auditList').innerHTML;
   try {
-    const pages = wineId ? [page, page + 1, page + 2] : [page];
+    const pages = wineId || own ? [page, page + 1, page + 2] : [page];
     let more = false;
     for (const p of pages) {
       const r = await gh(`${REPO}/commits?sha=${encodeURIComponent(CFG.dataBranch)}&path=${encodeURIComponent(CFG.dataPath)}&per_page=50&page=${p}`);
@@ -2251,6 +2285,7 @@ async function loadAudit(wineId, page) {
       for (const c of list) {
         if (/^(飲用優先|評分|調整照片順序|更換封面照片) /.test(c.commit.message) || HIDDEN_AUDIT.has(c.sha)) continue;
         if (wineId && !new RegExp('\\b' + wineId + '\\b').test(c.commit.message)) continue;
+        if (own && !c.commit.message.split('\n').some(l => l.trim() === me)) continue;
         S.audit.push(c);
       }
       more = list.length === 50; S.auditPage = p;

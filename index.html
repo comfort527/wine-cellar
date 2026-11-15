@@ -13,10 +13,10 @@
 <meta name="theme-color" content="#eef0ec" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1412" media="(prefers-color-scheme: dark)">
 <title>酒窖</title>
-<link rel="icon" href="icons/favicon.svg?v=20261115b" type="image/svg+xml">
-<link rel="icon" href="icons/favicon-96.png?v=20261115b" sizes="96x96" type="image/png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=20261115b">
-<link rel="manifest" href="manifest.webmanifest?v=20261115b">
+<link rel="icon" href="icons/favicon.svg?v=20261115c" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-96.png?v=20261115c" sizes="96x96" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=20261115c">
+<link rel="manifest" href="manifest.webmanifest?v=20261115c">
 <meta name="apple-mobile-web-app-title" content="酒窖">
 <meta name="application-name" content="酒窖">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -24,13 +24,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261115b" id="mainCss">
+<link rel="stylesheet" href="style.css?v=20261115c" id="mainCss">
 </head>
 <body class="loading">
 <header class="bar">
  <div class="bar-in">
   <a class="mark" href="#" id="homeLink" aria-label="回到全部酒款">
-   <img class="mark-ic" src="icons/logo.svg?v=20261115b" alt="" width="36" height="40">
+   <img class="mark-ic" src="icons/logo.svg?v=20261115c" alt="" width="36" height="40">
    <span class="mark-t">酒窖</span>
   </a>
   <span class="sync" id="sync"><span class="dot"></span><span id="syncText">讀取中</span></span>
@@ -299,7 +299,7 @@
  <div class="adm-main" id="admMain">
  <section id="tab-audit"><p class="hint" style="margin-top:0" id="auditHint">每次異動都是一筆 GitHub commit，由新到舊。</p><div class="audit" id="auditList"></div><button class="small" id="moreAudit" hidden style="margin-top:10px">載入更多</button></section>
  <section id="tab-outs" hidden>
-  <p class="hint" style="margin-top:0">每一次出庫（含送禮）都記在這裡，由新到舊。點一筆可以查看那款酒。</p>
+  <p class="hint" style="margin-top:0" id="histIntro">每一次出庫（含送禮）都記在這裡，由新到舊。點一筆可以查看那款酒。</p>
   <div class="hist-filter">
    <select id="h_year" aria-label="年份"></select>
    <div class="htypes" id="h_types" role="group" aria-label="出庫類型">
@@ -308,9 +308,9 @@
   </div>
   <div class="hist-sum" id="histSum"></div>
   <div class="hist-outs" id="histList"></div>
-  <h3 class="hist-h">已出清的酒款</h3>
+  <div id="histGoneBox"><h3 class="hist-h">已出清的酒款</h3>
   <p class="hint" style="margin-top:0">庫存全部出完的酒。再入手同一款酒時，可以按「編輯」補上瓶數。</p>
-  <div class="hist" id="histGone"></div>
+  <div class="hist" id="histGone"></div></div>
  </section>
  <section id="tab-lib" hidden>
    <label class="search" data-input="jm_q" data-ph="搜酒名、酒莊、年份" data-label="搜尋酒款" data-clear="jm_clear" data-clear-label="清除"></label>
@@ -345,10 +345,10 @@
   <p class="hint">建議先到該服務的帳號設定<b>每月花費上限</b>。辨識結果只會幫你填表，存檔前請自己確認。</p>
  </section>
  <section id="tab-keys" hidden>
-  <p class="hint" style="margin-top:0">每台裝置一組密碼。刪除後該裝置就無法再登入管理。編輯者可新增、編輯、出庫與上傳照片；管理員另可管理裝置密碼與更換權杖。</p>
+  <p class="hint" style="margin-top:0">每台裝置一組密碼，刪除後該裝置就無法再登入。<b>使用者</b>：對已建好的酒款出庫、移動，拍照放進待入櫃，記錄飲酒日誌。<b>管理員</b>：另外可以新增、編輯酒款、管理照片與待入櫃、設定櫃位、匯出。<b>工程人員</b>：另外可以管理裝置密碼、新增／刪除人員與更換權杖。</p>
   <div id="slotList"></div>
   <form id="slotForm" novalidate><fieldset><legend>新增裝置</legend>
-   <div class="inline" style="margin-top:0"><div class="field"><label for="k_label">裝置名稱</label><input id="k_label" maxlength="40" placeholder="例如 客廳 iPad"></div><div class="field"><label for="k_role">角色</label><select id="k_role"><option value="editor">編輯者</option><option value="admin">管理員</option></select></div></div>
+   <div class="inline" style="margin-top:0"><div class="field"><label for="k_label">裝置名稱</label><input id="k_label" maxlength="40" placeholder="例如 客廳 iPad"></div><div class="field"><label for="k_role">身分</label><select id="k_role"><option value="user">使用者</option><option value="editor">管理員</option><option value="admin">工程人員</option></select></div></div>
    <div class="inline"><div class="field"><label for="k_pass">密碼（至少 10 個字元）</label><input id="k_pass" type="password" autocomplete="new-password"></div><button class="primary" type="submit">新增</button></div>
   </fieldset></form>
   <form id="tokenForm" novalidate><fieldset><legend>更換 GitHub 權杖（權杖到期或外流時）</legend>
@@ -371,7 +371,7 @@
 
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="config.js?v=20261115b"></script>
-<script src="app.js?v=20261115b"></script>
+<script src="config.js?v=20261115c"></script>
+<script src="app.js?v=20261115c"></script>
 </body>
 </html>

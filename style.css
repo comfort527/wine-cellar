@@ -171,6 +171,7 @@ legend{font-size:20px;color:var(--muted);padding:0 6px}
 .slot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border-radius:var(--r-sm);background:var(--surface-2);margin-bottom:8px}
 .role{display:inline-block;padding:1px 8px;border-radius:999px;font-size:18px;background:var(--sunk);color:var(--muted);margin-left:6px}
 .role.admin{background:var(--wine);color:var(--on-wine)}
+.role.user{background:transparent;border:1px solid var(--line)}
 
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;z-index:100;max-width:90vw;font-size:21px;box-shadow:var(--shadow-lg)}
 .fab{position:fixed;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));width:72px;height:72px;border-radius:50%;background:var(--wine);border:0;color:var(--on-wine);font-size:45px;line-height:1;box-shadow:var(--shadow-lg);z-index:15;display:none}
@@ -461,7 +462,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261115b";
+:root{--ver:"20261115c";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
