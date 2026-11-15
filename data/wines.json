@@ -644,17 +644,24 @@
     }
    ],
    "origin": "France",
-   "photo": "",
+   "photo": "images/W021-1794708438302.jpg",
    "referencePrice": 2070,
-   "revision": 1,
+   "revision": 2,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-09-29T14:10:02.778Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-15T02:07:24.116Z",
+   "updatedBy": "芝琦",
    "vintage": "2018",
    "volume": "750ml",
    "wineName": "Virginie de Valandraud",
-   "wineryRegion": "Château Valandraud"
+   "wineryRegion": "Château Valandraud",
+   "photos": [
+    {
+     "photo": "images/W021-1794708438302.jpg",
+     "thumb": "images/W021-1794708438302-t.jpg"
+    }
+   ],
+   "thumb": "images/W021-1794708438302-t.jpg"
   },
   "W022": {
    "createdAt": "",
@@ -1822,8 +1829,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 114,
- "updatedAt": "2026-11-15T01:49:28.659Z",
+ "rev": 115,
+ "updatedAt": "2026-11-15T02:07:24.116Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
