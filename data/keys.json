@@ -69,6 +69,15 @@
    "iv": "fp6vfsViEHlW/mWR",
    "ct": "v/hW4JkO6gBKf9n+B62r2kVMfEoeObwl5s9OyJS68i8Gi53oN6hc3sul3E7ALPWG",
    "createdAt": "2026-11-15T05:54:18.023Z"
+  },
+  {
+   "id": "f1fb6f85-e0f0-4a09-a58e-6330fb2cbe52",
+   "label": "飛纓",
+   "role": "user",
+   "salt": "YpI8Ntnn4NV59QPD18xf0Q==",
+   "iv": "Eb10hP5LJabho1JH",
+   "ct": "AoZwqSZYYnIs0MYuhzYoh7DElBkxrAU9CXxCQWwyq4B0OHj/cp1GjQ1ykEyNzsSO",
+   "createdAt": "2026-11-15T05:54:42.294Z"
   }
  ]
 }
