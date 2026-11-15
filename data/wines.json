@@ -96,17 +96,24 @@
     }
    ],
    "origin": "France",
-   "photo": "",
+   "photo": "images/W003-1794709313080.jpg",
    "referencePrice": 2765,
-   "revision": 1,
+   "revision": 2,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-09-29T13:27:25.591Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-15T02:21:58.996Z",
+   "updatedBy": "芝琦",
    "vintage": "2005",
    "volume": "750ml",
    "wineName": "Premier Cru Pommard Les Pézerolles",
-   "wineryRegion": "Bouchard Père et Fils"
+   "wineryRegion": "Bouchard Père et Fils",
+   "photos": [
+    {
+     "photo": "images/W003-1794709313080.jpg",
+     "thumb": "images/W003-1794709313080-t.jpg"
+    }
+   ],
+   "thumb": "images/W003-1794709313080-t.jpg"
   },
   "W004": {
    "createdAt": "",
@@ -1875,8 +1882,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 123,
- "updatedAt": "2026-11-15T02:13:02.470Z",
+ "rev": 124,
+ "updatedAt": "2026-11-15T02:21:58.996Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
