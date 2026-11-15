@@ -1925,17 +1925,24 @@
     }
    ],
    "origin": "France",
-   "photo": "",
+   "photo": "images/W063-1794712027200.jpg",
    "referencePrice": 450,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-09-30T04:51:33.546Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-15T03:07:11.494Z",
+   "updatedBy": "芝琦",
    "vintage": "2023",
    "volume": "750ml",
    "wineName": "An 940/Pinot Noir",
-   "wineryRegion": "Gérard Bertrand"
+   "wineryRegion": "Gérard Bertrand",
+   "photos": [
+    {
+     "photo": "images/W063-1794712027200.jpg",
+     "thumb": "images/W063-1794712027200-t.jpg"
+    }
+   ],
+   "thumb": "images/W063-1794712027200-t.jpg"
   },
   "W064": {
    "createdAt": "",
@@ -2002,8 +2009,8 @@
    "revision": 3
   }
  },
- "rev": 142,
- "updatedAt": "2026-11-15T03:06:56.148Z",
+ "rev": 143,
+ "updatedAt": "2026-11-15T03:07:11.494Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
