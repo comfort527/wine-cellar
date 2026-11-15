@@ -28,8 +28,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 .bar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
 .bar-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px))}
 .mark{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink)}
-.mark svg{width:40px;height:40px;fill:var(--wine)}
-.mark svg .lbl{fill:var(--bg)}
+.mark-ic{display:block;height:40px;width:auto;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
 .mark-t{font:700 32px/1 var(--serif-tc);letter-spacing:.12em}
 .sync{display:inline-flex;align-items:center;gap:7px;font-size:18px;color:var(--muted);font-variant-numeric:tabular-nums}
 .sync .dot{width:7px;height:7px;border-radius:50%;background:var(--faint)}
@@ -462,7 +461,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261114e";
+:root{--ver:"20261115a";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
@@ -804,7 +803,7 @@ i[data-icon],.bnav button i,.tnav button i{font-style:normal;display:inline-flex
   .bnav .bn-pre{display:none}
   .toast{left:calc(50% + 39px)}
   .bar-in{max-width:none;gap:10px;padding:6px max(16px,env(safe-area-inset-right,0px)) 6px 16px}
-  .mark svg{width:26px;height:26px}.mark-t{font-size:22px}
+  .mark-ic{height:28px}.mark-t{font-size:22px}
   .page{max-width:none;display:grid;grid-template-columns:minmax(280px,42%) minmax(0,1fr);align-items:start;gap:12px 20px;padding:10px max(16px,env(safe-area-inset-right,0px)) 32px 16px}
   .page > .notice,.summary{grid-column:1/-1}
   .summary{flex-wrap:nowrap;align-items:center;gap:16px;padding-bottom:10px}
