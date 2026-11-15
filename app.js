@@ -82,7 +82,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261115h';
+const APP_VER = '20261115j';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -418,7 +418,7 @@ const countryOf = w => (w.origin || '').split(/[,，/]/)[0].trim() || '未填產
 const shelfNo = s => { const m = /\d+/.exec(s || ''); return m ? Number(m[0]) : 999; };
 // 編輯表單有選酒種就照選的；沒選過的舊資料才看酒名與備註的關鍵字判斷（只分紅、白）
 /* 酒種：[代號, 名稱, 酒櫃圖瓶底的 class]。存在 w.color；沒選過的舊資料只看關鍵字分紅、白 */
-const KINDS = [['red', '紅酒', ''], ['white', '白酒', 'w'], ['sweet', '甜酒／貴腐', 's'], ['sake', '清酒', 'k']];
+const KINDS = [['red', '紅酒', ''], ['white', '白酒', 'w'], ['sweet', '甜酒', 's'], ['sake', '清酒', 'k']];
 const KIND_IDS = KINDS.map(k => k[0]);
 const kindOf = w => KIND_IDS.includes(w.color) ? w.color : /白酒|white|riesling|sauvignon blanc|chardonnay/i.test(`${w.grapeNotes} ${w.wineName}`) ? 'white' : 'red';
 const kindName = k => (KINDS.find(x => x[0] === k) || KINDS[0])[1];
@@ -515,7 +515,7 @@ function renderMap(list) {
   fillBottles(true);
   if (html) renderLegend(all);
 }
-// 酒櫃下方的圖例：紅酒、白酒一定列；甜酒／貴腐、清酒有放在酒櫃裡才列
+// 酒櫃下方的圖例：紅酒、白酒一定列；甜酒、清酒有放在酒櫃裡才列
 function renderLegend(all) {
   const has = emptyCount(); for (const [, sh] of all) for (const s of sh.values()) for (const k of KIND_IDS) has[k] += s[k] || 0;
   const html = KINDS.filter(([k]) => k === 'red' || k === 'white' || has[k]).map(([k, n]) => `<span><i class="lg-${k}"></i>${n}</span>`).join('');
@@ -883,6 +883,7 @@ function wire() {
   matchMedia('(min-width: 761px), ' + PHL_MQ).addEventListener('change', () => { if (!$('adminModal').open) return; const cur = ADMIN_TABS.find(t => !$('tab-' + t).hidden); if (admWide()) switchTab(cur || 'lib'); else if (cur) switchTab(cur); });
   $('factPend').addEventListener('click', () => { showDialog('pendModal'); showErr('pendErr', ''); renderPendStrip(); renderPending(); });
   $('exportBtn').addEventListener('click', exportCsv);
+  $('exportXlsxBtn').addEventListener('click', exportXlsx);
   let fbRaf = 0; window.addEventListener('resize', () => { cancelAnimationFrame(fbRaf); fbRaf = requestAnimationFrame(fillBottles); });
   $('map').addEventListener('click', e => {
     const op = e.target.closest('[data-cabopen]');
@@ -1927,6 +1928,142 @@ function exportCsv() {
   a.href = URL.createObjectURL(new Blob(['﻿' + lines.join('\r\n')], {type: 'text/csv;charset=utf-8'}));
   a.download = `wine-cellar-${today()}.csv`;
   document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+
+/* ---------- 匯出 Excel：照「敦南8樓」酒單的格式（依酒莊產區、依位置、曾經擁有三張表） ---------- */
+// 地點：櫃名開頭是「8樓」的屬於「敦南8樓」，「行館」開頭的屬於「行館」；其他就用櫃名
+const SITES = [['8樓', '敦南8樓'], ['行館', '行館']];
+const siteOf = cab => { const s = SITES.find(([p]) => (cab || '').startsWith(p)); return s ? s[1] : cab || '其他'; };
+// 位置代碼：櫃名去掉地點開頭與結尾的「櫃」字，後面接層號；只有一層的櫃子不接層號（8樓右LB櫃 第1層 → 右LB1；8樓外冰箱 → 外冰箱）
+function locCode(cab, shelf) {
+  const s = SITES.find(([p]) => (cab || '').startsWith(p)), base = (s ? cab.slice(s[0].length) : cab || '').replace(/櫃$/, '');
+  const shelves = new Set(shelvesOf(cab)); for (const sh of Object.keys(S.data?.capacity?.[cab] || {})) shelves.add(sh);
+  if (shelf) shelves.add(shelf);
+  return shelves.size > 1 ? base + (shelfNo(shelf) < 999 ? shelfNo(shelf) : shelf || '') : base;
+}
+const xmlEsc = v => String(v ?? '').replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c])).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '');
+const colName = i => String.fromCharCode(65 + i);   // 0→A（只用到 A–M）
+// 樣式編號（對應下面 styles.xml 的 cellXfs）
+const XS = {title: 1, head: 2, hint: 3, text: 4, mid: 5, price: 6, cjkMid: 7, cjkLeft: 8};
+const XLSX_STYLES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+<numFmts count="1"><numFmt numFmtId="176" formatCode="&quot;NT$&quot;#,##0_);\\(&quot;NT$&quot;#,##0\\)"/></numFmts>
+<fonts count="6"><font><sz val="12"/><name val="Calibri"/><family val="2"/></font><font><b/><sz val="25"/><name val="微軟正黑體"/><family val="2"/><charset val="136"/></font><font><sz val="20"/><name val="Calibri"/><family val="2"/></font><font><sz val="20"/><name val="微軟正黑體"/><family val="2"/><charset val="136"/></font><font><sz val="16"/><name val="微軟正黑體"/><family val="2"/><charset val="136"/></font><font><b/><sz val="26"/><color rgb="FFFF0000"/><name val="BiauKaiTC Regular"/><family val="4"/><charset val="136"/></font></fonts>
+<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFD9D9D9"/><bgColor indexed="64"/></patternFill></fill></fills>
+<borders count="3"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color auto="1"/></left><right style="thin"><color auto="1"/></right><top style="thin"><color auto="1"/></top><bottom style="thin"><color auto="1"/></bottom><diagonal/></border><border><left/><right/><top/><bottom style="thin"><color auto="1"/></bottom><diagonal/></border></borders>
+<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+<cellXfs count="9"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
+<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" shrinkToFit="1"/></xf>
+<xf numFmtId="0" fontId="5" fillId="0" borderId="2" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>
+<xf numFmtId="0" fontId="2" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" shrinkToFit="1"/></xf>
+<xf numFmtId="0" fontId="2" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+<xf numFmtId="176" fontId="4" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+<xf numFmtId="0" fontId="3" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+<xf numFmtId="0" fontId="3" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" shrinkToFit="1"/></xf>
+</cellXfs>
+<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+</styleSheet>`;
+const XL_HEAD = ['Region', '酒莊/產區', '酒名', '年份', '容量', '數量', '參考價格', '來源', '位置', '其他備註/葡萄品種', '產地'];
+const XL_HEAD_ST = [XS.head, XS.head, XS.head, XS.head, XS.head, XS.head, XS.head, XS.head, XS.head, XS.head, XS.head];
+const XL_COLS = '<cols><col min="1" max="1" width="33.43" hidden="1" customWidth="1"/><col min="2" max="3" width="90.57" customWidth="1"/><col min="4" max="6" width="18.57" customWidth="1"/><col min="7" max="7" width="24" customWidth="1"/><col min="8" max="9" width="18.57" customWidth="1"/><col min="10" max="10" width="63.57" customWidth="1"/><col min="11" max="11" width="27" customWidth="1"/><col min="12" max="12" width="19" customWidth="1"/><col min="13" max="13" width="20.86" customWidth="1"/></cols>';
+// 一格：數字、文字或公式
+function xlCell(ref, v, st) {
+  if (v && typeof v === 'object' && v.f) return `<c r="${ref}" s="${st}"><f>${xmlEsc(v.f)}</f><v>${v.v ?? ''}</v></c>`;
+  if (typeof v === 'number' && Number.isFinite(v)) return `<c r="${ref}" s="${st}"><v>${v}</v></c>`;
+  if (v === '' || v == null) return `<c r="${ref}" s="${st}"/>`;
+  return `<c r="${ref}" s="${st}" t="inlineStr"><is><t xml:space="preserve">${xmlEsc(v)}</t></is></c>`;
+}
+function xlRow(r, cells, ht = 33) { return `<row r="${r}" ht="${ht}" customHeight="1">${cells.map(([c, v, st]) => xlCell(c + r, v, st)).join('')}</row>`; }
+// 一列酒：A 欄（Region，隱藏）留空
+function xlWineRow(r, x) {
+  const yr = /^\d{4}$/.test(String(x.w.vintage || '').trim()) ? Number(x.w.vintage) : String(x.w.vintage || '');
+  const price = x.w.referencePrice == null || x.w.referencePrice === '' ? '' : Number.isFinite(Number(x.w.referencePrice)) ? Number(x.w.referencePrice) : String(x.w.referencePrice);
+  return xlRow(r, [['A', '', 0], ['B', x.w.wineryRegion || '', XS.text], ['C', x.w.wineName || '', XS.text], ['D', yr, XS.mid], ['E', x.w.volume || '', XS.mid], ['F', x.qty, XS.mid],
+    ['G', price, XS.price], ['H', x.w.source || '', XS.cjkMid], ['I', x.code, XS.mid], ['J', x.w.grapeNotes || '', XS.cjkLeft], ['K', x.w.origin || '', XS.cjkLeft]]);
+}
+const xlBlank = r => xlRow(r, 'BCDEFGHIJK'.split('').map(c => [c, '', 'BC'.includes(c) || 'JK'.includes(c) ? XS.text : XS.mid]), 30);
+function xlSheet({title, hint, hintAt, blocks, sums, headRow}) {
+  const rows = [], merges = [];
+  let r = 1;
+  if (hint) { rows.push(xlRow(r, [[hintAt[0], hint, XS.hint], [hintAt[1], '', XS.hint]], 48.95)); merges.push(`${hintAt[0]}1:${hintAt[1]}1`); r++; }
+  rows.push(xlRow(r, 'BCDEFGHIJK'.split('').map((c, i) => [c, i ? '' : title, XS.title]))); merges.push(`B${r}:K${r}`); r++;
+  rows.push(xlRow(r, XL_HEAD.map((h, i) => [colName(i), h, XL_HEAD_ST[i]]))); r++;
+  const first = r;
+  blocks.forEach((list, bi) => {
+    if (bi) { rows.push(xlBlank(r)); r++; }
+    const start = r;
+    for (const x of list) { rows.push(xlWineRow(r, x)); r++; }
+    if (sums) { rows.push(xlRow(r, 'BCDEFGHIJK'.split('').map(c => [c, c === 'F' ? {f: `SUM(F${start}:F${r - 1})`, v: list.reduce((a, x) => a + (Number(x.qty) || 0), 0)} : '', 'BC'.includes(c) || 'JK'.includes(c) ? XS.text : XS.mid]))); r++; }
+  });
+  const last = Math.max(r - 1, first), head = first - 1;
+  return {last, head, xml: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><dimension ref="A1:M${last}"/><sheetViews><sheetView zoomScale="60" zoomScaleNormal="60" workbookViewId="0"><pane ySplit="${head}" topLeftCell="A${head + 1}" activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft" activeCell="B${head + 1}" sqref="B${head + 1}"/></sheetView></sheetViews><sheetFormatPr defaultColWidth="11" defaultRowHeight="30"/>${XL_COLS}<sheetData>${rows.join('')}</sheetData><autoFilter ref="A${head}:M${head}"/><mergeCells count="${merges.length}">${merges.map(m => `<mergeCell ref="${m}"/>`).join('')}</mergeCells><printOptions horizontalCentered="1"/><pageMargins left="0" right="0" top="0" bottom="0" header="0" footer="0"/><pageSetup paperSize="9" fitToHeight="0" orientation="landscape"/><headerFooter><oddFooter>第 &amp;P 頁，共 &amp;N 頁</oddFooter></headerFooter></worksheet>`};
+}
+const byWinery = (a, b) => (a.w.wineryRegion || '').localeCompare(b.w.wineryRegion || '', 'en', {sensitivity: 'base'}) || (a.w.wineName || '').localeCompare(b.w.wineName || '', 'en', {sensitivity: 'base'}) || String(a.w.vintage || '').localeCompare(String(b.w.vintage || ''));
+const byPlace = (a, b) => a.cab.localeCompare(b.cab) || shelfNo(a.shelf) - shelfNo(b.shelf) || byWinery(a, b);
+function buildWorkbook() {
+  const d = new Date(), stamp = `${d.getFullYear()}.${d.getMonth() + 1}.${d.getDate()}`;
+  const sites = new Map(), site = n => { if (!sites.has(n)) sites.set(n, {now: [], gone: []}); return sites.get(n); };
+  for (const w of active()) for (const l of w.locations || []) if (l.quantity > 0) site(siteOf(l.cabinet)).now.push({w, cab: l.cabinet, shelf: l.shelf, qty: Number(l.quantity) || 0, code: locCode(l.cabinet, l.shelf)});
+  for (const w of wines().filter(x => x.status === 'archived')) {
+    const outs = (w.outs || []).slice().sort(byNewest), lastOut = outs[0] || {}, loc = lastOut.cabinet ? lastOut : (w.locations || [])[0] || {};
+    const qty = outs.reduce((a, o) => a + (Number(o.qty) || 0), 0);
+    site(loc.cabinet ? siteOf(loc.cabinet) : SITES[0][1]).gone.push({w, cab: loc.cabinet || '', shelf: loc.shelf || '', qty: qty || '', code: loc.cabinet ? locCode(loc.cabinet, loc.shelf) : ''});
+  }
+  const order = [...sites.keys()].sort((a, b) => (a === SITES[0][1] ? -1 : b === SITES[0][1] ? 1 : a.localeCompare(b)));
+  const sheets = [];
+  for (const n of order) {
+    const {now, gone} = sites.get(n);
+    const cabs = [...new Set(now.map(x => x.cab))].sort();
+    const blocks = sort => cabs.map(c => now.filter(x => x.cab === c).sort(sort));
+    if (now.length) {
+      sheets.push({name: `${n}-依酒莊產區`, ...xlSheet({title: `${n}(${stamp}更新)`, hint: '  依酒莊/產區排序↓', hintAt: ['B', 'C'], blocks: blocks(byWinery), sums: true})});
+      sheets.push({name: `${n}-依位置`, ...xlSheet({title: `${n}(${stamp}更新)`, hint: '依位置排序↓', hintAt: ['H', 'I'], blocks: blocks(byPlace), sums: true})});
+    }
+    if (gone.length) sheets.push({name: `${n}-曾經擁有`, ...xlSheet({title: `${n}(${stamp}更新)`, blocks: [gone.sort(byPlace)], sums: false})});
+  }
+  if (!sheets.length) fail('還沒有酒款可以匯出。');
+  sheets.forEach(s => { s.name = s.name.replace(/[\\/?*[\]:]/g, '-').slice(0, 31); });
+  const files = [
+    ['[Content_Types].xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((s, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}</Types>`],
+    ['_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
+    ['xl/workbook.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView/></bookViews><sheets>${sheets.map((s, i) => `<sheet name="${xmlEsc(s.name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('')}</sheets><definedNames>${sheets.map((s, i) => { const q = `'${s.name.replace(/'/g, "''")}'`; return `<definedName name="_xlnm._FilterDatabase" localSheetId="${i}" hidden="1">${xmlEsc(q)}!$A$${s.head}:$M$${s.head}</definedName><definedName name="_xlnm.Print_Area" localSheetId="${i}">${xmlEsc(q)}!$B$1:$K$${s.last}</definedName><definedName name="_xlnm.Print_Titles" localSheetId="${i}">${xmlEsc(q)}!$${s.head - 1}:$${s.head}</definedName>`; }).join('')}</definedNames></workbook>`],
+    ['xl/_rels/workbook.xml.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((s, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('')}<Relationship Id="rId${sheets.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`],
+    ['xl/styles.xml', XLSX_STYLES],
+    ...sheets.map((s, i) => [`xl/worksheets/sheet${i + 1}.xml`, s.xml]),
+  ];
+  return {zip: zipStore(files), sheets: sheets.map(s => s.name)};
+}
+// 最簡單的 zip（不壓縮）：xlsx 就是一包 XML
+const CRC_T = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+const crc32 = b => { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = CRC_T[(c ^ b[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+function zipStore(files) {
+  const te = new TextEncoder(), parts = [], dir = []; let off = 0;
+  const d = new Date(), dt = ((d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1)) & 0xFFFF, dd = (((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()) & 0xFFFF;
+  for (const [name, text] of files) {
+    const nb = te.encode(name), data = te.encode(text), crc = crc32(data);
+    const h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true); h.setUint16(10, dt, true); h.setUint16(12, dd, true);
+    h.setUint32(14, crc, true); h.setUint32(18, data.length, true); h.setUint32(22, data.length, true); h.setUint16(26, nb.length, true); h.setUint16(28, 0, true);
+    parts.push(new Uint8Array(h.buffer), nb, data);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true); c.setUint16(12, dt, true); c.setUint16(14, dd, true);
+    c.setUint32(16, crc, true); c.setUint32(20, data.length, true); c.setUint32(24, data.length, true); c.setUint16(28, nb.length, true); c.setUint32(42, off, true);
+    dir.push(new Uint8Array(c.buffer), nb);
+    off += 30 + nb.length + data.length;
+  }
+  const size = dir.reduce((a, p) => a + p.length, 0), e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, size, true); e.setUint32(16, off, true);
+  return new Blob([...parts, ...dir, new Uint8Array(e.buffer)], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+function exportXlsx() {
+  try {
+    const {zip} = buildWorkbook();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(zip); a.download = `wine-cellar-${today()}.xlsx`;   // 檔名用英文：有些瀏覽器遇到中文檔名會變成「download」
+    document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  } catch (e) { toast(msgOf(e)); if (!e.user) console.error(e); }
 }
 
 /* ---------- 管理 ---------- */

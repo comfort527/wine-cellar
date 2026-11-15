@@ -13,10 +13,10 @@
 <meta name="theme-color" content="#eef0ec" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1412" media="(prefers-color-scheme: dark)">
 <title>酒窖</title>
-<link rel="icon" href="icons/favicon.svg?v=20261115h" type="image/svg+xml">
-<link rel="icon" href="icons/favicon-96.png?v=20261115h" sizes="96x96" type="image/png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=20261115h">
-<link rel="manifest" href="manifest.webmanifest?v=20261115h">
+<link rel="icon" href="icons/favicon.svg?v=20261115j" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-96.png?v=20261115j" sizes="96x96" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=20261115j">
+<link rel="manifest" href="manifest.webmanifest?v=20261115j">
 <meta name="apple-mobile-web-app-title" content="酒窖">
 <meta name="application-name" content="酒窖">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -24,13 +24,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261115h" id="mainCss">
+<link rel="stylesheet" href="style.css?v=20261115j" id="mainCss">
 </head>
 <body class="loading">
 <header class="bar">
  <div class="bar-in">
   <a class="mark" href="#" id="homeLink" aria-label="回到全部酒款">
-   <img class="mark-ic" src="icons/logo.svg?v=20261115h" alt="" width="36" height="40">
+   <img class="mark-ic" src="icons/logo.svg?v=20261115j" alt="" width="36" height="40">
    <span class="mark-t">酒窖</span>
   </a>
   <span class="sync" id="sync"><span class="dot"></span><span id="syncText">讀取中</span></span>
@@ -153,7 +153,7 @@
   <div class="field"><label for="f_wineName">酒名 *</label><input id="f_wineName" maxlength="200" required></div>
   <div class="field"><label for="f_wineryRegion">酒莊／產區</label><input id="f_wineryRegion" maxlength="200"></div>
   <div class="field"><label for="f_vintage">年份</label><input id="f_vintage" maxlength="40" placeholder="例如 2018 或 NV"></div>
-  <fieldset class="field types colorpick" id="f_colorSet"><legend>酒種</legend><label><input type="radio" name="f_color" value="red"><span>紅酒</span></label><label><input type="radio" name="f_color" value="white"><span>白酒</span></label><label><input type="radio" name="f_color" value="sweet"><span>甜酒／貴腐</span></label><label><input type="radio" name="f_color" value="sake"><span>清酒</span></label></fieldset>
+  <fieldset class="field types colorpick" id="f_colorSet"><legend>酒種</legend><label><input type="radio" name="f_color" value="red"><span>紅酒</span></label><label><input type="radio" name="f_color" value="white"><span>白酒</span></label><label><input type="radio" name="f_color" value="sweet"><span>甜酒</span></label><label><input type="radio" name="f_color" value="sake"><span>清酒</span></label></fieldset>
   <div class="field"><label for="f_entryDate">入庫日期</label><input id="f_entryDate" type="date"></div>
   <div class="field"><label for="f_volumeChoice">容量</label><select id="f_volumeChoice"><option>750ml</option><option>500ml</option><option>375ml</option><option>1500ml</option><option>3000ml</option><option value="__other__">其他（手動輸入）</option></select><input id="f_volumeOther" hidden maxlength="40" placeholder="例如 187ml"></div>
   <div class="field"><label for="f_sourceChoice">來源</label><select id="f_sourceChoice"><option value="">請選擇</option><option>購</option><option>贈</option><option>寄存</option><option value="__other__">其他（手動輸入）</option></select><input id="f_sourceOther" hidden maxlength="80" placeholder="輸入其他來源"></div>
@@ -289,7 +289,7 @@
    <button type="button" class="mi" data-tab="keys" id="keysTab" data-ic="keys" data-t="裝置密碼" data-s="新增／刪除裝置・更換 GitHub 權杖"></button>
   </div></div>
   <div class="adm-grp"><h5>資料</h5><div class="menu">
-   <button type="button" class="mi" data-tab="export" data-ic="export" data-t="匯出 CSV" data-s="下載全部酒款給 Excel 使用"></button>
+   <button type="button" class="mi" data-tab="export" data-ic="export" data-t="匯出" data-s="Excel 酒單・CSV"></button>
    <button type="button" class="mi" data-tab="storage" data-ic="storage" data-t="儲存空間" data-s="GitHub repo 已用空間" data-sub-id="storageSub"></button>
   </div></div>
   <div class="adm-grp adm-phone"><h5>帳號</h5><div class="menu">
@@ -360,8 +360,10 @@
   <p><a id="repoLink" target="_blank" rel="noopener">開啟 GitHub repo</a></p>
  </section>
  <section id="tab-export" hidden>
-  <p class="hint" style="margin-top:0">把全部酒款（含已出清）存成 CSV 檔，可以用 Excel 或 Numbers 打開。每個存放位置一列。</p>
-  <button type="button" class="primary" id="exportBtn">⇩ 下載 CSV</button>
+  <p class="hint" style="margin-top:0"><b>Excel 酒單</b>：照「敦南8樓」酒單的格式，分成「依酒莊產區」「依位置」「曾經擁有」三張表，每個櫃子一區、下面有瓶數小計，可以直接列印（橫式 A4）。</p>
+  <button type="button" class="primary" id="exportXlsxBtn">⇩ 下載 Excel 酒單</button>
+  <p class="hint" style="margin-top:22px"><b>CSV</b>：把全部酒款（含已出清）存成 CSV 檔，可以用 Excel 或 Numbers 打開。每個存放位置一列。</p>
+  <button type="button" id="exportBtn">⇩ 下載 CSV</button>
  </section>
  <section id="tab-storage" hidden>
   <p class="hint" style="margin-top:0">照片和資料都存在 GitHub repo，免費上限約 500 MB。快滿時請少換照片。</p>
@@ -372,7 +374,7 @@
 
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="config.js?v=20261115h"></script>
-<script src="app.js?v=20261115h"></script>
+<script src="config.js?v=20261115j"></script>
+<script src="app.js?v=20261115j"></script>
 </body>
 </html>
