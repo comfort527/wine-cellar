@@ -1980,10 +1980,10 @@
   },
   "W065": {
    "wineName": "INSIGNIA-Claire借放",
-   "wineryRegion": "JOSEPH PHELPS",
+   "wineryRegion": "JOSEPH PHELPS/Napa valley",
    "vintage": "2021",
    "entryDate": "",
-   "origin": "Napa valley",
+   "origin": "United States",
    "drinkWindow": "",
    "grapeNotes": "Claire借放，2027/4/1取。",
    "volume": "750ml",
@@ -2012,13 +2012,13 @@
    "status": "active",
    "createdAt": "2026-11-15T02:34:35.501Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-15T02:35:26.850Z",
+   "updatedAt": "2026-11-15T03:15:43.781Z",
    "updatedBy": "芝琦",
-   "revision": 3
+   "revision": 4
   }
  },
- "rev": 146,
- "updatedAt": "2026-11-15T03:12:35.353Z",
+ "rev": 147,
+ "updatedAt": "2026-11-15T03:15:43.781Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
