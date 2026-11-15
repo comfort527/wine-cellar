@@ -82,7 +82,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261115e';
+const APP_VER = '20261115f';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -376,7 +376,7 @@ async function start() {
   wire();
   try {
     await loadKeys();
-    if (S.session && (S.keys || S.keysSure) && !S.keys?.slots?.some(s => s.id === S.session.slotId)) { logout(true); notice('這台裝置的密碼已被刪除，請重新登入。', true); }
+    syncSlot(true);
     await loadData(true);
     notice(S.rawFallback ? 'GitHub 暫時限制訪客讀取次數，畫面可能慢幾分鐘才更新；登入管理後即時同步。' : '');
   } catch (e) { notice(msgOf(e), true); }
@@ -391,7 +391,20 @@ async function poll(force) {
   const every = (S.session ? CFG.pollSecondsEditor : CFG.pollSecondsViewer) * 1000;
   if (!force && Date.now() - S.lastPoll < every) return;
   S.lastPoll = Date.now();
+  if (S.session && (force || Date.now() - (S.keysAt || 0) > 60000)) { S.keysAt = Date.now(); try { await loadKeys(); syncSlot(); } catch {} }
   try { if (await loadData(false)) render(); else renderSync(); } catch {}
+}
+const remembered = () => { try { return !!localStorage.getItem('cellarSession'); } catch { return false; } };
+/* 這台裝置在裝置設定裡的狀態：被刪除就登出；身分被工程人員改了就套用新身分 */
+function syncSlot(startup) {
+  if (!S.session || !(S.keys || S.keysSure)) return;
+  const slot = S.keys?.slots?.find(x => x.id === S.session.slotId);
+  if (!slot) { logout(true); notice('這台裝置的密碼已被刪除，請重新登入。', true); return; }
+  if (slot.role === S.session.role) return;
+  saveSession({...S.session, role: slot.role}, remembered());
+  if (startup) return;
+  if ($('adminModal').open) { const cur = ADMIN_TABS.find(t => !$('tab-' + t).hidden); if (admWide() || cur) switchTab(cur && tabOK(cur) ? cur : 'lib'); else adminMenu(); }
+  render(); toast(`你的身分已改為「${roleName(slot.role)}」。`);
 }
 function readHash() {
   const m = /^#(W\d{3,}|H\d{3,})$/.exec(location.hash);
@@ -971,6 +984,7 @@ function wire() {
   $('h_year').addEventListener('change', e => { S.histYear = e.target.value; renderHistory(); });
   $('h_types').addEventListener('click', e => { const b = e.target.closest('[data-htype]'); if (b) { S.histType = b.dataset.htype; renderHistory(); } });
   $('slotList').addEventListener('click', e => { const b = e.target.closest('[data-delslot]'); if (b) deleteSlot(b); });
+  $('slotList').addEventListener('change', e => { const r = e.target.closest('[data-roleslot]'); if (r) changeRole(r); });
 }
 function toLedger() { document.querySelector('.ledger').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'}); }
 function openOrigins() {
@@ -1071,7 +1085,8 @@ async function doSetup() {
 }
 function renderSlots() {
   const slots = S.keys?.slots || [];
-  $('slotList').innerHTML = slots.map(s => `<div class="slot"><span><b>${esc(s.label)}</b><span class="role ${s.role === 'admin' ? 'admin' : s.role === 'user' ? 'user' : ''}">${roleName(s.role)}</span>${s.id === S.session?.slotId ? ' <span class="hint">（目前這台）</span>' : ''}<br><span class="hint">建立於 ${fmtTime(s.createdAt)}</span></span><button class="small danger" data-delslot="${esc(s.id)}">刪除</button></div>`).join('') || '<p class="hint">沒有裝置。</p>';
+  const sel = s => `<select class="rolesel ${s.role === 'admin' ? 'admin' : s.role === 'user' ? 'user' : ''}" data-roleslot="${esc(s.id)}" aria-label="${esc(s.label)} 的身分">${Object.entries(ROLE_NAMES).map(([k, n]) => `<option value="${k}" ${k === (ROLE_NAMES[s.role] ? s.role : 'editor') ? 'selected' : ''}>${n}</option>`).join('')}</select>`;
+  $('slotList').innerHTML = slots.map(s => `<div class="slot"><span><b>${esc(s.label)}</b>${isEng() ? sel(s) : `<span class="role ${s.role === 'admin' ? 'admin' : s.role === 'user' ? 'user' : ''}">${roleName(s.role)}</span>`}${s.id === S.session?.slotId ? ' <span class="hint">（目前這台）</span>' : ''}<br><span class="hint">建立於 ${fmtTime(s.createdAt)}${s.roleAt ? `・${fmtTime(s.roleAt)} 改為${roleName(s.role)}` : ''}</span></span><button class="small danger" data-delslot="${esc(s.id)}">刪除</button></div>`).join('') || '<p class="hint">沒有裝置。</p>';
 }
 async function addSlot() {
   if (!isEng()) fail('只有工程人員可以新增人員。');
@@ -1086,6 +1101,25 @@ async function addSlot() {
   await saveKeys(keys, `新增裝置 ${label}（${roleName(role)}）`);
   $('k_label').value = ''; $('k_pass').value = ''; renderSlots();
   toast(`已新增 ${label}。請把密碼告訴使用那台裝置的人。`);
+}
+async function changeRole(sel) {
+  if (!isEng()) return;
+  const id = sel.dataset.roleslot, role = sel.value, cur = S.keys?.slots?.find(x => x.id === id);
+  if (!cur || !ROLE_NAMES[role] || cur.role === role) return renderSlots();
+  const self = id === S.session.slotId;
+  if (!confirm(`把「${cur.label}」從「${roleName(cur.role)}」改成「${roleName(role)}」？${self && role !== 'admin' ? '\n\n這是你自己這台，改完後你就不能再管理裝置密碼。' : ''}`)) return renderSlots();
+  showErr('keysErr', ''); sel.disabled = true;
+  try {
+    await loadKeys();
+    const target = S.keys.slots.find(x => x.id === id); if (!target) fail('這台裝置已被刪除。');
+    if (target.role === role) return renderSlots();
+    if (target.role === 'admin' && role !== 'admin' && S.keys.slots.filter(x => x.role === 'admin').length <= 1) fail('至少要留一位工程人員。');
+    const keys = structuredClone(S.keys), t = keys.slots.find(x => x.id === id), old = t.role;
+    t.role = role; t.roleAt = now();
+    await saveKeys(keys, `變更身分 ${t.label}：${roleName(old)} → ${roleName(role)}`);
+    toast(`已把「${t.label}」改成「${roleName(role)}」。${self ? '' : '那台裝置下次開啟或一分鐘內會自動套用。'}`);
+    if (self) syncSlot(); else renderSlots();
+  } catch (e) { showErr('keysErr', msgOf(e)); renderSlots(); }
 }
 async function deleteSlot(btn) {
   if (!isEng()) return;
@@ -1109,7 +1143,7 @@ async function changeToken() {
   const keys = structuredClone(S.keys);
   keys.token = await seal(await aesKey(b64d(S.session.dataKey)), enc.encode(token));
   await saveKeys(keys, '更換 GitHub 權杖', token);
-  const remember = (() => { try { return !!localStorage.getItem('cellarSession'); } catch { return false; } })();
+  const remember = remembered();
   saveSession({...S.session, token}, remember);
   $('t_token').value = '';
   toast('已更換權杖。舊權杖可以在 GitHub 刪除了。');
