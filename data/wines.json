@@ -557,17 +557,24 @@
     }
    ],
    "origin": "France",
-   "photo": "",
+   "photo": "images/W017-1794709526566.jpg",
    "referencePrice": 19561,
-   "revision": 1,
+   "revision": 2,
    "source": "寄存",
    "status": "active",
-   "updatedAt": "2026-09-29T14:07:30.438Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-15T02:25:31.997Z",
+   "updatedBy": "芝琦",
    "vintage": "1995",
    "volume": "750ml",
    "wineName": "Pauillac (Premier Grand Cru Classé)",
-   "wineryRegion": "Château Mouton Rothschild木桐堡★"
+   "wineryRegion": "Château Mouton Rothschild木桐堡★",
+   "photos": [
+    {
+     "photo": "images/W017-1794709526566.jpg",
+     "thumb": "images/W017-1794709526566-t.jpg"
+    }
+   ],
+   "thumb": "images/W017-1794709526566-t.jpg"
   },
   "W018": {
    "createdAt": "",
@@ -1911,8 +1918,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 129,
- "updatedAt": "2026-11-15T02:24:40.394Z",
+ "rev": 130,
+ "updatedAt": "2026-11-15T02:25:31.997Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
