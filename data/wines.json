@@ -1792,18 +1792,18 @@
    "locations": [
     {
      "cabinet": "8樓右LB櫃",
-     "quantity": 4,
-     "shelf": "第1層"
+     "shelf": "第1層",
+     "quantity": 4
     }
    ],
-   "origin": "",
+   "origin": "France",
    "photo": "images/W059-1794233497836.jpg",
    "referencePrice": 7350,
-   "revision": 17,
+   "revision": 18,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-11-09T14:51:33.504Z",
-   "updatedBy": "廖炎鴻",
+   "updatedAt": "2026-11-15T03:17:17.066Z",
+   "updatedBy": "芝琦",
    "vintage": "2001",
    "volume": "375ml",
    "wineName": "Vieux Château Certan/Grand vin",
@@ -1822,7 +1822,8 @@
      "photo": "images/W059-1794233521392.jpg",
      "thumb": "images/W059-1794233521392-t.jpg"
     }
-   ]
+   ],
+   "color": "red"
   },
   "W060": {
    "createdAt": "",
@@ -2018,8 +2019,8 @@
    "revision": 4
   }
  },
- "rev": 148,
- "updatedAt": "2026-11-15T03:17:00.416Z",
+ "rev": 149,
+ "updatedAt": "2026-11-15T03:17:17.066Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
