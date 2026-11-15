@@ -403,17 +403,24 @@
     }
    ],
    "origin": "France",
-   "photo": "",
+   "photo": "images/W012-1794709471171.jpg",
    "referencePrice": 41212,
-   "revision": 1,
+   "revision": 2,
    "source": "寄存",
    "status": "active",
-   "updatedAt": "2026-09-29T13:40:19.173Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-15T02:24:40.394Z",
+   "updatedBy": "芝琦",
    "vintage": "1999",
    "volume": "750ml",
    "wineName": "Grand Vin Pauillac (Premier Grand Cru Classé)",
-   "wineryRegion": "Château Latour拉圖堡★"
+   "wineryRegion": "Château Latour拉圖堡★",
+   "photos": [
+    {
+     "photo": "images/W012-1794709471171.jpg",
+     "thumb": "images/W012-1794709471171-t.jpg"
+    }
+   ],
+   "thumb": "images/W012-1794709471171-t.jpg"
   },
   "W013": {
    "createdAt": "",
@@ -1904,8 +1911,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 128,
- "updatedAt": "2026-11-15T02:23:53.726Z",
+ "rev": 129,
+ "updatedAt": "2026-11-15T02:24:40.394Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
