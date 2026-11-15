@@ -82,7 +82,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261115j';
+const APP_VER = '20261115k';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -599,9 +599,10 @@ function sortWines(rows) {
 }
 function renderList(list, stagger) {
   $('filterBar').hidden = !S.filter;
-  if (S.filter) $('filterText').textContent = S.filter.origin ? `只顯示產地：${S.filter.origin}` : `只顯示 ${S.filter.cabinet}${S.filter.shelf ? ' · ' + S.filter.shelf : ''}`;
+  if (S.filter) $('filterText').textContent = S.filter.kind ? `只顯示${kindName(S.filter.kind)}` : S.filter.origin ? `只顯示產地：${S.filter.origin}` : `只顯示 ${S.filter.cabinet}${S.filter.shelf ? ' · ' + S.filter.shelf : ''}`;
   const q = S.search.trim().toLowerCase();
   const rows = sortWines(list.filter(w => {
+    if (S.filter?.kind && kindOf(w) !== S.filter.kind) return false;
     if (S.filter?.origin && countryOf(w) !== S.filter.origin) return false;
     if (S.filter?.cabinet && !(w.locations || []).some(l => l.quantity > 0 && l.cabinet === S.filter.cabinet && (!S.filter.shelf || l.shelf === S.filter.shelf))) return false;
     if (!q) return true;
@@ -821,7 +822,7 @@ function wire() {
   $('search').addEventListener('input', e => { S.search = e.target.value; render(); });
   $('clearSearch').addEventListener('click', () => { S.search = ''; $('search').value = ''; render(); });
   $('clearFilter').addEventListener('click', () => { S.filter = null; render(); });
-  $('factWines').addEventListener('click', () => { S.filter = null; S.search = ''; $('search').value = ''; closeDrawer(); render(); toLedger(); });
+  $('factWines').addEventListener('click', openKinds);
   $('factOrigins').addEventListener('click', openOrigins);
   $('factJournal').addEventListener('click', () => { showDialog('journalView'); renderHistory(); });
   $('jTabs').addEventListener('click', e => { const b = e.target.closest('[data-jt]'); if (b) switchJTab(b.dataset.jt); });
@@ -844,6 +845,11 @@ function wire() {
     const op = e.target.closest('[data-memopen]'); if (op) { $('memModal').close(); openDrawer(op.dataset.memopen); }
   });
   for (const id of ['f_vintage', 'f_wineName', 'f_wineryRegion']) $(id).addEventListener('input', renderRebuyNote);
+  $('kindList').addEventListener('click', e => {
+    const b = e.target.closest('[data-kind]'); if (!b) return;
+    S.filter = b.dataset.kind ? {kind: b.dataset.kind} : null; S.search = ''; $('search').value = '';
+    $('kindModal').close(); closeDrawer(); render(); toLedger();
+  });
   $('originList').addEventListener('click', e => {
     const b = e.target.closest('[data-origin]'); if (!b) return;
     S.filter = b.dataset.origin ? {origin: b.dataset.origin} : null; S.search = ''; $('search').value = '';
@@ -1010,6 +1016,15 @@ function wire() {
   $('slotList').addEventListener('change', e => { const r = e.target.closest('[data-roleslot]'); if (r) changeRole(r); });
 }
 function toLedger() { document.querySelector('.ledger').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'}); }
+// 點總覽的「酒款」：依酒種分類（紅酒、白酒、甜酒、清酒），點一種只看那一種
+function openKinds() {
+  const g = Object.fromEntries(KIND_IDS.map(k => [k, {wines: 0, bottles: 0}]));
+  for (const w of active()) { const x = g[kindOf(w)]; x.wines++; x.bottles += total(w); }
+  const cur = S.filter?.kind;
+  $('kindList').innerHTML = `<button class="origin ${cur ? '' : 'on'}" data-kind=""><b>全部酒種</b><span>${active().length} 款</span><span>${active().reduce((a, w) => a + total(w), 0)} 瓶</span></button>` +
+    KINDS.map(([k, n]) => `<button class="origin kind-${k} ${cur === k ? 'on' : ''}" data-kind="${k}"><b><i class="kdot"></i>${n}</b><span>${g[k].wines} 款</span><span>${g[k].bottles} 瓶</span></button>`).join('');
+  showDialog('kindModal');
+}
 function openOrigins() {
   const groups = new Map();
   for (const w of active()) { const c = countryOf(w), g = groups.get(c) || {wines: 0, bottles: 0}; g.wines++; g.bottles += total(w); groups.set(c, g); }
