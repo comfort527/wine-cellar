@@ -1302,10 +1302,10 @@
    "origin": "Italy",
    "photo": "images/W044-1794708511302.jpg",
    "referencePrice": 2560,
-   "revision": 2,
+   "revision": 3,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-11-15T02:08:44.789Z",
+   "updatedAt": "2026-11-15T02:09:00.992Z",
    "updatedBy": "芝琦",
    "vintage": "2016",
    "volume": "750ml",
@@ -1315,6 +1315,10 @@
     {
      "photo": "images/W044-1794708511302.jpg",
      "thumb": "images/W044-1794708511302-t.jpg"
+    },
+    {
+     "photo": "images/W044-1794708529556.jpg",
+     "thumb": "images/W044-1794708529556-t.jpg"
     }
    ],
    "thumb": "images/W044-1794708511302-t.jpg"
@@ -1843,8 +1847,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 117,
- "updatedAt": "2026-11-15T02:08:44.789Z",
+ "rev": 118,
+ "updatedAt": "2026-11-15T02:09:00.992Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
