@@ -1136,25 +1136,22 @@
    "drinkWindow": "",
    "entryDate": "",
    "grapeNotes": "AIT處長先生",
-   "locations": [
-    {
-     "cabinet": "8樓右LB櫃",
-     "quantity": 2,
-     "shelf": "第8層"
-    }
-   ],
+   "locations": [],
    "origin": "Turkey",
    "photo": "",
    "referencePrice": 900,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
-   "status": "active",
-   "updatedAt": "2026-09-29T14:19:20.999Z",
-   "updatedBy": "comfort527",
+   "status": "archived",
+   "updatedAt": "2026-11-15T02:28:10.179Z",
+   "updatedBy": "芝琦",
    "vintage": "2021",
    "volume": "750ml",
    "wineName": "Arkeo Acikara/Cabernet Sauvignon",
-   "wineryRegion": "Likya/Mediterranean"
+   "wineryRegion": "Likya/Mediterranean",
+   "color": "red",
+   "archivedAt": "2026-11-15T02:28:10.179Z",
+   "archivedBy": "芝琦"
   },
   "W037": {
    "createdAt": "",
@@ -1946,8 +1943,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 134,
- "updatedAt": "2026-11-15T02:27:53.295Z",
+ "rev": 135,
+ "updatedAt": "2026-11-15T02:28:10.180Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
