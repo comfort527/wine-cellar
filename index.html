@@ -13,10 +13,10 @@
 <meta name="theme-color" content="#eef0ec" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1412" media="(prefers-color-scheme: dark)">
 <title>酒窖</title>
-<link rel="icon" href="icons/favicon.svg?v=20261115p" type="image/svg+xml">
-<link rel="icon" href="icons/favicon-96.png?v=20261115p" sizes="96x96" type="image/png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=20261115p">
-<link rel="manifest" href="manifest.webmanifest?v=20261115p">
+<link rel="icon" href="icons/favicon.svg?v=20261115q" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-96.png?v=20261115q" sizes="96x96" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=20261115q">
+<link rel="manifest" href="manifest.webmanifest?v=20261115q">
 <meta name="apple-mobile-web-app-title" content="酒窖">
 <meta name="application-name" content="酒窖">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -24,13 +24,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261115p" id="mainCss">
+<link rel="stylesheet" href="style.css?v=20261115q" id="mainCss">
 </head>
 <body class="loading">
 <header class="bar">
  <div class="bar-in">
   <a class="mark" href="#" id="homeLink" aria-label="回到全部酒款">
-   <img class="mark-ic" src="icons/logo.svg?v=20261115p" alt="" width="36" height="40">
+   <img class="mark-ic" src="icons/logo.svg?v=20261115q" alt="" width="36" height="40">
    <span class="mark-t">酒窖</span>
   </a>
   <span class="sync" id="sync"><span class="dot"></span><span id="syncText">讀取中</span></span>
@@ -362,9 +362,7 @@
  </section>
  <section id="tab-export" hidden>
   <p class="hint" style="margin-top:0"><b>Excel 酒單</b>：照「敦南8樓」酒單的格式，分成「依酒莊產區」「依位置」「曾經擁有」三張表，每個櫃子一區、下面有瓶數小計，可以直接列印（橫式 A4）。</p>
-  <button type="button" class="primary" id="exportXlsxBtn">⇩ 下載 Excel 酒單</button>
-  <p class="hint" style="margin-top:22px"><b>CSV</b>：把全部酒款（含已出清）存成 CSV 檔，可以用 Excel 或 Numbers 打開。每個存放位置一列。</p>
-  <button type="button" id="exportBtn">⇩ 下載 CSV</button>
+  <div class="export-acts"><button type="button" class="primary" id="exportXlsxBtn">⇩ 下載 Excel</button><button type="button" id="exportBtn">⇩ 下載 CSV</button></div>
  </section>
  <section id="tab-storage" hidden>
   <p class="hint" style="margin-top:0">照片和資料都存在 GitHub repo，免費上限約 500 MB。快滿時請少換照片。</p>
@@ -375,7 +373,7 @@
 
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="config.js?v=20261115p"></script>
-<script src="app.js?v=20261115p"></script>
+<script src="config.js?v=20261115q"></script>
+<script src="app.js?v=20261115q"></script>
 </body>
 </html>

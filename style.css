@@ -485,7 +485,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261115p";
+:root{--ver:"20261115q";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
@@ -943,3 +943,6 @@ i[data-icon],.bnav button i,.tnav button i{font-style:normal;display:inline-flex
   .drawer.hero[open].closing{animation:fadeOut .24s ease-in forwards}
 }
 }
+.export-acts{display:flex;gap:10px}
+.export-acts button{white-space:nowrap}
+@media (max-width:760px){.export-acts button{flex:1 1 0;padding-left:8px;padding-right:8px}}
