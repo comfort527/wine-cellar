@@ -1033,17 +1033,24 @@
     }
    ],
    "origin": "Turkey",
-   "photo": "",
+   "photo": "images/W035-1794707360401.jpg",
    "referencePrice": 900,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-09-29T14:18:46.243Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-15T01:49:28.659Z",
+   "updatedBy": "芝琦",
    "vintage": "2021",
    "volume": "750ml",
    "wineName": "Arkeo Acikara/Cabernet Sauvignon",
-   "wineryRegion": "Likya/Mediterranean"
+   "wineryRegion": "Likya/Mediterranean",
+   "photos": [
+    {
+     "photo": "images/W035-1794707360401.jpg",
+     "thumb": "images/W035-1794707360401-t.jpg"
+    }
+   ],
+   "thumb": "images/W035-1794707360401-t.jpg"
   },
   "W036": {
    "createdAt": "",
@@ -1815,8 +1822,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 113,
- "updatedAt": "2026-11-13T02:01:49.261Z",
+ "rev": 114,
+ "updatedAt": "2026-11-15T01:49:28.659Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
