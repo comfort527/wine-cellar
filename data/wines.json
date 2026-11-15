@@ -964,18 +964,18 @@
      "quantity": 2
     }
    ],
-   "origin": "",
+   "origin": "United States",
    "photo": "images/W030-1794142303511.jpg",
    "referencePrice": 1000,
-   "revision": 4,
+   "revision": 5,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-11-15T03:12:35.353Z",
+   "updatedAt": "2026-11-15T03:18:18.525Z",
    "updatedBy": "芝琦",
    "vintage": "2023",
    "volume": "750ml",
    "wineName": "Diamond Collection Black Label Claret",
-   "wineryRegion": "Francis Ford Coppola",
+   "wineryRegion": "Francis Ford Coppola/California",
    "thumb": "images/W030-1794142303511-q60-t.jpg",
    "color": "red"
   },
@@ -2019,8 +2019,8 @@
    "revision": 4
   }
  },
- "rev": 149,
- "updatedAt": "2026-11-15T03:17:17.066Z",
+ "rev": 150,
+ "updatedAt": "2026-11-15T03:18:18.526Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
