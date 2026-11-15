@@ -18,11 +18,12 @@
   {
    "id": "02a3ce5a-3840-4cd2-a82d-6a0789a7fe17",
    "label": "浩銓",
-   "role": "editor",
+   "role": "user",
    "salt": "liAlmReGU0AmRpKhKDwJnQ==",
    "iv": "8Yp7tPTCYSrYxH+B",
    "ct": "8bNmmK7nYrwpEUXolXemx9bt+tBX/brwzi2+V9VDe8A7fVwnkFHutBfeSqJd03Ol",
-   "createdAt": "2026-11-08T05:01:19.267Z"
+   "createdAt": "2026-11-08T05:01:19.267Z",
+   "roleAt": "2026-11-15T05:52:28.205Z"
   },
   {
    "id": "9d41405c-ea52-437d-bf06-d06d2a8b5f8a",
