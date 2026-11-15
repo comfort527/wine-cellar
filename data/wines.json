@@ -2039,7 +2039,7 @@
    "grapeNotes": "Cabernet Sauvignon",
    "volume": "750ml",
    "source": "",
-   "color": "red",
+   "color": "sweet",
    "referencePrice": 900,
    "locations": [
     {
@@ -2067,13 +2067,13 @@
    "status": "active",
    "createdAt": "2026-11-15T03:21:10.283Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-15T03:23:05.055Z",
+   "updatedAt": "2026-11-15T05:26:43.142Z",
    "updatedBy": "芝琦",
-   "revision": 2
+   "revision": 3
   }
  },
- "rev": 163,
- "updatedAt": "2026-11-15T04:33:58.072Z",
+ "rev": 164,
+ "updatedAt": "2026-11-15T05:26:43.142Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
