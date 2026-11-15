@@ -240,17 +240,24 @@
     }
    ],
    "origin": "France",
-   "photo": "",
+   "photo": "images/W007-1794709428203.jpg",
    "referencePrice": 5500,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-09-29T13:32:49.891Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-15T02:23:53.726Z",
+   "updatedBy": "芝琦",
    "vintage": "2007",
    "volume": "750ml",
    "wineName": "Saint-Julien (Grand Cru Classé)",
-   "wineryRegion": "Château Ducru-Beaucaillou"
+   "wineryRegion": "Château Ducru-Beaucaillou",
+   "photos": [
+    {
+     "photo": "images/W007-1794709428203.jpg",
+     "thumb": "images/W007-1794709428203-t.jpg"
+    }
+   ],
+   "thumb": "images/W007-1794709428203-t.jpg"
   },
   "W008": {
    "createdAt": "",
@@ -1897,8 +1904,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 127,
- "updatedAt": "2026-11-15T02:23:34.966Z",
+ "rev": 128,
+ "updatedAt": "2026-11-15T02:23:53.726Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
