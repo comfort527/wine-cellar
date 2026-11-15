@@ -1948,10 +1948,48 @@
    "volume": "750ml",
    "wineName": "Sauvignon Blanc",
    "wineryRegion": "Shaw + Smith"
+  },
+  "W065": {
+   "wineName": "INSIGNIA",
+   "wineryRegion": "JOSEPH PHELPS",
+   "vintage": "2021",
+   "entryDate": "",
+   "origin": "Napa valley",
+   "drinkWindow": "",
+   "grapeNotes": "Claire借放，2027/4/1取。",
+   "volume": "750ml",
+   "source": "購",
+   "color": "red",
+   "referencePrice": null,
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "shelf": "第8層",
+     "quantity": 1
+    }
+   ],
+   "photo": "images/new-1794710064404.jpg",
+   "thumb": "images/new-1794710064404-t.jpg",
+   "photos": [
+    {
+     "photo": "images/new-1794710064404.jpg",
+     "thumb": "images/new-1794710064404-t.jpg"
+    },
+    {
+     "photo": "images/new-1794710070261.jpg",
+     "thumb": "images/new-1794710070261-t.jpg"
+    }
+   ],
+   "status": "active",
+   "createdAt": "2026-11-15T02:34:35.501Z",
+   "createdBy": "芝琦",
+   "updatedAt": "2026-11-15T02:34:35.501Z",
+   "updatedBy": "芝琦",
+   "revision": 1
   }
  },
- "rev": 137,
- "updatedAt": "2026-11-15T02:30:05.055Z",
+ "rev": 138,
+ "updatedAt": "2026-11-15T02:34:35.501Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
