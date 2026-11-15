@@ -1957,17 +1957,17 @@
    "locations": [
     {
      "cabinet": "8樓外冰箱",
-     "quantity": 2,
-     "shelf": "第1層"
+     "shelf": "最下層",
+     "quantity": 2
     }
    ],
    "origin": "Australia",
    "photo": "images/W064-1794712042042.jpg",
    "referencePrice": 760,
-   "revision": 2,
+   "revision": 3,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-11-15T03:07:26.568Z",
+   "updatedAt": "2026-11-15T03:23:43.767Z",
    "updatedBy": "芝琦",
    "vintage": "2024",
    "volume": "750ml",
@@ -1979,7 +1979,8 @@
      "thumb": "images/W064-1794712042042-t.jpg"
     }
    ],
-   "thumb": "images/W064-1794712042042-t.jpg"
+   "thumb": "images/W064-1794712042042-t.jpg",
+   "color": "white"
   },
   "W065": {
    "wineName": "INSIGNIA-Claire借放",
@@ -2062,8 +2063,8 @@
    "revision": 2
   }
  },
- "rev": 155,
- "updatedAt": "2026-11-15T03:23:05.055Z",
+ "rev": 156,
+ "updatedAt": "2026-11-15T03:23:43.767Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
