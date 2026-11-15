@@ -51,6 +51,15 @@
    "iv": "Qkvxh0zyzH4VvwmR",
    "ct": "CmhkQDxWsqjEUaZhvM1/s0ehZAhDBa1b6rYIWjUzr2ey6CYALNOmUt2qtukKcIXX",
    "createdAt": "2026-11-15T05:53:06.147Z"
+  },
+  {
+   "id": "348938db-6577-41b8-9e2e-8c868880b40c",
+   "label": "柯P",
+   "role": "user",
+   "salt": "qrFDpjZAbYa3TZ9q+0Jz3A==",
+   "iv": "DZnZblizI7lVXGqO",
+   "ct": "N15Q12vmJg9N0esBuax5A3CPaCY6njzknEJopyM9fU//RGrPXxf2xtvGzhUkPdwn",
+   "createdAt": "2026-11-15T05:53:45.361Z"
   }
  ]
 }
