@@ -450,6 +450,8 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
   background:radial-gradient(circle at 36% 32%,rgba(255,255,255,.4) 0 7%,transparent 13%),radial-gradient(circle,#0b0305 0 26%,#4a1220 31% 55%,#7a2032 62%,#2b0a10 74%);
   box-shadow:0 1px 2px rgba(0,0,0,.7)}
 .fr-btl i.w{background:radial-gradient(circle at 36% 32%,rgba(255,255,255,.45) 0 7%,transparent 13%),radial-gradient(circle,#0e1306 0 26%,#4c5a1e 31% 55%,#a3ad5c 62%,#2e3510 74%)}
+.fr-btl i.s{background:radial-gradient(circle at 36% 32%,rgba(255,255,255,.5) 0 7%,transparent 13%),radial-gradient(circle,#2a1404 0 26%,#9a5414 31% 55%,#f0b04e 62%,#5a2c06 74%)}
+.fr-btl i.k{background:radial-gradient(circle at 36% 32%,rgba(255,255,255,.8) 0 7%,transparent 13%),radial-gradient(circle,#4e5a62 0 26%,#c9d3da 31% 55%,#ffffff 62%,#8a979f 74%)}
 .fr-rail{display:flex;justify-content:space-between;align-items:center;height:26px;margin:2px -12px 0;padding:0 14px;
   background:linear-gradient(#f0c99a,#d7a26b 55%,#b98351);box-shadow:0 -4px 0 #6b4a2f,0 3px 4px rgba(0,0,0,.5);color:#4a2f18;font:600 15px var(--body)}
 .fr-rail b{font:700 16px var(--body)}
@@ -460,8 +462,10 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .fr-shelf.zero .fr-btl{opacity:.5}
 .fr-shelf:focus-visible{box-shadow:inset 0 0 0 2px #fff}
 .fr-feet{position:absolute;bottom:0;left:22px;right:22px;height:10px;background:radial-gradient(circle at 10px 0,#111 0 9px,transparent 10px) left/30px 10px no-repeat,radial-gradient(circle at 20px 0,#111 0 9px,transparent 10px) right/30px 10px no-repeat}
-.map-legend i.lg-r{background:radial-gradient(circle,#0b0305 0 26%,#4a1220 31% 55%,#7a2032 62%,#2b0a10 74%)}
-.map-legend i.lg-w{background:radial-gradient(circle,#0e1306 0 26%,#4c5a1e 31% 55%,#a3ad5c 62%,#2e3510 74%)}
+.map-legend i.lg-red{background:radial-gradient(circle,#0b0305 0 26%,#4a1220 31% 55%,#7a2032 62%,#2b0a10 74%)}
+.map-legend i.lg-white{background:radial-gradient(circle,#0e1306 0 26%,#4c5a1e 31% 55%,#a3ad5c 62%,#2e3510 74%)}
+.map-legend i.lg-sweet{background:radial-gradient(circle,#2a1404 0 26%,#9a5414 31% 55%,#f0b04e 62%,#5a2c06 74%)}
+.map-legend i.lg-sake{background:radial-gradient(circle,#4e5a62 0 26%,#c9d3da 31% 55%,#ffffff 62%,#8a979f 74%)}
 .pth{position:relative;display:block}
 .pth em{position:absolute;left:4px;bottom:4px;font:600 12px/1.4 var(--body);font-style:normal;color:#fff;background:var(--wine);border-radius:999px;padding:0 6px}
 .pend .pth button{position:absolute;top:4px;right:4px;width:30px;height:30px;min-width:0;min-height:0;padding:0;border-radius:50%;display:grid;place-items:center;font-size:18px;line-height:1;background:rgba(255,255,255,.92);color:#222;border:1px solid rgba(0,0,0,.15);box-shadow:0 1px 3px rgba(0,0,0,.3)}
@@ -471,7 +475,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261115f";
+:root{--ver:"20261115g";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
@@ -484,7 +488,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
   --serif-tc:"Noto Serif TC","Songti TC",serif;
   --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
   --r:14px; --r-sm:10px;
-  color-scheme:light;--ext:#9a7426;--star:#d99a14;--frame-red:#c65c6f;--frame-white:#6eb385}
+  color-scheme:light;--ext:#9a7426;--star:#d99a14;--frame-red:#c65c6f;--frame-white:#6eb385;--frame-sweet:#e08a2e;--frame-sake:#ffffff;--frame-sake-edge:#c9cec7}
 @media (prefers-color-scheme:dark){:root{
   --bg:#0f1412; --surface:#161c19; --surface-2:#1b2320; --sunk:#111714;
   --ink:#ebe7de; --muted:#9da79f; --faint:#6f7a73; --line:#27312c;
@@ -494,9 +498,11 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
   --ok:#7fcc9d; --bad:#f08597; --bad-soft:#3d1f26; --warn:#e2bb63; --warn-soft:#352c16;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
   --shadow-lg:0 24px 64px rgba(0,0,0,.55);
-  color-scheme:dark}:root{--ext:#d9b56a;--star:#f2c14e}:root:not([data-theme="light"]){--frame-red:#e88093;--frame-white:#91d2a7}}
-div.card.red,div.card.white{--fc:var(--frame-red);border:2px solid var(--fc)}
+  color-scheme:dark}:root{--ext:#d9b56a;--star:#f2c14e}:root:not([data-theme="light"]){--frame-red:#e88093;--frame-white:#91d2a7;--frame-sweet:#f2a557;--frame-sake:#f4f6f8;--frame-sake-edge:transparent}}
+div.card.red,div.card.white,div.card.sweet,div.card.sake{--fc:var(--frame-red);border:2px solid var(--fc)}
 div.card.white{--fc:var(--frame-white)}
+div.card.sweet{--fc:var(--frame-sweet)}
+div.card.sake{--fc:var(--frame-sake);box-shadow:0 0 0 1px var(--frame-sake-edge),var(--shadow)}
 
 /* 飲酒日誌選酒：點縮圖看照片 */
 .pthumb-v{position:relative;display:block;cursor:zoom-in;border-radius:8px}
@@ -512,6 +518,8 @@ fieldset.colorpick{display:flex;flex-direction:row;flex-wrap:wrap;align-items:ce
 .colorpick legend{width:100%}
 .colorpick input[value=red]:checked+span{background:var(--frame-red);border-color:var(--frame-red);color:#fff}
 .colorpick input[value=white]:checked+span{background:var(--frame-white);border-color:var(--frame-white);color:#fff}
+.colorpick input[value=sweet]:checked+span{background:var(--frame-sweet);border-color:var(--frame-sweet);color:#fff}
+.colorpick input[value=sake]:checked+span{background:var(--frame-sake);border-color:var(--frame-sake-edge);color:#1d2421;box-shadow:inset 0 0 0 1px var(--frame-sake-edge)}
 
 /* 智慧辨識 */
 .ai-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:10px}
@@ -743,7 +751,7 @@ fieldset.colorpick{display:flex;flex-direction:row;flex-wrap:wrap;align-items:ce
 .mc .sb:hover{background:#1c1a17}
 .mc .sb.on{background:#3a2e1f;color:#ffe1b5}
 .mc .bar{height:11px;border-radius:3px;background:#2d2924;overflow:hidden;display:flex}
-.mc .bar i{display:block;height:100%}.mc .bar i.r{background:#8a2638}.mc .bar i.w{background:#a3ad5c}
+.mc .bar i{display:block;height:100%}.mc .bar i.r{background:#8a2638}.mc .bar i.w{background:#a3ad5c}.mc .bar i.s{background:#e0943a}.mc .bar i.k{background:#e9eef1}
 .mc .bar i.f{background:repeating-linear-gradient(90deg,#4f8a5c 0 3px,transparent 3px 6px)}
 .mc .sc{text-align:right;white-space:nowrap}
 .mc .sc .full{font-style:normal;margin-left:4px;padding:0 5px;border-radius:999px;background:#9b2335;color:#fff;font-size:11px}
@@ -756,6 +764,8 @@ fieldset.colorpick{display:flex;flex-direction:row;flex-wrap:wrap;align-items:ce
 /* 沒有照片的酒款卡片：酒瓶剪影，年份印在酒標上（紅酒酒紅、白酒橄欖綠） */
 .card.red{--btl:#6b1c2c;--lbl:#f6efe4;--yr:#6b1c2c}
 .card.white{--btl:#7d8a45;--lbl:#f7f5e6;--yr:#4c5a1e}
+.card.sweet{--btl:#b5651d;--lbl:#fbf1e2;--yr:#8a4a12}
+.card.sake{--btl:#9fb3c0;--lbl:#ffffff;--yr:#3b5566}
 .card .phbox:not(.photo){container-type:inline-size}
 .card .phbox:not(.photo) .ph{position:relative;isolation:isolate;font-size:14cqw;letter-spacing:.02em;color:var(--yr);background:color-mix(in srgb,var(--fc) 14%,var(--surface))}
 .card .phbox:not(.photo) .ph::before{content:"";position:absolute;inset:4% 0;z-index:-2;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 160'%3E%3Cpath d='M28 2h16v30c0 10 20 12 20 30v90a6 6 0 0 1-6 6H14a6 6 0 0 1-6-6V62c0-18 20-20 20-30Z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 160'%3E%3Cpath d='M28 2h16v30c0 10 20 12 20 30v90a6 6 0 0 1-6 6H14a6 6 0 0 1-6-6V62c0-18 20-20 20-30Z'/%3E%3C/svg%3E") center/contain no-repeat;background:var(--btl)}

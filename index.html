@@ -13,10 +13,10 @@
 <meta name="theme-color" content="#eef0ec" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1412" media="(prefers-color-scheme: dark)">
 <title>酒窖</title>
-<link rel="icon" href="icons/favicon.svg?v=20261115f" type="image/svg+xml">
-<link rel="icon" href="icons/favicon-96.png?v=20261115f" sizes="96x96" type="image/png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=20261115f">
-<link rel="manifest" href="manifest.webmanifest?v=20261115f">
+<link rel="icon" href="icons/favicon.svg?v=20261115g" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-96.png?v=20261115g" sizes="96x96" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=20261115g">
+<link rel="manifest" href="manifest.webmanifest?v=20261115g">
 <meta name="apple-mobile-web-app-title" content="酒窖">
 <meta name="application-name" content="酒窖">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -24,13 +24,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261115f" id="mainCss">
+<link rel="stylesheet" href="style.css?v=20261115g" id="mainCss">
 </head>
 <body class="loading">
 <header class="bar">
  <div class="bar-in">
   <a class="mark" href="#" id="homeLink" aria-label="回到全部酒款">
-   <img class="mark-ic" src="icons/logo.svg?v=20261115f" alt="" width="36" height="40">
+   <img class="mark-ic" src="icons/logo.svg?v=20261115g" alt="" width="36" height="40">
    <span class="mark-t">酒窖</span>
   </a>
   <span class="sync" id="sync"><span class="dot"></span><span id="syncText">讀取中</span></span>
@@ -153,12 +153,12 @@
   <div class="field"><label for="f_wineName">酒名 *</label><input id="f_wineName" maxlength="200" required></div>
   <div class="field"><label for="f_wineryRegion">酒莊／產區</label><input id="f_wineryRegion" maxlength="200"></div>
   <div class="field"><label for="f_vintage">年份</label><input id="f_vintage" maxlength="40" placeholder="例如 2018 或 NV"></div>
-  <fieldset class="field types colorpick" id="f_colorSet"><legend>紅酒／白酒</legend><label><input type="radio" name="f_color" value="red"><span>🍷 紅酒</span></label><label><input type="radio" name="f_color" value="white"><span>🥂 白酒</span></label></fieldset>
+  <fieldset class="field types colorpick" id="f_colorSet"><legend>酒種</legend><label><input type="radio" name="f_color" value="red"><span>🍷 紅酒</span></label><label><input type="radio" name="f_color" value="white"><span>🥂 白酒</span></label><label><input type="radio" name="f_color" value="sweet"><span>🍯 甜酒／貴腐</span></label><label><input type="radio" name="f_color" value="sake"><span>🍶 清酒</span></label></fieldset>
   <div class="field"><label for="f_entryDate">入庫日期</label><input id="f_entryDate" type="date"></div>
   <div class="field"><label for="f_volumeChoice">容量</label><select id="f_volumeChoice"><option>750ml</option><option>500ml</option><option>375ml</option><option>1500ml</option><option>3000ml</option><option value="__other__">其他（手動輸入）</option></select><input id="f_volumeOther" hidden maxlength="40" placeholder="例如 187ml"></div>
   <div class="field"><label for="f_sourceChoice">來源</label><select id="f_sourceChoice"><option value="">請選擇</option><option>購</option><option>贈</option><option>寄存</option><option value="__other__">其他（手動輸入）</option></select><input id="f_sourceOther" hidden maxlength="80" placeholder="輸入其他來源"></div>
   <div class="field"><label for="f_referencePrice">參考價格（NT$）</label><input id="f_referencePrice" type="number" min="0" step="1" inputmode="numeric"></div>
-  <div class="field"><label for="f_origin">產地</label><input id="f_origin" maxlength="200"></div>
+  <div class="field"><label for="f_originChoice">產地</label><select id="f_originChoice"></select><input id="f_originOther" maxlength="200" hidden placeholder="輸入產地，例如 Portugal" aria-label="自行輸入產地" style="margin-top:6px"></div>
   <div class="field"><label for="f_drinkWindow">適飲期</label><input id="f_drinkWindow" maxlength="200" placeholder="例如 2026–2035"></div>
   <div class="field span"><label for="f_grapeNotes">葡萄品種／備註</label><textarea id="f_grapeNotes" maxlength="2000"></textarea></div>
   <div class="field span"><span class="lbl" id="locLbl">存放位置與瓶數</span><div id="locInputs"></div><div><button type="button" class="small" id="addLoc">＋ 新增位置</button></div><p class="hint">櫃位、層位從清單選擇；要新增名稱請到「管理 → 櫃位／層位」。</p><p class="hint" id="locHint" hidden>要扣除瓶數請用「出庫」，才會留下原因；這裡的瓶數調整會記為「資料修正」。</p></div>
@@ -372,7 +372,7 @@
 
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="config.js?v=20261115f"></script>
-<script src="app.js?v=20261115f"></script>
+<script src="config.js?v=20261115g"></script>
+<script src="app.js?v=20261115g"></script>
 </body>
 </html>

@@ -82,7 +82,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261115f';
+const APP_VER = '20261115g';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -416,9 +416,15 @@ addEventListener('hashchange', readHash);
 /* ---------- 畫面 ---------- */
 const countryOf = w => (w.origin || '').split(/[,，/]/)[0].trim() || '未填產地';
 const shelfNo = s => { const m = /\d+/.exec(s || ''); return m ? Number(m[0]) : 999; };
-// 編輯表單有選紅酒／白酒就照選的；沒選過的舊資料才看酒名與備註的關鍵字判斷
-const isWhite = w => w.color ? w.color === 'white' : /白酒|white|riesling|sauvignon blanc|chardonnay/i.test(`${w.grapeNotes} ${w.wineName}`);
-const colorName = w => isWhite(w) ? '白酒' : '紅酒';
+// 編輯表單有選酒種就照選的；沒選過的舊資料才看酒名與備註的關鍵字判斷（只分紅、白）
+/* 酒種：[代號, 名稱, 酒櫃圖瓶底的 class]。存在 w.color；沒選過的舊資料只看關鍵字分紅、白 */
+const KINDS = [['red', '紅酒', ''], ['white', '白酒', 'w'], ['sweet', '甜酒／貴腐', 's'], ['sake', '清酒', 'k']];
+const KIND_IDS = KINDS.map(k => k[0]);
+const kindOf = w => KIND_IDS.includes(w.color) ? w.color : /白酒|white|riesling|sauvignon blanc|chardonnay/i.test(`${w.grapeNotes} ${w.wineName}`) ? 'white' : 'red';
+const kindName = k => (KINDS.find(x => x[0] === k) || KINDS[0])[1];
+const colorName = w => kindName(kindOf(w));
+const emptyCount = () => Object.fromEntries(KIND_IDS.map(k => [k, 0]));
+const countSum = c => KIND_IDS.reduce((a, k) => a + (c[k] || 0), 0);
 function renderSync() {
   const el = $('sync'), every = (S.session ? CFG.pollSecondsEditor : CFG.pollSecondsViewer) * 1000;
   const age = S.syncedAt ? Date.now() - new Date(S.syncedAt).getTime() : Infinity;
@@ -478,8 +484,8 @@ function renderMap(list) {
   for (const c of S.data?.catalog?.cabinets || []) cabs.set(c, new Map());
   for (const w of list) for (const l of w.locations || []) {
     if (!cabs.has(l.cabinet)) cabs.set(l.cabinet, new Map());
-    const sh = cabs.get(l.cabinet), cur = sh.get(l.shelf) || {red: 0, white: 0, wines: 0};
-    if (l.quantity > 0) { cur[isWhite(w) ? 'white' : 'red'] += l.quantity; cur.wines++; }
+    const sh = cabs.get(l.cabinet), cur = sh.get(l.shelf) || {...emptyCount(), wines: 0};
+    if (l.quantity > 0) { cur[kindOf(w)] += l.quantity; cur.wines++; }
     sh.set(l.shelf, cur);
   }
   const all = [...cabs].filter(([, sh]) => sh.size);
@@ -489,34 +495,41 @@ function renderMap(list) {
   if (overview && !S.cabOpen) {
     $('map').classList.add('mini-mode');
     $('map').innerHTML = all.map(([cab, sh]) => miniCabHtml(cab, sh)).join('');
-    if (!$('mapLegend')) $('map').insertAdjacentHTML('afterend', '<div class="map-legend" id="mapLegend"><span><i class="lg-r"></i>紅酒</span><span><i class="lg-w"></i>白酒</span></div>');
+    renderLegend(all);
     return;
   }
   $('map').classList.remove('mini-mode');
   const back = overview ? `<button type="button" class="cab-back" data-cabback>‹ 全部 ${all.length} 個櫃子</button>` : '';
   const html = back + all.filter(([cab]) => !overview || cab === S.cabOpen).map(([cab, sh]) => {
-    const sum = [...sh.values()].reduce((a, s) => a + s.red + s.white, 0);
+    const sum = [...sh.values()].reduce((a, s) => a + countSum(s), 0);
     const on = S.filter?.cabinet === cab;
     const shelves = shelfEntries(sh).map(([name, s]) => {
-      const n = s.red + s.white;
+      const n = countSum(s);
       const sel = on && S.filter.shelf === name;
-      return `<button class="fr-shelf ${sel ? 'on' : ''} ${n ? '' : 'zero'}" data-cab="${esc(cab)}" data-shelf="${esc(name)}" aria-pressed="${sel}" aria-label="${esc(cab)} ${esc(name)}：${n} 瓶，${s.wines} 款"><span class="fr-btl" data-r="${s.red}" data-w="${s.white}"></span><span class="fr-rail"><b>${shelfNo(name) < 999 ? shelfNo(name) : esc(name)}</b><em>${n} 瓶${(f => f === null ? '' : f ? ` <span class="cap-pill ok">可再放 ${f}</span>` : ' <span class="cap-pill full">已滿</span>')(freeAt(cab, name, n))}</em></span></button>`;
+      return `<button class="fr-shelf ${sel ? 'on' : ''} ${n ? '' : 'zero'}" data-cab="${esc(cab)}" data-shelf="${esc(name)}" aria-pressed="${sel}" aria-label="${esc(cab)} ${esc(name)}：${n} 瓶，${s.wines} 款"><span class="fr-btl" data-n="${KIND_IDS.map(k => s[k] || 0).join(',')}"></span><span class="fr-rail"><b>${shelfNo(name) < 999 ? shelfNo(name) : esc(name)}</b><em>${n} 瓶${(f => f === null ? '' : f ? ` <span class="cap-pill ok">可再放 ${f}</span>` : ' <span class="cap-pill full">已滿</span>')(freeAt(cab, name, n))}</em></span></button>`;
     }).join('');
-    const frees = [...sh].map(([nm, x]) => freeAt(cab, nm, x.red + x.white)).filter(f => f !== null), freeSum = frees.reduce((a, f) => a + f, 0);
+    const frees = [...sh].map(([nm, x]) => freeAt(cab, nm, countSum(x))).filter(f => f !== null), freeSum = frees.reduce((a, f) => a + f, 0);
     return `<div class="fridge ${on && !S.filter.shelf ? 'on' : ''}"><button class="fr-top" data-cab="${esc(cab)}" aria-pressed="${on && !S.filter.shelf}" aria-label="${esc(cab)}：${sum} 瓶，${sh.size} 層${frees.length ? `，空位 ${freeSum}` : ''}"><span class="fr-name">${esc(cab)}</span><span class="fr-led">${sum}</span><span class="fr-sub">${frees.length ? `<span class="cap-top ${freeSum ? '' : 'full'}">${freeSum ? `空位 <b>${freeSum}</b>` : '已滿'}</span>` : `${sh.size} 層`}</span></button><div class="fr-door"><div class="fr-in">${shelves}</div></div><span class="fr-feet"></span></div>`;
   }).join('');
   $('map').innerHTML = html ? html + '' : '<p class="hint">還沒有存放位置。</p>';
   fillBottles(true);
-  if (html && !$('mapLegend')) $('map').insertAdjacentHTML('afterend', '<div class="map-legend" id="mapLegend"><span><i class="lg-r"></i>紅酒</span><span><i class="lg-w"></i>白酒</span></div>');
+  if (html) renderLegend(all);
+}
+// 酒櫃下方的圖例：紅酒、白酒一定列；甜酒／貴腐、清酒有放在酒櫃裡才列
+function renderLegend(all) {
+  const has = emptyCount(); for (const [, sh] of all) for (const s of sh.values()) for (const k of KIND_IDS) has[k] += s[k] || 0;
+  const html = KINDS.filter(([k]) => k === 'red' || k === 'white' || has[k]).map(([k, n]) => `<span><i class="lg-${k}"></i>${n}</span>`).join('');
+  if (!$('mapLegend')) $('map').insertAdjacentHTML('afterend', '<div class="map-legend" id="mapLegend"></div>');
+  if ($('mapLegend').innerHTML !== html) $('mapLegend').innerHTML = html;
 }
 function miniCabHtml(cab, sh) {
-  const rows = shelfEntries(sh).map(([name, s]) => ({name, ...s, n: s.red + s.white, free: freeAt(cab, name, s.red + s.white)}));
+  const rows = shelfEntries(sh).map(([name, s]) => ({name, ...s, n: countSum(s), free: freeAt(cab, name, countSum(s))}));
   const scale = Math.max(1, ...rows.map(r => r.n + (r.free || 0)));
   const sum = rows.reduce((a, r) => a + r.n, 0), frees = rows.filter(r => r.free !== null), freeSum = frees.reduce((a, r) => a + r.free, 0);
   const on = S.filter?.cabinet === cab;
   const bars = rows.map(r => {
     const sel = on && S.filter.shelf === r.name;
-    return `<button type="button" class="sb ${sel ? 'on' : ''}" data-cab="${esc(cab)}" data-shelf="${esc(r.name)}" aria-pressed="${sel}" aria-label="${esc(cab)} ${esc(r.name)}：${r.n} 瓶${r.free !== null ? `，可再放 ${r.free}` : ''}"><span class="sn">${shelfNo(r.name) < 999 ? shelfNo(r.name) : esc(r.name)}</span><span class="bar"><i class="r" style="width:${r.red / scale * 100}%"></i><i class="w" style="width:${r.white / scale * 100}%"></i>${r.free ? `<i class="f" style="width:${r.free / scale * 100}%"></i>` : ''}</span><span class="sc">${r.n}${r.free === 0 ? '<em class="full">滿</em>' : ''}</span></button>`;
+    return `<button type="button" class="sb ${sel ? 'on' : ''}" data-cab="${esc(cab)}" data-shelf="${esc(r.name)}" aria-pressed="${sel}" aria-label="${esc(cab)} ${esc(r.name)}：${r.n} 瓶${r.free !== null ? `，可再放 ${r.free}` : ''}"><span class="sn">${shelfNo(r.name) < 999 ? shelfNo(r.name) : esc(r.name)}</span><span class="bar">${KINDS.map(([k, , c]) => r[k] ? `<i class="${c || 'r'}" style="width:${r[k] / scale * 100}%"></i>` : '').join('')}${r.free ? `<i class="f" style="width:${r.free / scale * 100}%"></i>` : ''}</span><span class="sc">${r.n}${r.free === 0 ? '<em class="full">滿</em>' : ''}</span></button>`;
   }).join('');
   return `<div class="mc ${on ? 'on' : ''}"><button type="button" class="mc-h" data-cabopen="${esc(cab)}" aria-label="打開 ${esc(cab)}：${sum} 瓶"><span class="mc-n">${esc(cab)}</span><span class="mc-led">${sum}</span></button>${bars}<button type="button" class="mc-f" data-cabopen="${esc(cab)}"><span>${rows.length} 層・看整櫃 ›</span>${frees.length ? `<em>${freeSum ? `空位 ${freeSum}` : '已滿'}</em>` : ''}</button></div>`;
 }
@@ -525,29 +538,37 @@ const capOf = (cab, sh) => { const v = S.data?.capacity?.[cab]?.[sh]; return Num
 const qtyAt = (cab, sh) => bottlesAt(active(), cab, sh);
 const freeAt = (cab, sh, n) => { const c = capOf(cab, sh); return c === null ? null : Math.max(0, c - n); };
 /* 每層最多畫兩排：下排排滿，上排少一瓶、疊在兩瓶之間；放不下的以「+n」表示，紅白依比例 */
+// 放不下時依比例分配要畫的瓶數：有的酒種至少畫 1 瓶，剩下的給比例最大的
+function share(cnt, show) {
+  const n = cnt.reduce((a, v) => a + v, 0), out = cnt.map(v => v ? Math.max(1, Math.floor(show * v / n)) : 0);
+  let diff = show - out.reduce((a, v) => a + v, 0);
+  const order = cnt.map((v, i) => [show * v / n - Math.floor(show * v / n), i]).filter(([, i]) => cnt[i]).sort((a, b) => b[0] - a[0]).map(([, i]) => i);
+  for (let k = 0; diff > 0 && order.length; k = (k + 1) % order.length) { const i = order[k]; if (out[i] < cnt[i]) { out[i]++; diff--; } else if (order.every(j => out[j] >= cnt[j])) break; }
+  while (diff < 0) { const i = out.indexOf(Math.max(...out)); out[i]--; diff++; }
+  return out;
+}
 function fillBottles(fromRender) {
   // 手機上視窗蓋住酒櫃時先不播，等視窗關掉、看得到酒櫃時再播（見 wireMotion）
   const covered = fromRender === true && !!S.mapShown && motionOK() && mapCovered();
   const prev = fromRender === true && !covered ? S.mapShown : null, cur = new Map();
   for (const el of document.querySelectorAll('#map .fr-btl')) {
-    const red = Number(el.dataset.r) || 0, white = Number(el.dataset.w) || 0, n = red + white, cs = getComputedStyle(el);
+    const cnt = (el.dataset.n || '').split(',').map(Number).map(v => v || 0), n = cnt.reduce((a, v) => a + v, 0), cs = getComputedStyle(el);
     const bs = parseFloat(cs.getPropertyValue('--bs')) || 30, gap = parseFloat(cs.getPropertyValue('--gap')) || 3;
     const width = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
     const perRow = Math.max(1, Math.floor((width + gap) / (bs + gap))), cap = perRow * 2 - 1;
     const show = n > cap ? cap - 1 : n;   // 放不下時，最後一格改放「+n」
-    let wh = white, r = red;
-    if (n > cap) { wh = white ? Math.min(white, Math.max(1, Math.round(show * white / n))) : 0; r = show - wh; }
+    const draw = n > cap ? share(cnt, show) : cnt;   // 每種酒畫幾瓶
     const sh = el.closest('.fr-shelf'), id = sh.dataset.cab + '\n' + sh.dataset.shelf, was = prev?.get(id);
     cur.set(id, {n, show});
-    const key = `${r}|${wh}|${n}`; if (el.dataset.k === key) continue; el.dataset.k = key;
-    el.innerHTML = '<i></i>'.repeat(r) + '<i class="w"></i>'.repeat(wh) + (n > show ? `<b class="fr-more" title="還有 ${n - show} 瓶">+${n - show}</b>` : '');
+    const key = `${draw.join('|')}|${n}`; if (el.dataset.k === key) continue; el.dataset.k = key;
+    el.innerHTML = KINDS.map(([, , c], i) => (c ? `<i class="${c}"></i>` : '<i></i>').repeat(draw[i])).join('') + (n > show ? `<b class="fr-more" title="還有 ${n - show} 瓶">+${n - show}</b>` : '');
     // 出庫、入庫、移動後：這一層的瓶數跳一下，多出來的瓶子冒出來、少掉的瓶子淡出
     if (!was || was.n === n || !motionOK()) continue;
     sh.classList.add('chg');
     const bottles = el.querySelectorAll('i');
     if (show > was.show) [...bottles].slice(-Math.min(3, show - was.show)).forEach(b => b.classList.add('in'));
     else if (show < was.show) for (let k = Math.min(3, was.show - show); k > 0; k--) {
-      const g = document.createElement('i'); g.className = 'ghost' + (r ? '' : ' w');
+      const g = document.createElement('i'), top = KINDS[draw.indexOf(Math.max(...draw))]; g.className = 'ghost' + (top?.[2] ? ' ' + top[2] : '');
       g.addEventListener('animationend', () => g.remove()); setTimeout(() => g.remove(), 900);
       (el.querySelector('.fr-more') || {before: n2 => el.append(n2)}).before(g);
     }
@@ -623,7 +644,7 @@ function cardHtml(w) {
   if (ps.length > 1) media = `<span class="slides">${ps.map((p, i) => `<img class="ph" src="${esc(fileUrl(p.thumb || p.photo))}" alt="${esc(w.wineName)} ${i + 1}" loading="lazy" draggable="false">`).join('')}</span>${sdots(ps.length)}`;
   else if (ps.length) media = `<img class="ph" src="${esc(thumbUrl(w))}" alt="${esc(w.wineName)}" loading="lazy">`;
   else media = `<span class="ph">${esc(w.vintage || 'NV')}</span>`;
-  return `<div class="card ${isWhite(w) ? 'white' : 'red'}" role="button" tabindex="0" data-open="${esc(w.wineId)}"><span class="phbox ${ps.length ? 'photo' : ''}">${media}${prioOf(w) ? pdots(prioOf(w)) : ''}</span><span class="cb"><b>${esc(w.wineName)}</b><span class="prod">${esc(w.wineryRegion || '')}</span>${(() => { const t = total(w), h = hereQty(w); return h !== null && h !== t ? `<span class="here">${hereWord()} <strong class="hn">${h}</strong> 瓶</span><span class="tot">${esc(w.vintage || 'NV')}・共 ${t} 瓶</span>` : `<span>${esc(w.vintage || 'NV')} · ${t} 瓶</span>`; })()}</span></div>`;
+  return `<div class="card ${kindOf(w)}" role="button" tabindex="0" data-open="${esc(w.wineId)}"><span class="phbox ${ps.length ? 'photo' : ''}">${media}${prioOf(w) ? pdots(prioOf(w)) : ''}</span><span class="cb"><b>${esc(w.wineName)}</b><span class="prod">${esc(w.wineryRegion || '')}</span>${(() => { const t = total(w), h = hereQty(w); return h !== null && h !== t ? `<span class="here">${hereWord()} <strong class="hn">${h}</strong> 瓶</span><span class="tot">${esc(w.vintage || 'NV')}・共 ${t} 瓶</span>` : `<span>${esc(w.vintage || 'NV')} · ${t} 瓶</span>`; })()}</span></div>`;
 }
 
 /* ---------- 詳細資料抽屜 ---------- */
@@ -657,7 +678,7 @@ function galleryHtml(w) {
 function renderDrawer() {
   const w = byId(S.drawer); if (!w) { closeDrawer(); return; }
   const ed = canEdit(), use = canUse(), t = total(w), archived = w.status === 'archived';
-  const facts = `<div><dt>紅酒／白酒</dt><dd>${colorName(w)}</dd></div>` + [['wineryRegion', '酒莊／產區'], ['origin', '產地'], ['volume', '容量'], ['source', '來源'], ['referencePrice', '參考價格'], ['entryDate', '入庫日期'], ['drinkWindow', '適飲期']]
+  const facts = `<div><dt>酒種</dt><dd>${colorName(w)}</dd></div>` + [['wineryRegion', '酒莊／產區'], ['origin', '產地'], ['volume', '容量'], ['source', '來源'], ['referencePrice', '參考價格'], ['entryDate', '入庫日期'], ['drinkWindow', '適飲期']]
     .map(([k, l]) => `<div><dt>${l}</dt><dd>${k === 'referencePrice' ? fmtPrice(w[k]) : esc(w[k] || '—')}</dd></div>`).join('');
   const locs = (w.locations || []).map(l => `<div class="dw-loc ${S.filter?.cabinet === l.cabinet && (!S.filter.shelf || S.filter.shelf === l.shelf) ? 'here' : ''}"><span class="where">${esc(l.cabinet)} <small>· ${esc(l.shelf)}</small></span><span class="n">${l.quantity}</span></div>`).join('');
   const prevSl = $('drawerBody').querySelector('.slides'), keep = S.drawerShown === S.drawer && prevSl ? prevSl.scrollLeft : 0;
@@ -901,6 +922,7 @@ function wire() {
     const lg = e.target.closest('[data-log]'); if (lg) { showDialog('adminModal'); switchTab('audit', true); loadAudit(lg.dataset.log, 1); checkStorage(); }
   });
   $('f_volumeChoice').addEventListener('change', e => { $('f_volumeOther').hidden = e.target.value !== '__other__'; });
+  $('f_originChoice').addEventListener('change', e => { const o = e.target.value === '__other__'; $('f_originOther').hidden = !o; if (o) $('f_originOther').focus(); });
   $('f_sourceChoice').addEventListener('change', e => { $('f_sourceOther').hidden = e.target.value !== '__other__'; });
   $('addLoc').addEventListener('click', () => addLocRow());
   $('locInputs').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) b.closest('.loc-ed').remove(); });
@@ -933,7 +955,7 @@ function wire() {
   $('aiRemove').addEventListener('click', () => { if (!confirm('移除這台裝置上的 AI 金鑰？「智慧辨識」按鈕會隱藏。')) return; setAI(null); renderAiSettings(); toast('已移除 AI 金鑰。'); });
   $('aiBtn').addEventListener('click', aiRecognize);
   setTimeout(() => { sweepAI(); scheduleAiExpiry(); });  // 等整個程式載入完再執行
-  for (const id of ['f_wineName', 'f_wineryRegion', 'f_vintage', 'f_origin', 'f_grapeNotes', 'f_volumeChoice', 'f_volumeOther']) $(id).addEventListener('input', e => e.target.classList.remove('ai-filled', 'ai-guess'));
+  for (const id of ['f_wineName', 'f_wineryRegion', 'f_vintage', 'f_originChoice', 'f_originOther', 'f_grapeNotes', 'f_volumeChoice', 'f_volumeOther']) $(id).addEventListener('input', e => e.target.classList.remove('ai-filled', 'ai-guess'));
   $('pendList').addEventListener('change', e => {
     const inp = e.target.closest('[data-padd]'); if (!inp) return;
     const files = [...inp.files]; inp.value = ''; addPendPhotos(inp.closest('[data-pid]').dataset.pid, files);
@@ -1198,6 +1220,20 @@ function addLocRow(l = {cabinet: '', shelf: '', quantity: 1}) {
   $('locInputs').append(row);
   fillLocPair(row.querySelector('[data-k=cabinet]'), row.querySelector('[data-k=shelf]'), l.cabinet, l.shelf);
 }
+/* 產地：下拉選單，選項是資料裡用過的國家，款數多的排上面；最下面「其他」可自行輸入。
+   舊資料若不是選單裡的名稱（例如「France,Bdx」），就顯示在「其他」欄位原樣保留 */
+function originOptions() {
+  const c = new Map(); for (const w of wines()) { const o = countryOf(w); if (o !== '未填產地') c.set(o, (c.get(o) || 0) + 1); }
+  return [...c].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([o]) => o);
+}
+function fillOrigin(v) {
+  v = (v || '').trim();
+  const opts = originOptions(), sel = $('f_originChoice'), std = !v || opts.includes(v);
+  sel.innerHTML = `<option value="">請選擇產地</option>` + opts.map(o => `<option value="${esc(o)}">${esc(o)}</option>`).join('') + '<option value="__other__">其他（自行輸入）</option>';
+  sel.value = std ? v : '__other__'; $('f_originOther').hidden = std; $('f_originOther').value = std ? '' : v;
+}
+const readOrigin = () => ($('f_originChoice').value === '__other__' ? $('f_originOther').value : $('f_originChoice').value).trim();
+const originEl = () => $('f_originOther').hidden ? $('f_originChoice') : $('f_originOther');
 function setChoice(selId, otherId, value, fallback) {
   const v = value || fallback, sel = $(selId);
   const std = [...sel.options].some(o => o.value === v && o.value !== '__other__');
@@ -1223,18 +1259,20 @@ function openWineForm(w, pend, rb) {
   for (const [k] of FIELDS) { const el = $('f_' + k); if (el) el.value = w?.[k] ?? ''; }
   setChoice('f_volumeChoice', 'f_volumeOther', w?.volume, '750ml');
   setChoice('f_sourceChoice', 'f_sourceOther', w?.source, '');
-  const col = w && isWhite(w) ? 'white' : 'red';
+  const col = w ? kindOf(w) : 'red';
   document.querySelectorAll('input[name=f_color]').forEach(r => r.checked = r.value === col);
+  fillOrigin(w?.origin);
   $('locInputs').replaceChildren(); (w?.locations?.length ? w.locations : [{cabinet: '', shelf: '', quantity: 1}]).forEach(addLocRow);
   $('locHint').hidden = !w; $('locLbl').textContent = w ? '存放位置與瓶數' : '存放位置與初始瓶數';
   $('newPhotoField').hidden = !!w; $('f_camera').value = ''; $('f_gallery').value = '';
   document.querySelectorAll('#wineForm .rb-filled, #wineForm .rb-check').forEach(el => el.classList.remove('rb-filled', 'rb-check'));
   if (S.rebuy) {
     const src = S.rebuy.kind === 'cellar' ? S.rebuy.w : {wineName: S.rebuy.name, vintage: S.rebuy.vintage};
-    for (const k of ['wineName', 'wineryRegion', 'vintage', 'origin', 'drinkWindow', 'grapeNotes', 'referencePrice']) { const el = $('f_' + k); if (el && src[k] != null && src[k] !== '') { el.value = src[k]; el.classList.add('rb-filled'); } }
+    for (const k of ['wineName', 'wineryRegion', 'vintage', 'drinkWindow', 'grapeNotes', 'referencePrice']) { const el = $('f_' + k); if (el && src[k] != null && src[k] !== '') { el.value = src[k]; el.classList.add('rb-filled'); } }
+    if (src.origin) { fillOrigin(src.origin); originEl().classList.add('rb-filled'); }
     if (src.volume) setChoice('f_volumeChoice', 'f_volumeOther', src.volume, '750ml');
     if (src.source) setChoice('f_sourceChoice', 'f_sourceOther', src.source, '');
-    if (S.rebuy.kind === 'cellar') { const col = isWhite(src) ? 'white' : 'red'; document.querySelectorAll('input[name=f_color]').forEach(r => r.checked = r.value === col); }
+    if (S.rebuy.kind === 'cellar') { const col = kindOf(src); document.querySelectorAll('input[name=f_color]').forEach(r => r.checked = r.value === col); }
     $('f_entryDate').value = today();
     $('f_vintage').classList.add('rb-check'); document.querySelectorAll('#locInputs select, #locInputs [data-k=quantity]').forEach(el => el.classList.add('rb-check'));
     renderNewStrip();
@@ -1244,10 +1282,11 @@ function openWineForm(w, pend, rb) {
 }
 function readWineForm() {
   const r = {};
-  for (const [k] of FIELDS) { if (k === 'volume' || k === 'source' || k === 'referencePrice') continue; r[k] = $('f_' + k).value.trim(); }
+  for (const [k] of FIELDS) { if (k === 'volume' || k === 'source' || k === 'referencePrice' || k === 'origin') continue; r[k] = $('f_' + k).value.trim(); }
+  r.origin = ($('f_originChoice').value === '__other__' ? $('f_originOther').value : $('f_originChoice').value).trim();
   r.volume = ($('f_volumeChoice').value === '__other__' ? $('f_volumeOther').value : $('f_volumeChoice').value).trim();
   r.source = ($('f_sourceChoice').value === '__other__' ? $('f_sourceOther').value : $('f_sourceChoice').value).trim();
-  r.color = document.querySelector('input[name=f_color]:checked')?.value === 'white' ? 'white' : 'red';
+  const ck = document.querySelector('input[name=f_color]:checked')?.value; r.color = KIND_IDS.includes(ck) ? ck : 'red';
   const price = $('f_referencePrice').value.trim(); r.referencePrice = price === '' ? null : Number(price);
   if (!r.wineName) fail('請填寫酒名。');
   if (r.referencePrice !== null && (!Number.isFinite(r.referencePrice) || r.referencePrice < 0)) fail('參考價格格式不正確。');
@@ -1276,7 +1315,7 @@ async function saveWine() {
       d.wines[id] = next;
       const changes = [];
       for (const [k, label] of FIELDS) if (String(cur[k] ?? '') !== String(r[k] ?? '')) changes.push(`${label}：${cur[k] ?? '—'} → ${r[k] ?? '—'}`);
-      if (isWhite(cur) !== (r.color === 'white')) changes.push(`紅酒／白酒：${colorName(cur)} → ${r.color === 'white' ? '白酒' : '紅酒'}`);
+      if (kindOf(cur) !== r.color) changes.push(`酒種：${colorName(cur)} → ${kindName(r.color)}`);
       if (JSON.stringify(cur.locations || []) !== JSON.stringify(r.locations)) changes.push(`位置：${locText(cur.locations)} → ${locText(r.locations)}`);
       return changes;
     }, changes => `編輯 ${id} ${r.wineName}${changes.length ? '' : '（無變更）'}${changes.length ? '\n\n' + changes.join('\n') : ''}`);
@@ -1460,12 +1499,12 @@ vintage: the 4-digit year, "NV" for non-vintage, or "" if not visible;
 origin: the country in English (for example France, Italy, Spain, Germany, United States, Australia, Chile);
 volume: bottle size such as "750ml", "375ml" or "1500ml" if visible, else "";
 grapeNotes: the grape variety or varieties if printed; if not printed but you are confident from the appellation, give them and include "grapeNotes" in uncertain;
-color: "red" or "white" (rosé, sparkling and sweet white wines count as "white"), or "unknown";
+color: "red"; "white" (rosé and sparkling count as "white"); "sweet" for dessert and botrytis wines (Sauternes, Tokaji Aszú, Beerenauslese, ice wine, Port and other sweet wines); "sake" for Japanese sake (nihonshu); or "unknown";
 uncertain: an array of the key names you inferred or could not read clearly.
 Use "" for anything you cannot determine. Never invent a producer, name or year.`;
 const AI_SCHEMA = {type: 'object', additionalProperties: false, required: [...AI_FIELDS, 'uncertain'],
   properties: {wineName: {type: 'string'}, wineryRegion: {type: 'string'}, vintage: {type: 'string'}, origin: {type: 'string'}, volume: {type: 'string'}, grapeNotes: {type: 'string'},
-    color: {type: 'string', enum: ['red', 'white', 'unknown']}, uncertain: {type: 'array', items: {type: 'string', enum: AI_FIELDS}}}};
+    color: {type: 'string', enum: [...KIND_IDS, 'unknown']}, uncertain: {type: 'array', items: {type: 'string', enum: AI_FIELDS}}}};
 const CLAUDE_MODELS = ['claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5'];
 /* 金鑰只在本機保留 30 分鐘（從儲存那一刻算），時間到自動清除，要用再重新輸入。登出不提早清除 */
 const AI_TTL = 30 * 60 * 1000;
@@ -1588,7 +1627,7 @@ function aiParse(text) {
   const str = v => typeof v === 'string' ? v.trim() : '';
   return {wineName: str(o.wineName), wineryRegion: str(o.wineryRegion), vintage: str(o.vintage), origin: str(o.origin), grapeNotes: str(o.grapeNotes),
     volume: str(o.volume).replace(/\s+/g, '').replace(/ML$/i, 'ml').replace(/^(\d+(?:\.\d+)?)l$/i, (x, n) => Math.round(Number(n) * 1000) + 'ml'),
-    color: ['red', 'white'].includes(o.color) ? o.color : '', uncertain: Array.isArray(o.uncertain) ? o.uncertain.filter(k => AI_FIELDS.includes(k)) : []};
+    color: KIND_IDS.includes(o.color) ? o.color : '', uncertain: Array.isArray(o.uncertain) ? o.uncertain.filter(k => AI_FIELDS.includes(k)) : []};
 }
 async function aiRecognize() {
   const c = getAI();
@@ -1600,7 +1639,11 @@ async function aiRecognize() {
     let text; try { text = await aiCall(c, imgs); } catch (e) { fail(aiError(e)); }
     const r = aiParse(text), filled = [];
     const put = (k, el) => { if (!r[k] || el.value.trim()) return; el.value = r[k]; el.classList.add('ai-filled'); el.classList.toggle('ai-guess', r.uncertain.includes(k)); filled.push(k); };
-    for (const k of ['wineName', 'wineryRegion', 'vintage', 'origin', 'grapeNotes']) put(k, $('f_' + k));
+    for (const k of ['wineName', 'wineryRegion', 'vintage', 'grapeNotes']) put(k, $('f_' + k));
+    if (r.origin && !readOrigin()) {   // 辨識出的國家：選單裡有就選它，沒有就選「其他」並填入
+      const hit = [...$('f_originChoice').options].find(o => o.value !== '__other__' && o.value && o.value.toLowerCase() === r.origin.toLowerCase());
+      fillOrigin(hit ? hit.value : r.origin); const el = originEl(); el.classList.add('ai-filled'); el.classList.toggle('ai-guess', r.uncertain.includes('origin')); filled.push('origin');
+    }
     if (r.volume) { setChoice('f_volumeChoice', 'f_volumeOther', r.volume, '750ml'); const el = $('f_volumeOther').hidden ? $('f_volumeChoice') : $('f_volumeOther'); el.classList.add('ai-filled'); el.classList.toggle('ai-guess', r.uncertain.includes('volume')); filled.push('volume'); }
     if (r.color) { document.querySelectorAll('input[name=f_color]').forEach(x => x.checked = x.value === r.color); filled.push('color'); }
     const guess = filled.filter(k => r.uncertain.includes(k)).length;
@@ -1874,7 +1917,7 @@ async function checkStorage() {
 /* ---------- CSV ---------- */
 function exportCsv() {
   const cell = v => { const s = String(v ?? ''); return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
-  const lines = [['資料類型', ...FIELDS.map(f => f[1]), '紅酒／白酒', '櫃位', '層位', '瓶數', '飲用優先', '最後修改者', '最後修改時間'].join(',')];
+  const lines = [['資料類型', ...FIELDS.map(f => f[1]), '酒種', '櫃位', '層位', '瓶數', '飲用優先', '最後修改者', '最後修改時間'].join(',')];
   for (const w of wines()) {
     const type = w.status === 'archived' ? '歷史酒單' : '目前酒款';
     const locs = w.locations?.length ? w.locations : [{cabinet: '', shelf: '', quantity: 0}];
