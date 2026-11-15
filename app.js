@@ -82,7 +82,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261115k';
+const APP_VER = '20261115l';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -418,7 +418,7 @@ const countryOf = w => (w.origin || '').split(/[,，/]/)[0].trim() || '未填產
 const shelfNo = s => { const m = /\d+/.exec(s || ''); return m ? Number(m[0]) : 999; };
 // 編輯表單有選酒種就照選的；沒選過的舊資料才看酒名與備註的關鍵字判斷（只分紅、白）
 /* 酒種：[代號, 名稱, 酒櫃圖瓶底的 class]。存在 w.color；沒選過的舊資料只看關鍵字分紅、白 */
-const KINDS = [['red', '紅酒', ''], ['white', '白酒', 'w'], ['sweet', '甜酒', 's'], ['sake', '清酒', 'k']];
+const KINDS = [['red', '紅酒', ''], ['white', '白酒', 'w'], ['sweet', '甜酒／貴腐', 's'], ['sake', '清酒', 'k']];
 const KIND_IDS = KINDS.map(k => k[0]);
 const kindOf = w => KIND_IDS.includes(w.color) ? w.color : /白酒|white|riesling|sauvignon blanc|chardonnay/i.test(`${w.grapeNotes} ${w.wineName}`) ? 'white' : 'red';
 const kindName = k => (KINDS.find(x => x[0] === k) || KINDS[0])[1];
@@ -515,7 +515,7 @@ function renderMap(list) {
   fillBottles(true);
   if (html) renderLegend(all);
 }
-// 酒櫃下方的圖例：紅酒、白酒一定列；甜酒、清酒有放在酒櫃裡才列
+// 酒櫃下方的圖例：紅酒、白酒一定列；甜酒／貴腐、清酒有放在酒櫃裡才列
 function renderLegend(all) {
   const has = emptyCount(); for (const [, sh] of all) for (const s of sh.values()) for (const k of KIND_IDS) has[k] += s[k] || 0;
   const html = KINDS.filter(([k]) => k === 'red' || k === 'white' || has[k]).map(([k, n]) => `<span><i class="lg-${k}"></i>${n}</span>`).join('');
@@ -1016,7 +1016,7 @@ function wire() {
   $('slotList').addEventListener('change', e => { const r = e.target.closest('[data-roleslot]'); if (r) changeRole(r); });
 }
 function toLedger() { document.querySelector('.ledger').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'}); }
-// 點總覽的「酒款」：依酒種分類（紅酒、白酒、甜酒、清酒），點一種只看那一種
+// 點總覽的「酒款」：依酒種分類（紅酒、白酒、甜酒／貴腐、清酒），點一種只看那一種
 function openKinds() {
   const g = Object.fromEntries(KIND_IDS.map(k => [k, {wines: 0, bottles: 0}]));
   for (const w of active()) { const x = g[kindOf(w)]; x.wines++; x.bottles += total(w); }
