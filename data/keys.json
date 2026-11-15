@@ -60,6 +60,15 @@
    "iv": "DZnZblizI7lVXGqO",
    "ct": "N15Q12vmJg9N0esBuax5A3CPaCY6njzknEJopyM9fU//RGrPXxf2xtvGzhUkPdwn",
    "createdAt": "2026-11-15T05:53:45.361Z"
+  },
+  {
+   "id": "2416906a-7aae-4ce0-9ef0-4736511ebd4f",
+   "label": "俊凱",
+   "role": "user",
+   "salt": "Evm6Le6CJAyBydGdL0w/6Q==",
+   "iv": "fp6vfsViEHlW/mWR",
+   "ct": "v/hW4JkO6gBKf9n+B62r2kVMfEoeObwl5s9OyJS68i8Gi53oN6hc3sul3E7ALPWG",
+   "createdAt": "2026-11-15T05:54:18.023Z"
   }
  ]
 }
