@@ -1344,17 +1344,24 @@
     }
    ],
    "origin": "Italy",
-   "photo": "",
+   "photo": "images/W047-1794708601592.jpg",
    "referencePrice": 1486,
-   "revision": 1,
+   "revision": 2,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-09-30T04:33:13.621Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-15T02:10:11.874Z",
+   "updatedBy": "芝琦",
    "vintage": "2001",
    "volume": "750ml",
    "wineName": "Castello di Fonterutoli Chianti Classico",
-   "wineryRegion": "Mazzei/Fonterutoli"
+   "wineryRegion": "Mazzei/Fonterutoli",
+   "photos": [
+    {
+     "photo": "images/W047-1794708601592.jpg",
+     "thumb": "images/W047-1794708601592-t.jpg"
+    }
+   ],
+   "thumb": "images/W047-1794708601592-t.jpg"
   },
   "W048": {
    "createdAt": "",
@@ -1854,8 +1861,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 119,
- "updatedAt": "2026-11-15T02:09:27.629Z",
+ "rev": 120,
+ "updatedAt": "2026-11-15T02:10:11.874Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
