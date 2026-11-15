@@ -892,17 +892,24 @@
     }
    ],
    "origin": "Chile",
-   "photo": "",
+   "photo": "images/W028-1794709579687.jpg",
    "referencePrice": 5817,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-09-29T14:14:07.142Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-15T02:26:25.244Z",
+   "updatedBy": "芝琦",
    "vintage": "2006",
    "volume": "750ml",
    "wineName": "Cabernet Sauvignon(CONCHA Y TORO)",
-   "wineryRegion": "Don Melchor/Puente Alto"
+   "wineryRegion": "Don Melchor/Puente Alto",
+   "photos": [
+    {
+     "photo": "images/W028-1794709579687.jpg",
+     "thumb": "images/W028-1794709579687-t.jpg"
+    }
+   ],
+   "thumb": "images/W028-1794709579687-t.jpg"
   },
   "W029": {
    "createdAt": "",
@@ -1925,8 +1932,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 131,
- "updatedAt": "2026-11-15T02:26:01.636Z",
+ "rev": 132,
+ "updatedAt": "2026-11-15T02:26:25.244Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
