@@ -1024,17 +1024,24 @@
     }
    ],
    "origin": "France",
-   "photo": "",
+   "photo": "images/W032-1794709667876.jpg",
    "referencePrice": 33600,
-   "revision": 1,
+   "revision": 2,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-09-29T14:16:31.297Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-15T02:27:53.295Z",
+   "updatedBy": "芝琦",
    "vintage": "2015",
    "volume": "750ml",
    "wineName": "Echezeaux Grand Cru Cuvee Jean-Luc Bissey",
-   "wineryRegion": "Hospices de Beaune★"
+   "wineryRegion": "Hospices de Beaune★",
+   "photos": [
+    {
+     "photo": "images/W032-1794709667876.jpg",
+     "thumb": "images/W032-1794709667876-t.jpg"
+    }
+   ],
+   "thumb": "images/W032-1794709667876-t.jpg"
   },
   "W033": {
    "createdAt": "",
@@ -1939,8 +1946,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 133,
- "updatedAt": "2026-11-15T02:26:48.073Z",
+ "rev": 134,
+ "updatedAt": "2026-11-15T02:27:53.295Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
