@@ -1958,17 +1958,24 @@
     }
    ],
    "origin": "Australia",
-   "photo": "",
+   "photo": "images/W064-1794712042042.jpg",
    "referencePrice": 760,
-   "revision": 1,
+   "revision": 2,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-11-08T04:43:27.757Z",
-   "updatedBy": "廖炎鴻",
+   "updatedAt": "2026-11-15T03:07:26.568Z",
+   "updatedBy": "芝琦",
    "vintage": "2024",
    "volume": "750ml",
    "wineName": "Sauvignon Blanc",
-   "wineryRegion": "Shaw + Smith"
+   "wineryRegion": "Shaw + Smith",
+   "photos": [
+    {
+     "photo": "images/W064-1794712042042.jpg",
+     "thumb": "images/W064-1794712042042-t.jpg"
+    }
+   ],
+   "thumb": "images/W064-1794712042042-t.jpg"
   },
   "W065": {
    "wineName": "INSIGNIA-Claire借放",
@@ -2009,8 +2016,8 @@
    "revision": 3
   }
  },
- "rev": 143,
- "updatedAt": "2026-11-15T03:07:11.494Z",
+ "rev": 144,
+ "updatedAt": "2026-11-15T03:07:26.568Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
