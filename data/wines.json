@@ -1300,17 +1300,24 @@
     }
    ],
    "origin": "Italy",
-   "photo": "",
+   "photo": "images/W044-1794708511302.jpg",
    "referencePrice": 2560,
-   "revision": 1,
+   "revision": 2,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-09-30T04:29:05.713Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-15T02:08:44.789Z",
+   "updatedBy": "芝琦",
    "vintage": "2016",
    "volume": "750ml",
    "wineName": "Castello Fonterutoli Chianti Classico Gran Selezione",
-   "wineryRegion": "Mazzei/Fonterutoli"
+   "wineryRegion": "Mazzei/Fonterutoli",
+   "photos": [
+    {
+     "photo": "images/W044-1794708511302.jpg",
+     "thumb": "images/W044-1794708511302-t.jpg"
+    }
+   ],
+   "thumb": "images/W044-1794708511302-t.jpg"
   },
   "W047": {
    "createdAt": "",
@@ -1836,8 +1843,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 116,
- "updatedAt": "2026-11-15T02:07:53.220Z",
+ "rev": 117,
+ "updatedAt": "2026-11-15T02:08:44.789Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
