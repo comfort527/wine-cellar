@@ -82,7 +82,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261115n';
+const APP_VER = '20261115o';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -2513,7 +2513,8 @@ async function loadAudit(wineId, page) {
   S.auditWine = wineId; S.auditPage = page;
   if (page === 1) S.audit = [];
   const own = !canEdit(), me = '操作者：' + (S.session?.label || '');   // 使用者只看自己做的異動
-  $('auditHint').textContent = wineId ? `「${byId(wineId)?.wineName || ''}」的異動紀錄，由新到舊。` : own ? '你自己做過的異動，由新到舊。' : '每次異動都是一筆 GitHub commit，由新到舊。';
+  $('auditHint').textContent = wineId ? `「${byId(wineId)?.wineName || ''}」的異動紀錄，由新到舊。` : own ? '你自己做過的異動，由新到舊。' : '';
+  $('auditHint').hidden = !$('auditHint').textContent;
   $('auditList').innerHTML = page === 1 ? '<p class="hint">讀取中…</p>' : $('auditList').innerHTML;
   try {
     const pages = wineId || own ? [page, page + 1, page + 2] : [page];
