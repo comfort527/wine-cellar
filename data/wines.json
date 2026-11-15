@@ -133,17 +133,24 @@
     }
    ],
    "origin": "France",
-   "photo": "",
+   "photo": "images/W004-1794709400324.jpg",
    "referencePrice": 6750,
-   "revision": 1,
+   "revision": 2,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-09-29T13:29:30.027Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-15T02:23:26.677Z",
+   "updatedBy": "芝琦",
    "vintage": "2010",
    "volume": "750ml",
    "wineName": "Premier Cru Volnay Caillerets Ancienne Cuvée Carnot",
-   "wineryRegion": "Bouchard Père et Fils"
+   "wineryRegion": "Bouchard Père et Fils",
+   "photos": [
+    {
+     "photo": "images/W004-1794709400324.jpg",
+     "thumb": "images/W004-1794709400324-t.jpg"
+    }
+   ],
+   "thumb": "images/W004-1794709400324-t.jpg"
   },
   "W005": {
    "createdAt": "",
@@ -1886,8 +1893,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 125,
- "updatedAt": "2026-11-15T02:22:07.215Z",
+ "rev": 126,
+ "updatedAt": "2026-11-15T02:23:26.677Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
