@@ -13,10 +13,10 @@
 <meta name="theme-color" content="#eef0ec" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1412" media="(prefers-color-scheme: dark)">
 <title>酒窖</title>
-<link rel="icon" href="icons/favicon.svg?v=20261115o" type="image/svg+xml">
-<link rel="icon" href="icons/favicon-96.png?v=20261115o" sizes="96x96" type="image/png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=20261115o">
-<link rel="manifest" href="manifest.webmanifest?v=20261115o">
+<link rel="icon" href="icons/favicon.svg?v=20261115p" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-96.png?v=20261115p" sizes="96x96" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=20261115p">
+<link rel="manifest" href="manifest.webmanifest?v=20261115p">
 <meta name="apple-mobile-web-app-title" content="酒窖">
 <meta name="application-name" content="酒窖">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -24,13 +24,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261115o" id="mainCss">
+<link rel="stylesheet" href="style.css?v=20261115p" id="mainCss">
 </head>
 <body class="loading">
 <header class="bar">
  <div class="bar-in">
   <a class="mark" href="#" id="homeLink" aria-label="回到全部酒款">
-   <img class="mark-ic" src="icons/logo.svg?v=20261115o" alt="" width="36" height="40">
+   <img class="mark-ic" src="icons/logo.svg?v=20261115p" alt="" width="36" height="40">
    <span class="mark-t">酒窖</span>
   </a>
   <span class="sync" id="sync"><span class="dot"></span><span id="syncText">讀取中</span></span>
@@ -346,7 +346,6 @@
    <div class="ferr span" id="aiErr" hidden></div>
    <div class="ai-acts span"><button type="submit" class="primary" id="aiSave">驗證並儲存</button><button type="button" class="danger" id="aiRemove" hidden>移除金鑰</button></div>
   </form>
-  <p class="hint">建議先到該服務的帳號設定<b>每月花費上限</b>。辨識結果只會幫你填表，存檔前請自己確認。</p>
  </section>
  <section id="tab-keys" hidden>
   <p class="hint" style="margin-top:0">每台裝置一組密碼，刪除後該裝置就無法再登入。<b>使用者</b>：對已建好的酒款出庫、移動，拍照放進待入櫃，記錄飲酒日誌。<b>管理員</b>：另外可以新增、編輯酒款、管理照片與待入櫃、設定櫃位、匯出。<b>工程人員</b>：另外可以管理裝置密碼、新增／刪除人員、變更身分與更換權杖。要改某個人的身分，直接在他名字旁的選單換掉即可。</p>
@@ -360,7 +359,6 @@
    <p class="hint">更換後所有裝置密碼照常可用。</p>
   </fieldset></form>
   <div class="ferr" id="keysErr" hidden></div>
-  <p><a id="repoLink" target="_blank" rel="noopener">開啟 GitHub repo</a></p>
  </section>
  <section id="tab-export" hidden>
   <p class="hint" style="margin-top:0"><b>Excel 酒單</b>：照「敦南8樓」酒單的格式，分成「依酒莊產區」「依位置」「曾經擁有」三張表，每個櫃子一區、下面有瓶數小計，可以直接列印（橫式 A4）。</p>
@@ -377,7 +375,7 @@
 
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="config.js?v=20261115o"></script>
-<script src="app.js?v=20261115o"></script>
+<script src="config.js?v=20261115p"></script>
+<script src="app.js?v=20261115p"></script>
 </body>
 </html>
