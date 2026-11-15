@@ -1377,17 +1377,24 @@
     }
    ],
    "origin": "Italy",
-   "photo": "",
+   "photo": "images/W048-1794708629456.jpg",
    "referencePrice": 600,
-   "revision": 1,
+   "revision": 2,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-09-30T04:34:43.619Z",
-   "updatedBy": "comfort527",
+   "updatedAt": "2026-11-15T02:10:40.517Z",
+   "updatedBy": "芝琦",
    "vintage": "2013",
    "volume": "750ml",
    "wineName": "Zisola Noto Rosso",
-   "wineryRegion": "Mazzei/Zisola"
+   "wineryRegion": "Mazzei/Zisola",
+   "photos": [
+    {
+     "photo": "images/W048-1794708629456.jpg",
+     "thumb": "images/W048-1794708629456-t.jpg"
+    }
+   ],
+   "thumb": "images/W048-1794708629456-t.jpg"
   },
   "W049": {
    "createdAt": "",
@@ -1861,8 +1868,8 @@
    "wineryRegion": "Shaw + Smith"
   }
  },
- "rev": 120,
- "updatedAt": "2026-11-15T02:10:11.874Z",
+ "rev": 121,
+ "updatedAt": "2026-11-15T02:10:40.517Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
