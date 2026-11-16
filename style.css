@@ -34,6 +34,14 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 .sync .dot{width:7px;height:7px;border-radius:50%;background:var(--faint)}
 .sync.live .dot{background:var(--ok);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 22%,transparent)}
 .sync.stale .dot{background:var(--warn)}
+/* 已同步的綠點：一圈一圈往外擴散 */
+.sync .dot{position:relative;flex:none}
+.sync.live .dot::before,.sync.live .dot::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--ok);opacity:0;pointer-events:none}
+@keyframes syncRipple{0%{transform:scale(1);opacity:.55}100%{transform:scale(3.6);opacity:0}}
+@media (prefers-reduced-motion:no-preference){
+  .sync.live .dot::before{animation:syncRipple 2.4s ease-out infinite}
+  .sync.live .dot::after{animation:syncRipple 2.4s ease-out 1.2s infinite}
+}
 .who{margin-left:auto;display:flex;align-items:center;gap:8px}
 .pill{font-size:20px;color:var(--muted);white-space:nowrap}
 .pill b{color:var(--ink);font-weight:700}
@@ -483,7 +491,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261115r";
+:root{--ver:"20261116a";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
