@@ -491,7 +491,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261118a";
+:root{--ver:"20261118b";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
@@ -955,9 +955,9 @@ i[data-icon],.bnav button i,.tnav button i{font-style:normal;display:inline-flex
 
 /* ---------- 液態玻璃（A）：手機與 iPad 的底部列變成懸浮的玻璃膠囊 ----------
    網頁做得到的是毛玻璃：後面的內容模糊透出、顏色更飽和，加上邊緣高光與柔和陰影 */
-:root{--lg-bg:rgba(255,255,255,.52);--lg-rim:rgba(255,255,255,.78);--lg-edge:rgba(0,0,0,.08);--lg-shine:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.08) 55%,rgba(255,255,255,.18));--lg-shadow:0 10px 30px rgba(0,0,0,.14),0 2px 6px rgba(0,0,0,.08);--lg-pick:rgba(255,255,255,.6);--lg-pick-rim:rgba(255,255,255,.9);--lg-on:var(--wine)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--lg-bg:rgba(28,34,31,.5);--lg-rim:rgba(255,255,255,.2);--lg-edge:rgba(0,0,0,.45);--lg-shine:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.02) 55%,rgba(255,255,255,.05));--lg-shadow:0 10px 30px rgba(0,0,0,.5);--lg-pick:rgba(255,255,255,.14);--lg-pick-rim:rgba(255,255,255,.22);--lg-on:var(--frame-red)}}
-:root[data-theme="dark"]{--lg-bg:rgba(28,34,31,.5);--lg-rim:rgba(255,255,255,.2);--lg-edge:rgba(0,0,0,.45);--lg-shine:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.02) 55%,rgba(255,255,255,.05));--lg-shadow:0 10px 30px rgba(0,0,0,.5);--lg-pick:rgba(255,255,255,.14);--lg-pick-rim:rgba(255,255,255,.22);--lg-on:var(--frame-red)}
+:root{--lg-bg:rgba(255,255,255,.52);--lg-strong:rgba(255,255,255,.74);--lg-rim:rgba(255,255,255,.78);--lg-edge:rgba(0,0,0,.08);--lg-shine:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.08) 55%,rgba(255,255,255,.18));--lg-shadow:0 10px 30px rgba(0,0,0,.14),0 2px 6px rgba(0,0,0,.08);--lg-pick:rgba(255,255,255,.6);--lg-pick-rim:rgba(255,255,255,.9);--lg-on:var(--wine)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--lg-bg:rgba(28,34,31,.5);--lg-strong:rgba(26,32,29,.76);--lg-rim:rgba(255,255,255,.2);--lg-edge:rgba(0,0,0,.45);--lg-shine:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.02) 55%,rgba(255,255,255,.05));--lg-shadow:0 10px 30px rgba(0,0,0,.5);--lg-pick:rgba(255,255,255,.14);--lg-pick-rim:rgba(255,255,255,.22);--lg-on:var(--frame-red)}}
+:root[data-theme="dark"]{--lg-bg:rgba(28,34,31,.5);--lg-strong:rgba(26,32,29,.76);--lg-rim:rgba(255,255,255,.2);--lg-edge:rgba(0,0,0,.45);--lg-shine:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.02) 55%,rgba(255,255,255,.05));--lg-shadow:0 10px 30px rgba(0,0,0,.5);--lg-pick:rgba(255,255,255,.14);--lg-pick-rim:rgba(255,255,255,.22);--lg-on:var(--frame-red)}
 @media (max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px), (min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse){
   .bnav{background:var(--lg-bg);background-image:var(--lg-shine);-webkit-backdrop-filter:blur(22px) saturate(185%);backdrop-filter:blur(22px) saturate(185%);border:1px solid var(--lg-edge);box-shadow:inset 0 1px 0 var(--lg-rim),inset 0 0 0 1px rgba(255,255,255,.12),var(--lg-shadow)}
   .bnav button.on{color:var(--lg-on)}
@@ -979,8 +979,28 @@ i[data-icon],.bnav button i,.tnav button i{font-style:normal;display:inline-flex
   body{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
   .toast{bottom:calc(112px + env(safe-area-inset-bottom,0px))}
 }
+/* ---------- 液態玻璃（B）：上方列、視窗標題列與按鈕列、切換鈕、篩選列、總覽卡、提示訊息、詳細資料的關閉鍵 ---------- */
+.bar,.seg,.filterbar,.toast,dialog:not(.drawer) .dh{-webkit-backdrop-filter:blur(22px) saturate(185%);backdrop-filter:blur(22px) saturate(185%)}
+.bar{background:var(--lg-bg);background-image:var(--lg-shine);border-bottom:1px solid var(--lg-edge);box-shadow:inset 0 -1px 0 var(--lg-rim),0 4px 18px rgba(0,0,0,.06)}
+dialog:not(.drawer) .dh{background:var(--lg-strong);background-image:var(--lg-shine);border-bottom:1px solid var(--lg-edge);box-shadow:inset 0 1px 0 var(--lg-rim);border-top-left-radius:inherit;border-top-right-radius:inherit}
+.seg{background:var(--lg-bg);background-image:var(--lg-shine);border:1px solid var(--lg-edge);border-radius:999px;padding:3px;gap:2px;box-shadow:inset 0 1px 0 var(--lg-rim),0 4px 14px rgba(0,0,0,.08)}
+.seg button{background:transparent;border:0!important;border-radius:999px;color:var(--muted)}
+.seg button.on{background:var(--lg-pick);color:var(--ink);box-shadow:inset 0 1px 0 var(--lg-pick-rim),0 2px 8px rgba(0,0,0,.12)}
+.filterbar{background:color-mix(in srgb,var(--wine-soft) 72%,transparent);background-image:var(--lg-shine);border:1px solid var(--lg-edge);box-shadow:inset 0 1px 0 var(--lg-rim),0 4px 14px rgba(0,0,0,.06)}
+.toast{background:var(--lg-strong);background-image:var(--lg-shine);color:var(--ink);border:1px solid var(--lg-edge);box-shadow:inset 0 1px 0 var(--lg-rim),var(--lg-shadow)}
+/* 手機直放、手機橫放：底部固定的「取消／儲存」列、浮在照片上的關閉鍵與輪播點 */
+@media (max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px), (orientation:landscape) and (max-height:500px) and (max-width:1000px){
+  dialog:not(.drawer) .dact{background:var(--lg-strong);background-image:var(--lg-shine);-webkit-backdrop-filter:blur(22px) saturate(185%);backdrop-filter:blur(22px) saturate(185%);border-top:1px solid var(--lg-edge);box-shadow:inset 0 1px 0 var(--lg-rim)}
+  .drawer .dw-top .x,.drawer .dw-top.over .x{background:var(--lg-strong);background-image:var(--lg-shine);-webkit-backdrop-filter:blur(18px) saturate(185%);backdrop-filter:blur(18px) saturate(185%);color:var(--ink);border:1px solid var(--lg-edge);box-shadow:inset 0 1px 0 var(--lg-rim),var(--lg-shadow)}
+  .gal .sdots{background:rgba(255,255,255,.26);background-image:var(--lg-shine);-webkit-backdrop-filter:blur(14px) saturate(185%);backdrop-filter:blur(14px) saturate(185%);border:1px solid rgba(255,255,255,.35);box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+}
+/* 手機直放：總覽的「酒款」「產地」卡片 */
+@media (max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px){
+  .fact{background:var(--lg-bg);background-image:var(--lg-shine);-webkit-backdrop-filter:blur(22px) saturate(185%);backdrop-filter:blur(22px) saturate(185%);border:1px solid var(--lg-edge);border-radius:18px;box-shadow:inset 0 1px 0 var(--lg-rim),0 6px 18px rgba(0,0,0,.08)}
+}
 /* 系統設定「降低透明度」：回到不透明 */
 @media (prefers-reduced-transparency:reduce){
-  .bnav{background:var(--surface)!important;background-image:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  .bnav,.bar,.seg,.filterbar,.toast,.fact,dialog:not(.drawer) .dh,dialog:not(.drawer) .dact,.drawer .dw-top .x{background-color:var(--surface)!important;background-image:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  .bar{background-color:var(--bg)!important}.filterbar{background-color:var(--wine-soft)!important}.toast{background-color:var(--ink)!important;color:var(--bg)!important}
 }
 
