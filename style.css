@@ -491,7 +491,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261116a";
+:root{--ver:"20261118a";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
@@ -952,3 +952,35 @@ i[data-icon],.bnav button i,.tnav button i{font-style:normal;display:inline-flex
 .export-acts{display:flex;gap:10px}
 .export-acts button{white-space:nowrap}
 @media (max-width:760px){.export-acts button{flex:1 1 0;padding-left:8px;padding-right:8px}}
+
+/* ---------- 液態玻璃（A）：手機與 iPad 的底部列變成懸浮的玻璃膠囊 ----------
+   網頁做得到的是毛玻璃：後面的內容模糊透出、顏色更飽和，加上邊緣高光與柔和陰影 */
+:root{--lg-bg:rgba(255,255,255,.52);--lg-rim:rgba(255,255,255,.78);--lg-edge:rgba(0,0,0,.08);--lg-shine:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.08) 55%,rgba(255,255,255,.18));--lg-shadow:0 10px 30px rgba(0,0,0,.14),0 2px 6px rgba(0,0,0,.08);--lg-pick:rgba(255,255,255,.6);--lg-pick-rim:rgba(255,255,255,.9);--lg-on:var(--wine)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--lg-bg:rgba(28,34,31,.5);--lg-rim:rgba(255,255,255,.2);--lg-edge:rgba(0,0,0,.45);--lg-shine:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.02) 55%,rgba(255,255,255,.05));--lg-shadow:0 10px 30px rgba(0,0,0,.5);--lg-pick:rgba(255,255,255,.14);--lg-pick-rim:rgba(255,255,255,.22);--lg-on:var(--frame-red)}}
+:root[data-theme="dark"]{--lg-bg:rgba(28,34,31,.5);--lg-rim:rgba(255,255,255,.2);--lg-edge:rgba(0,0,0,.45);--lg-shine:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.02) 55%,rgba(255,255,255,.05));--lg-shadow:0 10px 30px rgba(0,0,0,.5);--lg-pick:rgba(255,255,255,.14);--lg-pick-rim:rgba(255,255,255,.22);--lg-on:var(--frame-red)}
+@media (max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px), (min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse){
+  .bnav{background:var(--lg-bg);background-image:var(--lg-shine);-webkit-backdrop-filter:blur(22px) saturate(185%);backdrop-filter:blur(22px) saturate(185%);border:1px solid var(--lg-edge);box-shadow:inset 0 1px 0 var(--lg-rim),inset 0 0 0 1px rgba(255,255,255,.12),var(--lg-shadow)}
+  .bnav button.on{color:var(--lg-on)}
+  .bnav button.on:not(.add)::before{content:"";position:absolute;inset:0 4px;border-radius:22px;background:var(--lg-pick);box-shadow:inset 0 1px 0 var(--lg-pick-rim),0 2px 8px rgba(0,0,0,.08);z-index:-1}
+}
+/* 手機直放：膠囊離開螢幕邊緣，「＋新增」是有光澤的酒紅圓鈕 */
+@media (max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px){
+  .bnav{left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));border-radius:30px;padding:6px}
+  .bnav .add i{background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.55),transparent 42%),linear-gradient(160deg,#a8334d,#5e1022);border:1px solid rgba(255,255,255,.35);box-shadow:inset 0 1px 1px rgba(255,255,255,.6),inset 0 -2px 4px rgba(0,0,0,.25),0 8px 18px rgba(94,16,34,.35)}
+  body{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+  .toast{bottom:calc(104px + env(safe-area-inset-bottom,0px))}
+}
+/* iPad：膠囊左右留邊，選中的那一格是浮起的玻璃 */
+@media (min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse){
+  .bnav{left:16px;right:16px;bottom:calc(12px + env(safe-area-inset-bottom,0px));border-radius:28px;padding:7px 10px}
+  .bnav button.on:not(.add){background:transparent}
+  .bnav button.on:not(.add)::before{inset:0;border-radius:18px}
+  .bnav .add{background:radial-gradient(ellipse at 50% 0,rgba(255,255,255,.35),transparent 60%),linear-gradient(160deg,#a8334d,#5e1022);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 6px 16px rgba(94,16,34,.3)}
+  body{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+  .toast{bottom:calc(112px + env(safe-area-inset-bottom,0px))}
+}
+/* 系統設定「降低透明度」：回到不透明 */
+@media (prefers-reduced-transparency:reduce){
+  .bnav{background:var(--surface)!important;background-image:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+}
+
