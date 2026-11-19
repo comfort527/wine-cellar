@@ -491,7 +491,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261119b";
+:root{--ver:"20261119c";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
@@ -1007,7 +1007,15 @@ dialog.has-nav .dact{display:none}
   #journalView .db,#pendModal .db,#adminModal .db{padding-bottom:22px}
 }
 @media (min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse){
-  #journalView,#pendModal,#adminModal{inset:20px 0 calc(96px + env(safe-area-inset-bottom,0px)) 0;max-height:calc(100dvh - 136px - env(safe-area-inset-bottom,0px))}
+  #journalView,#pendModal,#adminModal{inset:20px 0 calc(88px + env(safe-area-inset-bottom,0px)) 0;margin:auto auto 0;max-height:calc(100dvh - 128px - env(safe-area-inset-bottom,0px))}
+}
+/* 底部列放在視窗正下方：視窗本身不捲動、只捲內容區，底部列用 absolute 掛在視窗外面下方。
+   不用 position:fixed，因為 iPhone 的 Safari 會把放在視窗裡的 fixed 元素裁掉、看不到 */
+@media (max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px), (min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse){
+  #journalView[open],#pendModal[open],#adminModal[open]{display:flex;flex-direction:column;overflow:visible}
+  #journalView[open]>.db,#pendModal[open]>.db,#adminModal[open]>.db{flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain;border-bottom-left-radius:inherit;border-bottom-right-radius:inherit}
+  #journalView[open]>.dh,#pendModal[open]>.dh,#adminModal[open]>.dh{flex:none}
+  dialog.has-nav>#bnav{position:absolute;left:0;right:0;top:calc(100% + 10px);bottom:auto;margin:0}
 }
 /* 系統設定「降低透明度」：回到不透明 */
 @media (prefers-reduced-transparency:reduce){
