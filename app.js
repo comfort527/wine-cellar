@@ -37,12 +37,14 @@ function showDialog(id) { document.querySelectorAll('.ferr').forEach(e => e.hidd
 const dlgClose = HTMLDialogElement.prototype.close, dlgShow = HTMLDialogElement.prototype.showModal;
 const isClosing = d => d.classList.contains('closing'), dlgStack = [];   // dlgStack：視窗打開的先後順序
 HTMLDialogElement.prototype.showModal = function () {
-  if (this.open && isClosing(this)) { this.classList.remove('closing'); return; }
+  if (this.open && isClosing(this)) { this.classList.remove('closing'); navLater(this); return; }
   dlgShow.call(this);
   const i = dlgStack.indexOf(this); if (i >= 0) dlgStack.splice(i, 1); dlgStack.push(this);
+  navLater(this);
 };
 HTMLDialogElement.prototype.close = function (v) {
   if (!this.open || isClosing(this)) return;
+  if (this.classList.contains('has-nav')) navOut();
   const before = getComputedStyle(this).animationName;
   if (this.id === 'drawer') heroClose();
   this.classList.add('closing');
@@ -54,6 +56,33 @@ HTMLDialogElement.prototype.close = function (v) {
   const timer = setTimeout(done, 450);
   this.finishClose = done;
 };
+/* 底部列跟著「日誌、待入櫃、管理」：這三個是底部列的目的地，視窗開著時把底部列搬進視窗裡
+   （showModal 開的視窗外面都按不到），關掉時搬回原位。視窗升起的動畫跑完才搬進去，免得底部列跟著視窗移動 */
+const NAV_DLG = {journalView: 'journal', pendModal: 'pend', adminModal: 'admin'};
+let navSlot = null;   // 底部列原本的位置
+const navWanted = () => matchMedia(PHONE_MQ + ', ' + TABLET_MQ).matches;
+function navMark(key) { document.querySelectorAll('#bnav [data-nav]').forEach(b => b.classList.toggle('on', b.dataset.nav === (key || 'home'))); }
+function navInto(d) {
+  const n = $('bnav'); if (!n || !d.open || isClosing(d) || !navWanted()) return;
+  if (!navSlot) { navSlot = document.createComment('底部列原位'); n.before(navSlot); }
+  if (n.parentElement !== d) d.append(n);
+  d.classList.add('has-nav'); navMark(NAV_DLG[d.id]);
+}
+function navOut() {
+  const n = $('bnav'); if (!n || !navSlot) return;
+  const d = n.closest('dialog'); if (d) d.classList.remove('has-nav');
+  n.style.transform = ''; n.style.transition = '';
+  if (n.previousSibling !== navSlot) navSlot.after(n);
+  navMark(null);
+}
+function navLater(d) {
+  if (!NAV_DLG[d.id] || !navWanted()) return;
+  const go = () => navInto(d), an = getComputedStyle(d).animationName;
+  if (!an || an === 'none') return go();
+  const h = e => { if (e.target === d) { d.removeEventListener('animationend', h); go(); } };
+  d.addEventListener('animationend', h); setTimeout(go, 400);
+}
+document.addEventListener('close', e => { if (e.target instanceof HTMLDialogElement && e.target.classList.contains('has-nav')) navOut(); }, true);
 // Esc／返回鍵：也走收回動畫；上一個視窗還在收回時又按一次，就直接收完並關下一個
 document.addEventListener('cancel', e => {
   const d = e.target; if (!(d instanceof HTMLDialogElement)) return;
@@ -82,7 +111,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261118b';
+const APP_VER = '20261119a';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -760,7 +789,7 @@ function wireMotion() {
   document.addEventListener('touchstart', e => {
     g = null; if (e.touches.length !== 1) return;
     const t = e.target, p = e.touches[0], dlg = t.closest?.('dialog[open]');
-    if (!t.closest || t.closest('input,textarea,select,#pgrid,[data-nodrag]')) return;
+    if (!t.closest || t.closest('input,textarea,select,#pgrid,#bnav,[data-nodrag]')) return;
     if (dlg) {
       // 視窗往下滑關閉：手機直放的底部視窗、iPad 與電腦（觸控螢幕）的中間視窗；從頂端橫槓／標題列拖，或內容已在最上面時往下拖。
       // iPad 與電腦的詳細資料在右側，改成往右滑關閉（照片輪播上不算，那是在換照片）
@@ -787,7 +816,7 @@ function wireMotion() {
     }
     if (e.cancelable) e.preventDefault();
     g.dy = Math.max(0, main);   // 沿著關閉方向拖了多遠
-    if (g.kind === 'sheet') { g.el.style.transition = 'none'; g.el.style.transform = `translate${horiz ? 'X' : 'Y'}(${g.dy}px)`; }
+    if (g.kind === 'sheet') { g.el.style.transition = 'none'; g.el.style.transform = `translate${horiz ? 'X' : 'Y'}(${g.dy}px)`; if (g.el.classList.contains('has-nav')) { const nv = $('bnav'); nv.style.transition = 'none'; nv.style.transform = `translate${horiz ? 'X' : 'Y'}(${-g.dy}px)`; } }
     else { const y = Math.min(96, g.dy * .5); ptr.style.transform = `translate(-50%,${y}px)`; ptr.firstChild.style.transform = `rotate(${y * 3.6}deg)`; ptr.classList.toggle('ready', y >= 64); }
   }, {passive: false});
   const end = e => {
@@ -801,8 +830,10 @@ function wireMotion() {
       return;
     }
     const el = cur.el, v = cur.dy / Math.max(1, e.timeStamp - cur.t), close = e.type === 'touchend' && (cur.dy > 110 || (cur.dy > 36 && v > .6));
-    const reset = () => { el.style.transition = ''; el.style.transform = ''; };
-    if (!close) { el.style.transition = 'transform .2s ease-out'; el.style.transform = ''; setTimeout(reset, 220); return; }
+    const nv = el.classList.contains('has-nav') ? $('bnav') : null;
+    const reset = () => { el.style.transition = ''; el.style.transform = ''; if (nv) { nv.style.transition = ''; nv.style.transform = ''; } };
+    if (!close) { el.style.transition = 'transform .2s ease-out'; el.style.transform = ''; if (nv) { nv.style.transition = 'transform .2s ease-out'; nv.style.transform = ''; } setTimeout(reset, 220); return; }
+    if (nv) navOut();
     const ax = cur.axis === 'x' ? 'X' : 'Y', far = ax === 'X' ? '110%' : `${innerHeight}px`;
     const a = el.animate([{transform: `translate${ax}(${cur.dy}px)`}, {transform: `translate${ax}(${far})`}], {duration: 170, easing: 'ease-in', fill: 'forwards'});
     const done = () => { if (el.open) dlgClose.call(el); el.classList.remove('hero'); a.cancel(); reset(); };
@@ -877,6 +908,12 @@ function wire() {
   const onNav = e => {
     const b = e.target.closest('[data-nav]'); if (!b) return;
     const n = b.dataset.nav;
+    // 底部列在「日誌、待入櫃、管理」視窗裡時：按同一個不動作；按「酒窖」關掉所有視窗；按別的就先關掉目前這個再切換
+    const cur = b.closest('dialog.has-nav');
+    if (cur) {
+      if (NAV_DLG[cur.id] === n) return;
+      if (n === 'home') document.querySelectorAll('dialog[open]').forEach(d => d.close()); else cur.close();
+    }
     if (n === 'home') { S.filter = null; S.cabOpen = null; S.search = ''; if ($('search')) $('search').value = ''; render(); window.scrollTo({top: 0, behavior: 'smooth'}); }
     else if (n === 'journal') { if (S.session) $('factJournal').click(); }
     else if (n === 'add') { if (canEdit()) openWineForm(null); }
@@ -885,6 +922,7 @@ function wire() {
     else if (n === 'login') $('loginBtn').click();
   };
   matchMedia(DESK_MQ).addEventListener('change', () => render());
+  matchMedia(PHONE_MQ + ', ' + TABLET_MQ).addEventListener('change', () => { if (!navWanted()) navOut(); });
   $('bnav').addEventListener('click', onNav); $('tnav').addEventListener('click', onNav);
   $('admBack').addEventListener('click', adminMenu);
   matchMedia('(min-width: 761px), ' + PHL_MQ).addEventListener('change', () => { if (!$('adminModal').open) return; const cur = ADMIN_TABS.find(t => !$('tab-' + t).hidden); if (admWide()) switchTab(cur || 'lib'); else if (cur) switchTab(cur); });
