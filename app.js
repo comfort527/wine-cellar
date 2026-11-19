@@ -38,10 +38,15 @@ const dlgClose = HTMLDialogElement.prototype.close, dlgShow = HTMLDialogElement.
 const isClosing = d => d.classList.contains('closing'), dlgStack = [];   // dlgStack：視窗打開的先後順序
 HTMLDialogElement.prototype.showModal = function () {
   if (this.open && isClosing(this)) { this.classList.remove('closing'); navLater(this); return; }
-  if (S.navSwap) { this.classList.add('swap'); setTimeout(() => this.classList.remove('swap'), 400); }
+  // 從底部列切換：同一瞬間換成新視窗（外框直接出現、底部列直接搬過來、舊視窗同時收掉），只讓裡面的內容淡入，
+  // 不會有新舊兩個視窗疊在一起、也不會露出後面的首頁
+  const from = S.swapFrom; S.swapFrom = null;
+  if (from) this.classList.add('swap');
   dlgShow.call(this);
   const i = dlgStack.indexOf(this); if (i >= 0) dlgStack.splice(i, 1); dlgStack.push(this);
-  navLater(this);
+  if (!from) return navLater(this);
+  if (NAV_DLG[this.id]) navInto(this);
+  from.classList.remove('closing', 'hero', 'has-nav', 'swap'); if (from.open) dlgClose.call(from);   // swap 留到關閉時才拿掉：中途拿掉會讓升起動畫重播
 };
 HTMLDialogElement.prototype.close = function (v) {
   if (!this.open || isClosing(this)) return;
@@ -66,6 +71,7 @@ function navMark(key) { document.querySelectorAll('#bnav [data-nav]').forEach(b 
 function navInto(d) {
   const n = $('bnav'); if (!n || !d.open || isClosing(d) || !navWanted()) return;
   if (!navSlot) { navSlot = document.createComment('底部列原位'); n.before(navSlot); }
+  const prev = n.closest('dialog'); if (prev && prev !== d) prev.classList.remove('has-nav');
   if (n.parentElement !== d) d.append(n);
   d.classList.add('has-nav'); navMark(NAV_DLG[d.id]);
 }
@@ -83,7 +89,7 @@ function navLater(d) {
   const h = e => { if (e.target === d) { d.removeEventListener('animationend', h); go(); } };
   d.addEventListener('animationend', h); setTimeout(go, 400);
 }
-document.addEventListener('close', e => { if (e.target instanceof HTMLDialogElement && e.target.classList.contains('has-nav')) navOut(); }, true);
+document.addEventListener('close', e => { if (!(e.target instanceof HTMLDialogElement)) return; e.target.classList.remove('swap'); if (e.target.classList.contains('has-nav')) navOut(); }, true);
 // Esc／返回鍵：也走收回動畫；上一個視窗還在收回時又按一次，就直接收完並關下一個
 document.addEventListener('cancel', e => {
   const d = e.target; if (!(d instanceof HTMLDialogElement)) return;
@@ -112,7 +118,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261119d';
+const APP_VER = '20261119f';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -915,7 +921,7 @@ function wire() {
       if (NAV_DLG[cur.id] === n) return;
       // 切換時舊視窗直接消失（不播往下收的動畫），新視窗淡入，像換分頁
       if (n === 'home') document.querySelectorAll('dialog[open]').forEach(d => d.close());
-      else { navOut(); cur.classList.remove('closing', 'hero'); dlgClose.call(cur); S.navSwap = true; setTimeout(() => { S.navSwap = false; }, 300); }
+      else { if (!Object.values(NAV_DLG).includes(n)) navOut(); S.swapFrom = cur; }
     }
     if (n === 'home') { S.filter = null; S.cabOpen = null; S.search = ''; if ($('search')) $('search').value = ''; render(); window.scrollTo({top: 0, behavior: 'smooth'}); }
     else if (n === 'journal') { if (S.session) $('factJournal').click(); }
@@ -923,6 +929,7 @@ function wire() {
     else if (n === 'pend') $('factPend').click();
     else if (n === 'admin') openAdmin();
     else if (n === 'login') $('loginBtn').click();
+    S.swapFrom = null;
   };
   matchMedia(DESK_MQ).addEventListener('change', () => render());
   matchMedia(PHONE_MQ + ', ' + TABLET_MQ).addEventListener('change', () => { if (!navWanted()) navOut(); });

@@ -491,7 +491,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261119d";
+:root{--ver:"20261119f";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
@@ -1023,4 +1023,5 @@ dialog.has-nav .dact{display:none}
   .bar{background-color:var(--bg)!important}.filterbar{background-color:var(--wine-soft)!important}.toast{background-color:var(--ink)!important;color:var(--bg)!important}
 }
 /* 從底部列切換頁面時：新視窗淡入，不再從底部升起 */
-dialog.swap[open]{animation:fadeIn .14s ease-out!important}
+dialog.swap[open]:not(.closing){animation:none!important}
+@media (prefers-reduced-motion:no-preference){dialog.swap[open]>.dh,dialog.swap[open]>.db{animation:fadeIn .18s ease-out}}
