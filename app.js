@@ -38,6 +38,7 @@ const dlgClose = HTMLDialogElement.prototype.close, dlgShow = HTMLDialogElement.
 const isClosing = d => d.classList.contains('closing'), dlgStack = [];   // dlgStack：視窗打開的先後順序
 HTMLDialogElement.prototype.showModal = function () {
   if (this.open && isClosing(this)) { this.classList.remove('closing'); navLater(this); return; }
+  if (S.navSwap) { this.classList.add('swap'); setTimeout(() => this.classList.remove('swap'), 400); }
   dlgShow.call(this);
   const i = dlgStack.indexOf(this); if (i >= 0) dlgStack.splice(i, 1); dlgStack.push(this);
   navLater(this);
@@ -111,7 +112,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261119c';
+const APP_VER = '20261119d';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -912,7 +913,9 @@ function wire() {
     const cur = b.closest('dialog.has-nav');
     if (cur) {
       if (NAV_DLG[cur.id] === n) return;
-      if (n === 'home') document.querySelectorAll('dialog[open]').forEach(d => d.close()); else cur.close();
+      // 切換時舊視窗直接消失（不播往下收的動畫），新視窗淡入，像換分頁
+      if (n === 'home') document.querySelectorAll('dialog[open]').forEach(d => d.close());
+      else { navOut(); cur.classList.remove('closing', 'hero'); dlgClose.call(cur); S.navSwap = true; setTimeout(() => { S.navSwap = false; }, 300); }
     }
     if (n === 'home') { S.filter = null; S.cabOpen = null; S.search = ''; if ($('search')) $('search').value = ''; render(); window.scrollTo({top: 0, behavior: 'smooth'}); }
     else if (n === 'journal') { if (S.session) $('factJournal').click(); }
