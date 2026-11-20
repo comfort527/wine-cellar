@@ -117,6 +117,7 @@ function sbPlace() {
 }
 window.visualViewport?.addEventListener('resize', sbPlace);
 window.visualViewport?.addEventListener('scroll', sbPlace);
+function qaClose() { $('qa').classList.remove('open'); $('qaBtn').setAttribute('aria-expanded', 'false'); }
 function navLater(d) {
   if (!isNavDlg(d) || !navWanted()) return;
   const go = () => navInto(d), an = getComputedStyle(d).animationName;
@@ -153,7 +154,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261120e';
+const APP_VER = '20261120f';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -519,6 +520,10 @@ function render() {
   $('factJournal').hidden = !S.session;
   $('bnLoginT').textContent = setup ? '設定' : '登入';
   $('bnPendN').hidden = !pn; $('bnPendN').textContent = pn;
+  // 右下角的圓形快速按鈕（新增、待入櫃）：有登入才出現；使用者只有待入櫃
+  $('qa').hidden = !canUse(); $('qaAdd').hidden = !canEdit(); $('bnav').classList.toggle('has-qa', canUse());
+  $('qaN').hidden = !pn; $('qaN').textContent = pn;
+  if ($('qa').hidden) qaClose();
   $('tnAdd').hidden = !canEdit(); $('tnPend').hidden = !canUse(); $('tnAdmin').hidden = !S.session;
   $('tnPendN').hidden = !pn; $('tnPendN').textContent = pn;
   $('bnav').dataset.n = document.querySelectorAll('#bnav button:not([hidden])').length;
@@ -978,6 +983,12 @@ function wire() {
   matchMedia(DESK_MQ).addEventListener('change', () => render());
   matchMedia(PHONE_MQ + ', ' + TABLET_MQ).addEventListener('change', () => { if (!navWanted()) navOut(); });
   $('bnav').addEventListener('click', onNav); $('tnav').addEventListener('click', onNav);
+  // 右下角快速按鈕：點了往上展開「新增酒款」「待入櫃」；選一個就照底部列原本的動作做
+  $('qaBtn').addEventListener('click', e => { e.stopPropagation(); const o = !$('qa').classList.contains('open'); $('qa').classList.toggle('open', o); $('qaBtn').setAttribute('aria-expanded', o); });
+  $('qa').addEventListener('click', e => { const b = e.target.closest('[data-qa]'); if (!b) return; qaClose(); $(b.dataset.qa === 'add' ? 'bnAdd' : 'bnPend').click(); });
+  // 選單開著時點其他地方：只收起選單，不觸發底下的東西（例如不會誤開酒款）
+  document.addEventListener('click', e => { if ($('qa').classList.contains('open') && !e.target.closest('#qa')) { e.preventDefault(); e.stopPropagation(); qaClose(); } }, true);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('qa').classList.contains('open')) qaClose(); });
   $('admBack').addEventListener('click', adminMenu);
   matchMedia('(min-width: 761px), ' + PHL_MQ).addEventListener('change', () => { if (!$('adminModal').open) return; const cur = ADMIN_TABS.find(t => !$('tab-' + t).hidden); if (admWide()) switchTab(cur || 'lib'); else if (cur) switchTab(cur); });
   $('factPend').addEventListener('click', () => { showDialog('pendModal'); showErr('pendErr', ''); renderPendStrip(); renderPending(); });

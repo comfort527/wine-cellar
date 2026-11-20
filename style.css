@@ -491,7 +491,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261120e";
+:root{--ver:"20261120f";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
@@ -636,7 +636,7 @@ fieldset.colorpick{display:flex;flex-direction:row;flex-wrap:wrap;align-items:ce
 
 /* 手機底部導覽列 */
 .bnav{display:none}
-.bnav .sch,#sbar{display:none}
+.bnav .sch,#sbar,.qa{display:none}
 /* 手機與 iPad 共用：底部導覽列的外框，以及改由導覽列取代的上方按鈕 */
 @media (max-width:760px), (min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse), (orientation:landscape) and (max-height:500px) and (max-width:1000px){
   .bnav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--surface) 94%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-top:1px solid var(--line)}
@@ -970,7 +970,6 @@ i[data-icon],.bnav button i,.tnav button i{font-style:normal;display:inline-flex
   .bnav{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
   .bnav .add i .ico{width:26px;height:26px;stroke-width:1.7}
   .bnav .sch{display:flex}
-  .bnav [data-nav=home]{display:none}   /* 頁面本來就是酒窖，手機直放不需要「酒窖」鍵 */
   .bnav .sch i{display:grid;place-items:center;width:34px;height:34px;margin-top:-2px;border-radius:50%;color:#fff;background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.5),transparent 45%),linear-gradient(160deg,#4f9a6a,#1f5a37);border:1px solid rgba(255,255,255,.35);box-shadow:inset 0 1px 1px rgba(255,255,255,.55),inset 0 -2px 4px rgba(0,0,0,.2),0 5px 12px rgba(31,90,55,.3)}
   .bnav .sch i .ico{width:20px;height:20px;stroke-width:2.3}
   .tools .search{display:none}
@@ -1040,8 +1039,6 @@ dialog.has-nav:not(#wineModal) .dact{display:none}
   #wineModal[data-mode=new] .dact button{flex:1 1 0}
   #wineModal[data-mode=new] .dact .primary{flex:2 1 0}
 }
-/* iPad：頁面本身就是酒窖，底部列不放「酒窖」鍵 */
-@media (min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse){.bnav [data-nav=home]{display:none}}
 /* 系統設定「降低透明度」：回到不透明 */
 @media (prefers-reduced-transparency:reduce){
   .bnav,.bar,.seg,.filterbar,.toast,.fact,dialog:not(.drawer) .dh,dialog:not(.drawer) .dact,.drawer .dw-top .x{background-color:var(--surface)!important;background-image:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
@@ -1050,3 +1047,31 @@ dialog.has-nav:not(#wineModal) .dact{display:none}
 /* 從底部列切換頁面時：新視窗淡入，不再從底部升起 */
 dialog.swap[open]:not(.closing){animation:none!important}
 @media (prefers-reduced-motion:no-preference){dialog.swap[open]>.dh,dialog.swap[open]>.db{animation:fadeIn .18s ease-out}}
+
+/* ---------- 右下角圓形快速按鈕（手機直放與 iPad）：新增酒款、待入櫃 ----------
+   放在底部列裡、貼在膠囊右邊，所以跟著底部列一起進出懸浮視窗 */
+@media (max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px), (min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse){
+  #bnAdd,#bnPend{display:none!important}
+  .qa:not([hidden]){display:block}
+  .qa{position:absolute;top:50%;left:calc(100% + 12px);width:64px;height:64px;transform:translateY(-50%)}
+  .bnav #qaBtn{flex:none;max-width:none;position:relative;display:grid;place-items:center;width:64px;height:64px;min-height:0;padding:0;border-radius:50%;color:#fff;border:1px solid rgba(255,255,255,.35);
+    background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.5),transparent 45%),linear-gradient(160deg,#a8334d,#5e1022);
+    box-shadow:inset 0 1px 1px rgba(255,255,255,.6),inset 0 -2px 4px rgba(0,0,0,.25),0 8px 18px rgba(94,16,34,.35)}
+  .bnav #qaBtn i{display:block;font-size:0;line-height:0}
+  .bnav #qaBtn .ico{width:28px;height:28px;stroke-width:2.2;transition:transform .22s ease}
+  .qa.open #qaBtn .ico{transform:rotate(45deg)}
+  .bnav #qaN{position:absolute;top:-3px;right:-3px;left:auto}
+  .qa-items{position:absolute;right:6px;bottom:calc(100% + 14px);display:flex;flex-direction:column;align-items:flex-end;gap:12px;pointer-events:none}
+  .qa.open .qa-items{pointer-events:auto}
+  .bnav .qa-items button{flex:none;max-width:none;border-radius:0;display:flex;flex-direction:row;align-items:center;gap:10px;min-height:0;padding:0;border:0;background:none;color:var(--ink);font:600 17px var(--body);white-space:nowrap;opacity:0;transform:translateY(16px) scale(.92);transition:opacity .16s ease,transform .24s cubic-bezier(.2,.8,.3,1.15)}
+  .bnav .qa-items button[hidden]{display:none}
+  .qa.open .qa-items button{opacity:1;transform:none}
+  .qa.open .qa-items button:nth-last-child(2){transition-delay:.06s}
+  .qa-items span{padding:8px 14px;border-radius:999px;background:var(--lg-strong);border:1px solid var(--lg-edge);box-shadow:inset 0 1px 0 var(--lg-rim),var(--lg-shadow)}
+  .bnav .qa-items i{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:var(--surface);color:var(--wine);border:1px solid var(--lg-edge);box-shadow:var(--lg-shadow)}
+  .bnav .qa-items i .ico{width:24px;height:24px;stroke-width:2}
+  dialog.has-nav>#bnav.has-qa{right:76px}
+}
+@media (max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px){ .bnav.has-qa{right:88px} }
+@media (min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse){ .bnav.has-qa{right:96px} }
+@media (prefers-reduced-motion:reduce){ .bnav .qa-items button,.bnav #qaBtn .ico{transition:none} }
