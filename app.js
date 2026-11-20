@@ -82,6 +82,39 @@ function navOut() {
   if (n.previousSibling !== navSlot) navSlot.after(n);
   navMark(null);
 }
+/* 手機直放：底部列的「搜尋」。點下去底部列變成搜尋列，把清單上方那個搜尋框（同一個 #search）搬進來、鍵盤跳出 */
+let sbSlot = null;
+const searching = () => document.body.classList.contains('searching');
+function enterSearch() {
+  if (!matchMedia(PHONE_MQ).matches) return;
+  // 視窗開著時輸入框拿不到焦點：先立刻關掉所有視窗（不播動畫），再在同一個點擊裡 focus，iPhone 才會跳出鍵盤
+  navOut();
+  document.querySelectorAll('dialog[open]').forEach(d => { d.classList.remove('closing', 'hero', 'swap', 'has-nav'); dlgClose.call(d); });
+  const lab = $('search').closest('label');
+  if (!sbSlot) { sbSlot = document.createComment('搜尋框原位'); lab.before(sbSlot); }
+  $('sbField').prepend(lab);
+  document.body.classList.add('searching');
+  $('search').focus({preventScroll: true});
+  sbCount(); sbPlace();
+  document.querySelector('.ledger').scrollIntoView({block: 'start'});
+}
+function exitSearch(clear) {
+  if (!searching()) return;
+  document.body.classList.remove('searching');
+  if (sbSlot) sbSlot.after($('search').closest('label'));
+  $('sbar').style.transform = '';
+  $('search').blur();
+  if (clear) { S.search = ''; $('search').value = ''; render(); }
+}
+function sbCount() { if ($('sbCount')) $('sbCount').textContent = searching() && S.search.trim() ? $('countText').textContent : ''; }
+// 鍵盤跳出時，畫面可見的範圍變矮：把搜尋列往上推到鍵盤上方
+function sbPlace() {
+  const vv = window.visualViewport; if (!vv) { $('sbar').style.transform = ''; return; }
+  const off = searching() ? Math.max(0, Math.round(innerHeight - vv.height - vv.offsetTop)) : 0;
+  $('sbar').style.transform = off ? `translateY(${-off}px)` : '';
+}
+window.visualViewport?.addEventListener('resize', sbPlace);
+window.visualViewport?.addEventListener('scroll', sbPlace);
 function navLater(d) {
   if (!NAV_DLG[d.id] || !navWanted()) return;
   const go = () => navInto(d), an = getComputedStyle(d).animationName;
@@ -118,7 +151,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261119f';
+const APP_VER = '20261120a';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -348,6 +381,7 @@ function restoreSession() {
   try { const v = localStorage.getItem('cellarSession') || sessionStorage.getItem('cellarSession'); if (v) S.session = JSON.parse(v); } catch {}
 }
 function logout(silent) {
+  exitSearch(true);
   S.session = null;
   try { localStorage.removeItem('cellarSession'); sessionStorage.removeItem('cellarSession'); } catch {}
   document.querySelectorAll('dialog[open]').forEach(d => d.close());
@@ -486,6 +520,7 @@ function render() {
   $('tnAdd').hidden = !canEdit(); $('tnPend').hidden = !canUse(); $('tnAdmin').hidden = !S.session;
   $('tnPendN').hidden = !pn; $('tnPendN').textContent = pn;
   $('bnav').dataset.n = document.querySelectorAll('#bnav button:not([hidden])').length;
+  sbCount();
   $('admWho').textContent = S.session ? `目前是「${S.session.label}」` : '';
   $('viewList').classList.toggle('on', S.view !== 'grid'); $('viewList').setAttribute('aria-pressed', S.view !== 'grid');
   $('viewGrid').classList.toggle('on', S.view === 'grid'); $('viewGrid').setAttribute('aria-pressed', S.view === 'grid');
@@ -859,6 +894,10 @@ function wireMotion() {
 function wire() {
   document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => b.closest('dialog').close()));
   $('search').addEventListener('input', e => { S.search = e.target.value; render(); });
+  $('search').setAttribute('enterkeyhint', 'search');
+  $('search').addEventListener('keydown', e => { if (e.key === 'Enter' && searching()) { e.preventDefault(); $('search').blur(); } });   // 按「搜尋」收起鍵盤看結果
+  $('sbExit').addEventListener('click', () => exitSearch(true));
+  matchMedia(PHONE_MQ).addEventListener('change', e => { if (!e.matches) exitSearch(false); });
   $('clearSearch').addEventListener('click', () => { S.search = ''; $('search').value = ''; render(); });
   $('clearFilter').addEventListener('click', () => { S.filter = null; render(); });
   $('factWines').addEventListener('click', openKinds);
@@ -886,11 +925,13 @@ function wire() {
   for (const id of ['f_vintage', 'f_wineName', 'f_wineryRegion']) $(id).addEventListener('input', renderRebuyNote);
   $('kindList').addEventListener('click', e => {
     const b = e.target.closest('[data-kind]'); if (!b) return;
+    exitSearch(false);
     S.filter = b.dataset.kind ? {kind: b.dataset.kind} : null; S.search = ''; $('search').value = '';
     $('kindModal').close(); closeDrawer(); render(); toLedger();
   });
   $('originList').addEventListener('click', e => {
     const b = e.target.closest('[data-origin]'); if (!b) return;
+    exitSearch(false);
     S.filter = b.dataset.origin ? {origin: b.dataset.origin} : null; S.search = ''; $('search').value = '';
     $('originModal').close(); render(); toLedger();
   });
@@ -899,7 +940,7 @@ function wire() {
   wireMotion();
   $('viewList').addEventListener('click', () => setView('list'));
   $('viewGrid').addEventListener('click', () => setView('grid'));
-  $('homeLink').addEventListener('click', e => { e.preventDefault(); S.filter = null; S.search = ''; $('search').value = ''; closeDrawer(); scrollTo({top: 0, behavior: 'smooth'}); render(); });
+  $('homeLink').addEventListener('click', e => { e.preventDefault(); exitSearch(false); S.filter = null; S.search = ''; $('search').value = ''; closeDrawer(); scrollTo({top: 0, behavior: 'smooth'}); render(); });
   $('loginBtn').addEventListener('click', async () => {
     try { await loadKeys(); } catch (e) { return toast(msgOf(e)); }
     render();
@@ -915,6 +956,7 @@ function wire() {
   const onNav = e => {
     const b = e.target.closest('[data-nav]'); if (!b) return;
     const n = b.dataset.nav;
+    if (n === 'search') return enterSearch();
     // 底部列在「日誌、待入櫃、管理」視窗裡時：按同一個不動作；按「酒窖」關掉所有視窗；按別的就先關掉目前這個再切換
     const cur = b.closest('dialog.has-nav');
     if (cur) {
