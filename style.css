@@ -491,7 +491,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261120a";
+:root{--ver:"20261120b";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
@@ -970,6 +970,7 @@ i[data-icon],.bnav button i,.tnav button i{font-style:normal;display:inline-flex
   .bnav{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
   .bnav .add i .ico{width:26px;height:26px;stroke-width:1.7}
   .bnav .sch{display:flex}
+  .bnav [data-nav=home]{display:none}   /* 頁面本來就是酒窖，手機直放不需要「酒窖」鍵 */
   .bnav .sch i{display:grid;place-items:center;width:34px;height:34px;margin-top:-2px;border-radius:50%;color:#fff;background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.5),transparent 45%),linear-gradient(160deg,#4f9a6a,#1f5a37);border:1px solid rgba(255,255,255,.35);box-shadow:inset 0 1px 1px rgba(255,255,255,.55),inset 0 -2px 4px rgba(0,0,0,.2),0 5px 12px rgba(31,90,55,.3)}
   .bnav .sch i .ico{width:20px;height:20px;stroke-width:2.3}
   .tools .search{display:none}
