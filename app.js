@@ -45,7 +45,7 @@ HTMLDialogElement.prototype.showModal = function () {
   dlgShow.call(this);
   const i = dlgStack.indexOf(this); if (i >= 0) dlgStack.splice(i, 1); dlgStack.push(this);
   if (!from) return navLater(this);
-  if (NAV_DLG[this.id]) navInto(this);
+  if (isNavDlg(this)) navInto(this);
   from.classList.remove('closing', 'hero', 'has-nav', 'swap'); if (from.open) dlgClose.call(from);   // swap 留到關閉時才拿掉：中途拿掉會讓升起動畫重播
 };
 HTMLDialogElement.prototype.close = function (v) {
@@ -64,7 +64,9 @@ HTMLDialogElement.prototype.close = function (v) {
 };
 /* 底部列跟著「日誌、待入櫃、管理」：這三個是底部列的目的地，視窗開著時把底部列搬進視窗裡
    （showModal 開的視窗外面都按不到），關掉時搬回原位。視窗升起的動畫跑完才搬進去，免得底部列跟著視窗移動 */
-const NAV_DLG = {journalView: 'journal', pendModal: 'pend', adminModal: 'admin'};
+const NAV_DLG = {journalView: 'journal', pendModal: 'pend', adminModal: 'admin', wineModal: 'add'};
+// 新增酒款的視窗也是底部列的目的地；但從詳細資料按「編輯」打開時不算（那時沿用一般視窗）
+const isNavDlg = d => !!NAV_DLG[d.id] && (d.id !== 'wineModal' || d.dataset.mode === 'new');
 let navSlot = null;   // 底部列原本的位置
 const navWanted = () => matchMedia(PHONE_MQ + ', ' + TABLET_MQ).matches;
 function navMark(key) { document.querySelectorAll('#bnav [data-nav]').forEach(b => b.classList.toggle('on', b.dataset.nav === (key || 'home'))); }
@@ -116,7 +118,7 @@ function sbPlace() {
 window.visualViewport?.addEventListener('resize', sbPlace);
 window.visualViewport?.addEventListener('scroll', sbPlace);
 function navLater(d) {
-  if (!NAV_DLG[d.id] || !navWanted()) return;
+  if (!isNavDlg(d) || !navWanted()) return;
   const go = () => navInto(d), an = getComputedStyle(d).animationName;
   if (!an || an === 'none') return go();
   const h = e => { if (e.target === d) { d.removeEventListener('animationend', h); go(); } };
@@ -151,7 +153,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261120d';
+const APP_VER = '20261120e';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -1385,6 +1387,7 @@ function openWineForm(w, pend, rb) {
     renderNewStrip();
   }
   renderRebuyNote();
+  $('wineModal').dataset.mode = w ? 'edit' : 'new';
   showDialog('wineModal');
 }
 function readWineForm() {
