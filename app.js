@@ -154,7 +154,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261120f';
+const APP_VER = '20261120g';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -1112,7 +1112,21 @@ function wire() {
   $('viewerBody').addEventListener('click', galleryNav); $('j_path').addEventListener('click', journalPick);
   $('j_missBtn').addEventListener('click', startMissing);
   $('j_left').addEventListener('input', syncJournalForm);
-  $('j_stars').addEventListener('click', e => { const b = e.target.closest('[data-jstar]'); if (b) { const n = Number(b.dataset.jstar); S.jRating = S.jRating === n ? 0 : n; syncJournalForm(); } });
+  $('j_stars').querySelectorAll('button').forEach((b, i) => b.style.setProperty('--i', i));
+  $('j_stars').addEventListener('click', e => { const b = e.target.closest('[data-jstar]'); if (b) { const n = Number(b.dataset.jstar); S.jRating = S.jRating === n ? 0 : n; syncJournalForm(); starPop($('j_stars')); } });
+  // 星星評分：滑鼠滑過時從左到右一顆一顆亮起、微微放大；移開恢復（手指點選時改用 starPop 依序跳一下）
+  document.addEventListener('pointerover', e => {
+    if (e.pointerType === 'touch') return;
+    const b = e.target.closest?.('.stars button'); if (!b) return;
+    const g = b.parentElement, btns = [...g.querySelectorAll('button')], n = btns.indexOf(b), prev = Number(g.dataset.hot ?? -1);
+    btns.forEach((x, i) => { const on = i <= n; x.style.transitionDelay = on && i > prev ? `${(i - Math.max(prev, -1) - 1) * 45}ms` : '0ms'; x.classList.toggle('hot', on); });
+    g.dataset.hot = n;
+  });
+  document.addEventListener('pointerout', e => {
+    const g = e.target.closest?.('.stars'); if (!g || g.contains(e.relatedTarget)) return;
+    g.querySelectorAll('button').forEach(x => { x.style.transitionDelay = '0ms'; x.classList.remove('hot'); });
+    delete g.dataset.hot;
+  });
   for (const id of ['j_camera', 'j_gallery']) $(id).addEventListener('change', e => pickPhoto(e.target.files[0], 'j_preview', b => S.jPhoto = b, 'journalErr'));
   $('h_year').addEventListener('change', e => { S.histYear = e.target.value; renderHistory(); });
   $('h_types').addEventListener('click', e => { const b = e.target.closest('[data-htype]'); if (b) { S.histType = b.dataset.htype; renderHistory(); } });
@@ -2357,10 +2371,12 @@ function drinkRecords() {
     note: j.note || '', who: j.who || '', where: '', rating: Number(j.rating) || 0, photo: j.thumb ? fileUrl(j.thumb) : j.photo ? fileUrl(j.photo) : '', by: j.by, j});
   return out;
 }
+// 評分後：亮著的星星從左到右依序跳一下
+function starPop(g) { if (!g) return; g.classList.remove('pop'); void g.offsetWidth; g.classList.add('pop'); setTimeout(() => g.classList.remove('pop'), 700); }
 function starsHtml(e) {
   const ed = canModEntry(e);
   return `<span class="stars" ${ed ? 'role="group"' : 'role="img"'} aria-label="評分 ${e.rating}／5">${[1, 2, 3, 4, 5].map(i => ed
-    ? `<button type="button" class="${i <= e.rating ? 'on' : ''}" data-rate="${i}" data-key="${esc(e.key)}" aria-label="${i} 顆星">★</button>`
+    ? `<button type="button" class="${i <= e.rating ? 'on' : ''}" style="--i:${i - 1}" data-rate="${i}" data-key="${esc(e.key)}" aria-label="${i} 顆星">★</button>`
     : `<i class="${i <= e.rating ? 'on' : ''}">★</i>`).join('')}</span>`;
 }
 function entryHtml(e) {
@@ -2414,7 +2430,10 @@ async function setRating(key, n) {
       if (next) rec.rating = next; else delete rec.rating;
     }, `評分 ${e.wineId || ''} ${e.name}：${next} 顆星`, {quiet: true});
   } catch (err) { toast(msgOf(err)); }
-  finally { S.rateBusy = false; renderJournal(); }
+  finally {
+    S.rateBusy = false; renderJournal();
+    starPop([...document.querySelectorAll('[data-rate]')].find(b => b.dataset.key === key)?.closest('.stars'));
+  }
 }
 function openJournal(editId) {
   if (!canUse()) return;

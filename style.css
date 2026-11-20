@@ -357,7 +357,11 @@ legend{font-size:20px;color:var(--muted);padding:0 6px}
 .stars{display:inline-flex;gap:0}
 .stars button,.stars i{display:inline-grid;place-items:center;width:34px;height:34px;min-height:0;padding:0;border:0;background:none;font:normal 26px/1 var(--body);color:var(--line)}
 .stars .on{color:var(--star)}
-.stars button:hover{color:var(--star)}
+.stars button{transition:color .14s ease,transform .22s cubic-bezier(.2,.8,.3,1.4)}
+.stars button.hot{color:var(--star);transform:scale(1.2)}
+@keyframes starPop{0%{transform:scale(1)}45%{transform:scale(1.3)}100%{transform:scale(1)}}
+.stars.pop .on{animation:starPop .32s ease-out both;animation-delay:calc(var(--i,0) * 55ms)}
+@media (prefers-reduced-motion:reduce){.stars button{transition:none}.stars button.hot{transform:none}.stars.pop .on{animation:none}}
 .stars.big button{width:46px;height:46px;font-size:34px}
 #journalForm .field{margin-top:10px}
 @media (max-width:900px){.jr{grid-template-columns:1fr}}
@@ -491,7 +495,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261120f";
+:root{--ver:"20261120g";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
