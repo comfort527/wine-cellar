@@ -491,7 +491,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261120b";
+:root{--ver:"20261120d";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
@@ -1035,6 +1035,8 @@ dialog.has-nav .dact{display:none}
   #journalView[open]>.dh,#pendModal[open]>.dh,#adminModal[open]>.dh{flex:none}
   dialog.has-nav>#bnav{position:absolute;left:0;right:0;top:calc(100% + 10px);bottom:auto;margin:0}
 }
+/* iPad：頁面本身就是酒窖，底部列不放「酒窖」鍵 */
+@media (min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse){.bnav [data-nav=home]{display:none}}
 /* 系統設定「降低透明度」：回到不透明 */
 @media (prefers-reduced-transparency:reduce){
   .bnav,.bar,.seg,.filterbar,.toast,.fact,dialog:not(.drawer) .dh,dialog:not(.drawer) .dact,.drawer .dw-top .x{background-color:var(--surface)!important;background-image:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
