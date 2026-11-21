@@ -108,7 +108,7 @@ function exitSearch(clear) {
   $('search').blur();
   if (clear) { S.search = ''; $('search').value = ''; render(); }
 }
-function sbCount() { if ($('sbCount')) $('sbCount').textContent = searching() && S.search.trim() ? $('countText').textContent : ''; }
+function sbCount() { if ($('sbCount')) $('sbCount').textContent = searching() && S.search.trim() ? `找到 ${S.searchHits || 0} 款` : ''; }
 // 鍵盤跳出時，畫面可見的範圍變矮：把搜尋列往上推到鍵盤上方
 function sbPlace() {
   const vv = window.visualViewport; if (!vv) { $('sbar').style.transform = ''; return; }
@@ -154,7 +154,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261120g';
+const APP_VER = '20261121a';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -683,18 +683,59 @@ function renderList(list, stagger) {
     if (!q) return true;
     return [w.wineId, ...FIELDS.map(f => w[f[0]]), ...(w.locations || []).map(l => l.cabinet + ' ' + l.shelf)].join(' ').toLowerCase().includes(q);
   }));
-  $('countText').textContent = S.data ? (rows.length === list.length ? `共 ${list.length} 款` : `${rows.length} / ${list.length} 款`) : '';
+  // 有輸入搜尋字時，也找所有登錄過的酒：已喝完的酒款、非酒窖的飲用紀錄（不篩選某櫃／某層時才列）
+  const extra = q && S.data && !S.filter?.cabinet ? pastMatches(q) : [];
+  S.searchHits = rows.length + extra.length;
+  $('countText').textContent = !S.data ? '' : extra.length ? `${rows.length} / ${list.length} 款・另有 ${extra.length} 款已喝完／非酒窖` : rows.length === list.length ? `共 ${list.length} 款` : `${rows.length} / ${list.length} 款`;
   const el = $('list');
   el.className = 'rows' + (S.view === 'grid' ? ' grid' : '');
-  el.innerHTML = rows.map(w => S.view === 'grid' ? cardHtml(w) : rowHtml(w)).join('');
+  // 依酒名、年份排序時混在一起排；其他排序（位置、瓶數、飲用優先）時排在後面
+  const all = rows.map(w => ({w}));
+  if (extra.length) {
+    if (['name', 'vintage', 'vintage-desc'].includes(S.sort)) {
+      const keyed = [...all, ...extra.map(x => ({x, w: x.w || {wineId: 'zz' + x.key, wineName: x.name, vintage: x.vintage}}))];
+      const order = sortWines(keyed.map(k => k.w)); all.length = 0; all.push(...order.map(w => keyed.find(k => k.w === w)));
+    } else all.push(...extra.map(x => ({x})));
+  }
+  el.innerHTML = all.map(({w, x}) => x ? (S.view === 'grid' ? pastCardHtml(x) : pastRowHtml(x)) : S.view === 'grid' ? cardHtml(w) : rowHtml(w)).join('');
   if (stagger) { el.classList.add('stagger'); [...el.children].slice(0, 12).forEach((c, i) => { c.style.animationDelay = i * 28 + 'ms'; }); }
-  el.hidden = !rows.length;
+  el.hidden = !all.length;
   const empty = $('empty');
-  empty.hidden = !!rows.length;
-  if (rows.length) return;
+  empty.hidden = !!all.length;
+  if (all.length) return;
   if (!S.data) empty.innerHTML = '<h3>讀取中</h3><p>連上 GitHub 後，這裡會列出每一款酒。</p>';
   else if (!list.length) empty.innerHTML = canEdit() ? '<h3>酒窖還是空的</h3><p>按「＋ 新增酒款」登記第一瓶。</p>' : '<h3>酒窖還是空的</h3>';
   else empty.innerHTML = '<h3>沒有符合的酒款</h3><p>換個關鍵字，或按「顯示全部」。</p>';
+}
+/* 搜尋時一起列出的「已喝完／非酒窖」：已出清的酒款（點開看詳細資料），與非酒窖的飲用紀錄（點開看喝過幾次、再買一次） */
+function pastMatches(q) {
+  const out = [];
+  for (const it of memItems()) {
+    if (it.kind === 'cellar' && it.w.status !== 'archived') continue;
+    if (it.kind === 'ext' && (S.filter?.kind || S.filter?.origin)) continue;
+    if (it.kind === 'cellar') {
+      const w = it.w;
+      if (S.filter?.kind && kindOf(w) !== S.filter.kind) continue;
+      if (S.filter?.origin && countryOf(w) !== S.filter.origin) continue;
+      if (![w.wineId, ...FIELDS.map(f => w[f[0]])].join(' ').toLowerCase().includes(q)) continue;
+    } else if (![it.name, it.vintage, ...it.events.map(e => [e.note, e.who, e.source].join(' '))].join(' ').toLowerCase().includes(q)) continue;
+    out.push(it);
+  }
+  return out;
+}
+const pastTag = x => x.kind === 'ext' ? '非酒窖' : '已喝完';
+const pastOpen = x => x.kind === 'ext' ? `data-mem="${esc(x.key)}"` : `data-open="${esc(x.w.wineId)}"`;
+const pastSub = x => [x.vintage || 'NV', x.count ? `喝過 ${x.count} 次` : '', x.last?.date ? `最後 ${fmtDate(x.last.date)}` : ''].filter(Boolean).join(' · ');
+function pastCardHtml(x) {
+  const ph = x.photo ? `<img class="ph" src="${esc(x.photo)}" alt="${esc(x.name)}" loading="lazy">` : `<span class="ph">${esc(x.vintage || 'NV')}</span>`;
+  return `<div class="card gone ${x.kind === 'ext' ? 'ext' : kindOf(x.w)}" role="button" tabindex="0" ${pastOpen(x)}><span class="phbox ${x.photo ? 'photo' : ''}">${ph}<em class="gtag">${pastTag(x)}</em></span><span class="cb"><b>${esc(x.name)}</b><span class="prod">${esc(x.winery || '')}</span><span>${esc(pastSub(x))}</span></span></div>`;
+}
+function pastRowHtml(x) {
+  return `<button class="row gone" ${pastOpen(x)}>
+   ${x.kind === 'ext' ? `<span class="vin">${esc(x.vintage || 'NV')}</span>` : vinHtml(x.w, true)}
+   <span class="nm"><b>${esc(x.name)}</b><span>${esc(x.winery || '')}${x.winery && x.origin ? ' · ' : ''}${esc(x.origin || '')}</span></span>
+   <span class="lc"><span>${esc(pastSub(x))}</span></span>
+   <span class="qt"><em class="gtag">${pastTag(x)}</em></span></button>`;
 }
 // 年份；清單模式前面加酒種圓點（紅酒紅點、白酒綠點、甜酒／貴腐橘點、清酒白點）
 function vinHtml(w, dot) {
@@ -1007,10 +1048,12 @@ function wire() {
     if (S.filter && matchMedia(TABLET_MQ).matches ? !matchMedia(SPLIT_MQ).matches : S.filter && matchMedia(PHONE_MQ).matches) document.querySelector('.ledger').scrollIntoView({behavior: 'smooth'});
   });
   $('list').addEventListener('click', e => {
+    const m = e.target.closest('[data-mem]'); if (m) return openMem(m.dataset.mem);
     const o = e.target.closest('[data-open]'); if (!o) return;
     openDrawer(o.dataset.open, false, o);
   });
   onKeyActivate($('list'), 'div[data-open]', o => openDrawer(o.dataset.open));
+  onKeyActivate($('list'), 'div[data-mem]', o => openMem(o.dataset.mem));
   // 照片輪播：捲動時更新小圓點
   document.addEventListener('scroll', e => {
     const sl = e.target; if (!sl.classList || !sl.classList.contains('slides')) return;

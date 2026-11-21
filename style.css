@@ -495,7 +495,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261120g";
+:root{--ver:"20261121a";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
@@ -1079,3 +1079,12 @@ dialog.swap[open]:not(.closing){animation:none!important}
 @media (max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px){ .bnav.has-qa{right:88px} }
 @media (min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse){ .bnav.has-qa{right:96px} }
 @media (prefers-reduced-motion:reduce){ .bnav .qa-items button,.bnav #qaBtn .ico{transition:none} }
+
+/* 搜尋時一起列出的已喝完／非酒窖：變淡，左上角有標籤 */
+.card.gone,.row.gone{opacity:.66}
+.card.gone .ph{filter:saturate(.55)}
+div.card.ext{border:2px solid var(--line)}
+.gtag{display:inline-block;padding:2px 9px;border-radius:999px;font:600 13px/1.5 var(--body);font-style:normal;letter-spacing:.04em;background:rgba(0,0,0,.6);color:#fff;white-space:nowrap}
+.phbox .gtag{position:absolute;left:6px;top:6px;z-index:1}
+.row.gone .qt{font:inherit}
+
