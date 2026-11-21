@@ -1847,12 +1847,12 @@
    "grapeNotes": "酒商直購",
    "locations": [],
    "origin": "",
-   "photo": "",
+   "photo": "images/W060-1795238254753.jpg",
    "referencePrice": 825,
-   "revision": 5,
+   "revision": 6,
    "source": "購",
    "status": "archived",
-   "updatedAt": "2026-11-21T05:16:47.831Z",
+   "updatedAt": "2026-11-21T05:17:39.651Z",
    "updatedBy": "芝琦",
    "vintage": "2020",
    "volume": "750ml",
@@ -1861,8 +1861,13 @@
    "color": "red",
    "archivedAt": "2026-11-13T02:01:49.261Z",
    "archivedBy": "芝琦",
-   "photos": [],
-   "thumb": ""
+   "photos": [
+    {
+     "photo": "images/W060-1795238254753.jpg",
+     "thumb": "images/W060-1795238254753-t.jpg"
+    }
+   ],
+   "thumb": "images/W060-1795238254753-t.jpg"
   },
   "W061": {
    "createdAt": "",
@@ -2081,8 +2086,8 @@
    "revision": 3
   }
  },
- "rev": 171,
- "updatedAt": "2026-11-21T05:16:47.831Z",
+ "rev": 172,
+ "updatedAt": "2026-11-21T05:17:39.651Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
