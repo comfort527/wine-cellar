@@ -154,7 +154,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261121a';
+const APP_VER = '20261121b';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -728,7 +728,7 @@ const pastOpen = x => x.kind === 'ext' ? `data-mem="${esc(x.key)}"` : `data-open
 const pastSub = x => [x.vintage || 'NV', x.count ? `喝過 ${x.count} 次` : '', x.last?.date ? `最後 ${fmtDate(x.last.date)}` : ''].filter(Boolean).join(' · ');
 function pastCardHtml(x) {
   const ph = x.photo ? `<img class="ph" src="${esc(x.photo)}" alt="${esc(x.name)}" loading="lazy">` : `<span class="ph">${esc(x.vintage || 'NV')}</span>`;
-  return `<div class="card gone ${x.kind === 'ext' ? 'ext' : kindOf(x.w)}" role="button" tabindex="0" ${pastOpen(x)}><span class="phbox ${x.photo ? 'photo' : ''}">${ph}<em class="gtag">${pastTag(x)}</em></span><span class="cb"><b>${esc(x.name)}</b><span class="prod">${esc(x.winery || '')}</span><span>${esc(pastSub(x))}</span></span></div>`;
+  return `<div class="card gone ${x.kind === 'ext' ? 'ext' : kindOf(x.w)}" role="button" tabindex="0" ${pastOpen(x)}><span class="phbox ${x.photo ? 'photo' : ''}">${ph}<em class="gtag">${pastTag(x)}</em>${x.w ? keepStamp(x.w) : ''}</span><span class="cb"><b>${esc(x.name)}</b><span class="prod">${esc(x.winery || '')}</span><span>${esc(pastSub(x))}</span></span></div>`;
 }
 function pastRowHtml(x) {
   return `<button class="row gone" ${pastOpen(x)}>
@@ -765,7 +765,7 @@ function cardHtml(w) {
   if (ps.length > 1) media = `<span class="slides">${ps.map((p, i) => `<img class="ph" src="${esc(fileUrl(p.thumb || p.photo))}" alt="${esc(w.wineName)} ${i + 1}" loading="lazy" draggable="false">`).join('')}</span>${sdots(ps.length)}`;
   else if (ps.length) media = `<img class="ph" src="${esc(thumbUrl(w))}" alt="${esc(w.wineName)}" loading="lazy">`;
   else media = `<span class="ph">${esc(w.vintage || 'NV')}</span>`;
-  return `<div class="card ${kindOf(w)}" role="button" tabindex="0" data-open="${esc(w.wineId)}"><span class="phbox ${ps.length ? 'photo' : ''}">${media}${prioOf(w) ? pdots(prioOf(w)) : ''}</span><span class="cb"><b>${esc(w.wineName)}</b><span class="prod">${esc(w.wineryRegion || '')}</span>${(() => { const t = total(w), h = hereQty(w); return h !== null && h !== t ? `<span class="here">${hereWord()} <strong class="hn">${h}</strong> 瓶</span><span class="tot">${esc(w.vintage || 'NV')}・共 ${t} 瓶</span>` : `<span>${esc(w.vintage || 'NV')} · ${t} 瓶</span>`; })()}</span></div>`;
+  return `<div class="card ${kindOf(w)}" role="button" tabindex="0" data-open="${esc(w.wineId)}"><span class="phbox ${ps.length ? 'photo' : ''}">${media}${prioOf(w) ? pdots(prioOf(w)) : ''}${keepStamp(w)}</span><span class="cb"><b>${esc(w.wineName)}</b><span class="prod">${esc(w.wineryRegion || '')}</span>${(() => { const t = total(w), h = hereQty(w); return h !== null && h !== t ? `<span class="here">${hereWord()} <strong class="hn">${h}</strong> 瓶</span><span class="tot">${esc(w.vintage || 'NV')}・共 ${t} 瓶</span>` : `<span>${esc(w.vintage || 'NV')} · ${t} 瓶</span>`; })()}</span></div>`;
 }
 
 /* ---------- 詳細資料抽屜 ---------- */
@@ -791,10 +791,15 @@ function outsHtml(w) {
     : `<div class="out mv"><span class="d">${fmtDate(e.date)}</span><span class="q">⇄${e.qty}</span><span class="r"><b>${esc(e.from.cabinet)} · ${esc(e.from.shelf)} → ${esc(e.to.cabinet)} · ${esc(e.to.shelf)}</b><small>移動${e.note ? ' · ' + esc(e.note) : ''} · ${esc(nameOf(e.by))}</small></span></div>`;
   return `<section class="dw-outs"><h3>庫存紀錄 <span class="hint">${sumText}</span></h3>${all.map(row).join('')}</section>`;
 }
+/* 留存紀念：「葡萄品種／備註」裡有剛好「留存紀念」四個字時，照片上蓋金色「留存」戳記（畫在照片上面，照片檔不變） */
+const isKeep = w => /留存紀念/.test(w?.grapeNotes || '');
+const KEEP_STAMP = `<img class="keep-stamp" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f6dc8c%22/%3E%3Cstop%20offset%3D%22.5%22%20stop-color%3D%22%23c8963a%22/%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%238a6018%22/%3E%3C/linearGradient%3E%3Cpath%20id%3D%22a%22%20d%3D%22M18%2C52%20A32%2C32%200%200%2C1%2082%2C52%22/%3E%3C/defs%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2246%22%20fill%3D%22url%28%23g%29%22%20stroke%3D%22%23ffffff66%22%20stroke-width%3D%222%22/%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2238%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff99%22%20stroke-width%3D%221.2%22%20stroke-dasharray%3D%222%203%22/%3E%3Ctext%20font-size%3D%2210%22%20fill%3D%22%234a3208%22%20letter-spacing%3D%222%22%20font-weight%3D%22700%22%20font-family%3D%22Helvetica%2CArial%2Csans-serif%22%3E%3CtextPath%20href%3D%22%23a%22%20startOffset%3D%2250%25%22%20text-anchor%3D%22middle%22%3EMEMORY%3C/textPath%3E%3C/text%3E%3Ctext%20x%3D%2250%22%20y%3D%2266%22%20text-anchor%3D%22middle%22%20font-size%3D%2228%22%20font-weight%3D%22900%22%20fill%3D%22%233d2706%22%20font-family%3D%22PingFang%20TC%2CNoto%20Sans%20TC%2CMicrosoft%20JhengHei%2Csans-serif%22%3E%E7%95%99%E5%AD%98%3C/text%3E%3C/svg%3E" alt="留存紀念" draggable="false">`;
+const keepStamp = w => isKeep(w) ? KEEP_STAMP : '';
+const notesHtml = v => esc(v).replace(/留存紀念/g, '<mark class="keep-mark">留存紀念</mark>');
 function galleryHtml(w) {
   const ps = photosOf(w); if (!ps.length) return '';
   const imgs = ps.map((p, i) => `<img src="${esc(fileUrl(p.photo))}" alt="${esc(w.wineName)} 照片 ${i + 1}／${ps.length}" ${i ? 'loading="lazy"' : ''} draggable="false">`).join('');
-  return `<div class="gal"><div class="slides">${imgs}</div>${ps.length > 1 ? `<button type="button" class="gnav prev" data-gnav="-1" aria-label="上一張">‹</button><button type="button" class="gnav next" data-gnav="1" aria-label="下一張">›</button>${sdots(ps.length)}` : ''}</div>`;
+  return `<div class="gal"><div class="slides">${imgs}</div>${keepStamp(w)}${ps.length > 1 ? `<button type="button" class="gnav prev" data-gnav="-1" aria-label="上一張">‹</button><button type="button" class="gnav next" data-gnav="1" aria-label="下一張">›</button>${sdots(ps.length)}` : ''}</div>`;
 }
 function renderDrawer() {
   const w = byId(S.drawer); if (!w) { closeDrawer(); return; }
@@ -813,7 +818,7 @@ function renderDrawer() {
     <div class="dw-prio"><span class="lbl">飲用優先</span>${ed ? `<span class="pdots big" role="group" aria-label="設定飲用優先">${[1, 2, 3, 4].map(i => `<button class="${i <= prioOf(w) ? 'on' : ''}" data-prio="${i}" aria-label="優先 ${i}" aria-pressed="${i === prioOf(w)}">${i}</button>`).join('')}</span>` : pdots(prioOf(w), 'big num')}<span class="hint">${prioOf(w) ? `${prioOf(w)}／4` : '未設定'}${ed ? '　點數字設定等級，4 最優先；再點一次取消' : ''}</span></div>
     <div class="dw-act">${use && !archived ? `<button class="primary" data-stockany="${esc(w.wineId)}" ${t ? '' : 'disabled'}>出庫</button><button class="primary" data-moveany="${esc(w.wineId)}" ${t ? '' : 'disabled'}>移動</button>` : ''}${ed ? `<button class="primary" data-edit="${esc(w.wineId)}">編輯</button><button data-photo="${esc(w.wineId)}">照片（${photosOf(w).length}/${MAX_PHOTOS}）</button><button data-log="${esc(w.wineId)}">異動紀錄</button>` : ''}</div>
     ${ed ? (archived ? '<p class="hint" style="margin:0">這款酒已全部出庫。要補回庫存，請按「編輯」填入瓶數，它會回到目前酒款。</p>' : '') : use ? (archived ? '<p class="hint" style="margin:0">這款酒已全部出庫。</p>' : '') : '<p class="hint" style="margin:0">登入後可以出庫與移動這款酒。</p>'}
-    <dl class="dw-facts">${facts}${w.grapeNotes ? `<div class="wide"><dt>葡萄品種／備註</dt><dd class="note">${esc(w.grapeNotes)}</dd></div>` : ''}</dl>
+    <dl class="dw-facts">${facts}${w.grapeNotes ? `<div class="wide"><dt>葡萄品種／備註</dt><dd class="note">${notesHtml(w.grapeNotes)}</dd></div>` : ''}</dl>
     ${use ? outsHtml(w) : ''}
     <div class="dw-meta">${w.createdAt ? `建立 ${fmtTime(w.createdAt)}（${esc(nameOf(w.createdBy))}）<br>` : ''}最後修改 ${fmtTime(w.updatedAt)}（${esc(nameOf(w.updatedBy))}）${archived ? `<br>出清 ${fmtTime(w.archivedAt)}（${esc(nameOf(w.archivedBy))}）` : ''}</div>
    </div>`;
@@ -1109,6 +1114,8 @@ function wire() {
   $('aiRemove').addEventListener('click', () => { if (!confirm('移除這台裝置上的 AI 金鑰？「智慧辨識」按鈕會隱藏。')) return; setAI(null); renderAiSettings(); toast('已移除 AI 金鑰。'); });
   $('aiBtn').addEventListener('click', aiRecognize);
   setTimeout(() => { sweepAI(); scheduleAiExpiry(); });  // 等整個程式載入完再執行
+  const keepHint = () => { $('keepHint').hidden = !/留存紀念/.test($('f_grapeNotes').value); };
+  $('f_grapeNotes').addEventListener('input', keepHint); $('wineModal').addEventListener('keepcheck', keepHint);
   for (const id of ['f_wineName', 'f_wineryRegion', 'f_vintage', 'f_originChoice', 'f_originOther', 'f_grapeNotes', 'f_volumeChoice', 'f_volumeOther']) $(id).addEventListener('input', e => e.target.classList.remove('ai-filled', 'ai-guess'));
   $('pendList').addEventListener('change', e => {
     const inp = e.target.closest('[data-padd]'); if (!inp) return;
@@ -1456,6 +1463,7 @@ function openWineForm(w, pend, rb) {
   }
   renderRebuyNote();
   $('wineModal').dataset.mode = w ? 'edit' : 'new';
+  $('wineModal').dispatchEvent(new Event('keepcheck'));
   showDialog('wineModal');
 }
 function readWineForm() {

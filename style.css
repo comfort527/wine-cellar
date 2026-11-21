@@ -495,7 +495,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261121a";
+:root{--ver:"20261121b";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
@@ -1087,4 +1087,13 @@ div.card.ext{border:2px solid var(--line)}
 .gtag{display:inline-block;padding:2px 9px;border-radius:999px;font:600 13px/1.5 var(--body);font-style:normal;letter-spacing:.04em;background:rgba(0,0,0,.6);color:#fff;white-space:nowrap}
 .phbox .gtag{position:absolute;left:6px;top:6px;z-index:1}
 .row.gone .qt{font:inherit}
+
+/* 留存紀念的金色「留存」戳記 */
+.keep-stamp{position:absolute;z-index:2;pointer-events:none;user-select:none;filter:drop-shadow(0 3px 6px rgba(0,0,0,.35))}
+.phbox .keep-stamp{right:6px;top:6px;width:40%;max-width:72px}
+.gal .keep-stamp{right:16px;top:16px;width:28%;max-width:130px}
+@media (max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px){.drawer .gal .keep-stamp{top:72px}}
+.keep-mark{background:#fbecee;color:#c0182f;font-weight:700;padding:0 2px;border-radius:3px}
+.keep-hint{display:block;margin-top:4px;color:#c0182f;font-size:15px}
+.keep-hint[hidden]{display:none}
 
