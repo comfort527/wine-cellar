@@ -498,7 +498,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261121d";
+:root{--ver:"20261121e";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
@@ -615,7 +615,12 @@ fieldset.colorpick{display:flex;flex-direction:row;flex-wrap:wrap;align-items:ce
 #wineForm .ai-guess,#wineForm .rb-check{outline:2px dashed #c9971c;outline-offset:2px}
 .out.in .q{color:#2f7a45}
 #jm_list{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,380px),1fr));gap:8px}
-#jm_list .lib{margin-bottom:0}
+#jm_list .lib{margin-bottom:0;align-items:start}
+.lph{display:flex;flex-direction:column;align-items:center;gap:4px;width:64px}
+.lstars{display:flex;flex-direction:column;align-items:center;line-height:1}
+.lsr{position:relative;display:inline-block;color:color-mix(in srgb,var(--star) 22%,var(--line));font-size:12px;letter-spacing:0;white-space:nowrap}
+.lsr b{position:absolute;left:0;top:0;width:calc(var(--r) / 5 * 100%);overflow:hidden;color:var(--star);font-weight:inherit}
+.lstars em{font:700 12px var(--body);color:var(--star);font-style:normal;margin-top:2px}
 
 /* 管理：手機分組清單＋子頁、平板／電腦左右兩欄 */
 .adm-head{display:flex;flex-direction:column;align-items:flex-start;min-width:0}
