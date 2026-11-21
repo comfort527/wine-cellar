@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com; connect-src 'self' blob: https://api.github.com https://raw.githubusercontent.com https://api.anthropic.com https://generativelanguage.googleapis.com https://api.openai.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://raw.githubusercontent.com https://wine-cellar-photos.comfort527.workers.dev; connect-src 'self' blob: https://api.github.com https://raw.githubusercontent.com https://wine-cellar-photos.comfort527.workers.dev https://api.anthropic.com https://generativelanguage.googleapis.com https://api.openai.com; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <!-- 提前連線：打開網頁時先和照片、資料所在的 GitHub 伺服器建立連線，第一批照片與資料可早一點出現 -->
 <link rel="preconnect" href="https://raw.githubusercontent.com">
@@ -13,10 +13,10 @@
 <meta name="theme-color" content="#eef0ec" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1412" media="(prefers-color-scheme: dark)">
 <title>酒窖</title>
-<link rel="icon" href="icons/favicon.svg?v=20261121l" type="image/svg+xml">
-<link rel="icon" href="icons/favicon-96.png?v=20261121l" sizes="96x96" type="image/png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=20261121l">
-<link rel="manifest" href="manifest.webmanifest?v=20261121l">
+<link rel="icon" href="icons/favicon.svg?v=20261121m" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-96.png?v=20261121m" sizes="96x96" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=20261121m">
+<link rel="manifest" href="manifest.webmanifest?v=20261121m">
 <meta name="apple-mobile-web-app-title" content="酒窖">
 <meta name="application-name" content="酒窖">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -24,13 +24,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261121l" id="mainCss">
+<link rel="stylesheet" href="style.css?v=20261121m" id="mainCss">
 </head>
 <body class="loading">
 <header class="bar">
  <div class="bar-in">
   <a class="mark" href="#" id="homeLink" aria-label="回到全部酒款">
-   <img class="mark-ic" src="icons/logo.svg?v=20261121l" alt="" width="36" height="40">
+   <img class="mark-ic" src="icons/logo.svg?v=20261121m" alt="" width="36" height="40">
    <span class="mark-t">酒窖</span>
   </a>
   <span class="sync" id="sync"><span class="dot"></span><span id="syncText">讀取中</span></span>
@@ -374,15 +374,16 @@
   <div class="export-acts"><button type="button" class="primary" id="exportXlsxBtn">⇩ 下載 Excel</button><button type="button" id="exportBtn">⇩ 下載 CSV</button></div>
  </section>
  <section id="tab-storage" hidden>
-  <p class="hint" style="margin-top:0">照片和資料都存在 GitHub repo，免費上限約 500 MB。快滿時請少換照片。</p>
+  <p class="hint" style="margin-top:0">新拍的照片存在 Cloudflare（免費 10 GB）；酒款資料與異動紀錄存在 GitHub。下面是 GitHub 的已用空間（含搬家前的舊照片備份）。</p>
   <div class="storage" id="storageBar" hidden><span class="txt"></span><div class="track"><div class="fill"></div></div></div>
+  <div id="migBox" hidden><h3 class="hist-h">照片搬到 Cloudflare</h3><p class="hint" style="margin-top:0">把存在 GitHub 的舊照片複製一份到 Cloudflare，之後打開照片會比較快。已經搬過的會自動跳過，中途關掉也可以再按一次接著搬。GitHub 上的照片會留著當備份。</p><button type="button" class="primary" id="migBtn">搬移照片到 Cloudflare</button><p class="hint" id="migMsg" role="status"></p></div>
  </section>
  </div>
 </div></dialog>
 
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="config.js?v=20261121l"></script>
-<script src="app.js?v=20261121l"></script>
+<script src="config.js?v=20261121m"></script>
+<script src="app.js?v=20261121m"></script>
 </body>
 </html>

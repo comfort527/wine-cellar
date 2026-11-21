@@ -156,7 +156,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261121l';
+const APP_VER = '20261121m';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -171,7 +171,27 @@ const byId = id => { const w = S.data?.wines[id]; return w ? {...w, wineId: id} 
 const total = w => (w.locations || []).reduce((a, l) => a + (Number(l.quantity) || 0), 0);
 const nameOf = v => !v ? '—' : String(v).includes('@') ? String(v).split('@')[0] : String(v);
 const locText = ls => (ls || []).map(l => `${l.cabinet}/${l.shelf}×${l.quantity}`).join('、') || '無';
-const fileUrl = path => S.localPhotos.get(path) || `${CFG.rawBase}/${CFG.owner}/${CFG.repo}/${CFG.dataBranch}/${path.split('/').map(encodeURIComponent).join('/')}`;
+const PB = CFG.photoBase || '';   // Cloudflare 照片空間；空白＝照片仍放 GitHub
+const encPath = path => path.split('/').map(encodeURIComponent).join('/');
+const ghRawBase = () => `${CFG.rawBase}/${CFG.owner}/${CFG.repo}/${CFG.dataBranch}`;
+const fileUrl = path => S.localPhotos.get(path) || `${PB || ghRawBase()}/${encPath(path)}`;
+// Cloudflare 讀不到的照片（還沒搬過去的舊照片）自動改從 GitHub 讀
+document.addEventListener('error', e => {
+  const t = e.target; if (!PB || t.tagName !== 'IMG' || t.dataset.fb || !t.src.startsWith(PB + '/')) return;
+  t.dataset.fb = '1'; t.src = ghRawBase() + t.src.slice(PB.length);
+}, true);
+async function fetchPhoto(path) {   // 取得照片內容：Cloudflare 優先，讀不到改 GitHub
+  if (S.localPhotos.has(path)) return fetch(S.localPhotos.get(path));
+  if (PB) { try { const r = await fetch(`${PB}/${encPath(path)}`); if (r.ok) return r; } catch {} }
+  return fetch(`${ghRawBase()}/${encPath(path)}`);
+}
+async function r2Send(method, path, body) {
+  let r;
+  try { r = await fetch(`${PB}/${encPath(path)}`, {method, body, headers: {'Authorization': 'Bearer ' + S.session.token, ...(body ? {'Content-Type': 'image/jpeg'} : {})}}); }
+  catch { fail('連不上照片空間（Cloudflare），請檢查網路後再試。'); }
+  if (r.status === 403) fail('照片空間拒絕這台裝置，請工程人員確認權杖。');
+  return r;
+}
 const photoUrl = w => w.photo ? fileUrl(w.photo) : '';
 const thumbUrl = w => w.thumb ? fileUrl(w.thumb) : photoUrl(w);
 const MAX_PHOTOS = 4;
@@ -1042,6 +1062,7 @@ function wire() {
   matchMedia('(min-width: 761px), ' + PHL_MQ).addEventListener('change', () => { if (!$('adminModal').open) return; const cur = ADMIN_TABS.find(t => !$('tab-' + t).hidden); if (admWide()) switchTab(cur || 'lib'); else if (cur) switchTab(cur); });
   $('factPend').addEventListener('click', () => { showDialog('pendModal'); showErr('pendErr', ''); renderPendStrip(); renderPending(); });
   $('exportBtn').addEventListener('click', exportCsv);
+  $('migBtn').addEventListener('click', migratePhotos);
   $('exportXlsxBtn').addEventListener('click', exportXlsx);
   let fbRaf = 0; window.addEventListener('resize', () => { cancelAnimationFrame(fbRaf); fbRaf = requestAnimationFrame(fillBottles); });
   $('map').addEventListener('click', e => {
@@ -1248,6 +1269,7 @@ function switchTab(name, noLoad) {
   if (name === 'outs') renderHistory();
   if (name === 'keys') renderSlots();
   if (name === 'ai') renderAiSettings();
+  if (name === 'storage') $('migBox').hidden = !(PB && isEng());
   if (name === 'lib') renderMem();
   if (name === 'audit' && !noLoad) loadAudit('', 1);
 }
@@ -1672,9 +1694,16 @@ async function compress(file) {
 }
 async function uploadPhoto(ph, id) {
   const base = `${CFG.imageDir}/${id}-${Date.now()}`, who = `\n\n操作者：${S.session.label}`;
-  const full = await putFile(`${base}.jpg`, new Uint8Array(await ph.full.arrayBuffer()), null, `照片 ${id}（${kb(ph.full.size)}）${who}`);
-  if (!full.ok) fail('照片上傳失敗，請再試一次。');
-  const thumb = await putFile(`${base}-t.jpg`, new Uint8Array(await ph.thumb.arrayBuffer()), null, `縮圖 ${id}（${kb(ph.thumb.size)}）${who}`);
+  let full, thumb;
+  if (PB) {   // 照片放 Cloudflare
+    full = {ok: (await r2Send('PUT', `${base}.jpg`, ph.full)).ok};
+    if (!full.ok) fail('照片上傳失敗，請再試一次。');
+    thumb = {ok: (await r2Send('PUT', `${base}-t.jpg`, ph.thumb).catch(() => ({ok: false}))).ok};
+  } else {
+    full = await putFile(`${base}.jpg`, new Uint8Array(await ph.full.arrayBuffer()), null, `照片 ${id}（${kb(ph.full.size)}）${who}`);
+    if (!full.ok) fail('照片上傳失敗，請再試一次。');
+    thumb = await putFile(`${base}-t.jpg`, new Uint8Array(await ph.thumb.arrayBuffer()), null, `縮圖 ${id}（${kb(ph.thumb.size)}）${who}`);
+  }
   S.localPhotos.set(`${base}.jpg`, URL.createObjectURL(ph.full));
   if (thumb.ok) S.localPhotos.set(`${base}-t.jpg`, URL.createObjectURL(ph.thumb));
   return {photo: `${base}.jpg`, thumb: thumb.ok ? `${base}-t.jpg` : ''};
@@ -1786,7 +1815,7 @@ function renderAiRow() {
 const blobToB64 = b => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(b); });
 async function aiImages() {
   const blobs = [];
-  for (const ph of S.pendKeep || []) { try { const r = await fetch(fileUrl(ph.photo)); if (r.ok) blobs.push(await r.blob()); } catch {} }
+  for (const ph of S.pendKeep || []) { try { const r = await fetchPhoto(ph.photo); if (r.ok) blobs.push(await r.blob()); } catch {} }
   for (const ph of S.newPhotos || []) blobs.push(ph.full);
   return Promise.all(blobs.slice(0, MAX_PHOTOS).map(async b => ({type: /^image\//.test(b.type) ? b.type : 'image/jpeg', b64: await blobToB64(b)})));
 }
@@ -1942,7 +1971,8 @@ function usedPaths() {  // 目前資料仍在用的照片檔（再買一次會�
 async function deleteFiles(paths, id) {
   const used = usedPaths();
   for (const path of paths.filter(p => p && !used.has(p))) {
-    try {
+    if (PB) await r2Send('DELETE', path).catch(() => {});   // Cloudflare 上的照片
+    try {   // GitHub 上的舊照片（搬家前上傳、留作備份的）
       const r = await gh(`${REPO}/contents/${path}?ref=${encodeURIComponent(CFG.dataBranch)}`);
       if (!r.ok) continue;
       const {sha} = await r.json();
@@ -2102,6 +2132,37 @@ async function checkStorage() {
     }
     return S.storage;
   } catch { return null; }
+}
+
+/* 工程人員：把 GitHub 上的舊照片複製到 Cloudflare（已存在的跳過，可重複執行） */
+async function migratePhotos() {
+  if (!PB || !isEng() || S.migrating) return;
+  const btn = $('migBtn'), msg = t => { $('migMsg').textContent = t; };
+  S.migrating = true; btn.disabled = true; msg('讀取照片清單中…');
+  try {
+    const r = await gh(`${REPO}/git/trees/${encodeURIComponent(CFG.dataBranch)}?recursive=1`);
+    if (!r.ok) fail('讀不到 GitHub 的照片清單（' + r.status + '）。');
+    const files = (await r.json()).tree.filter(t => t.type === 'blob' && t.path.startsWith(CFG.imageDir + '/') && /\.(jpe?g|png|webp)$/i.test(t.path)).map(t => t.path);
+    let done = 0, moved = 0, skip = 0, bad = [];
+    const show = () => msg(`已處理 ${done}／${files.length} 張（搬過去 ${moved}、原本就有 ${skip}${bad.length ? `、失敗 ${bad.length}` : ''}）`);
+    show();
+    const one = async path => {
+      try {
+        const h = await fetch(`${PB}/${encPath(path)}`, {method: 'HEAD', cache: 'no-store'});
+        if (h.ok) { skip++; return; }
+        const g = await gh(`${REPO}/contents/${encPath(path)}?ref=${encodeURIComponent(CFG.dataBranch)}`, {raw: true});
+        if (!g.ok) throw 0;
+        const p = await r2Send('PUT', path, await g.blob());
+        if (!p.ok) throw 0;
+        moved++;
+      } catch { bad.push(path); } finally { done++; show(); }
+    };
+    const queue = files.slice();
+    await Promise.all(Array.from({length: 4}, async () => { while (queue.length) await one(queue.shift()); }));
+    msg(bad.length ? `完成，但有 ${bad.length} 張沒搬成功，請再按一次重試。（共 ${files.length} 張：搬過去 ${moved}、原本就有 ${skip}）` : `全部完成！共 ${files.length} 張照片都在 Cloudflare 了（這次搬過去 ${moved} 張、原本就有 ${skip} 張）。`);
+    if (!bad.length) toast('照片已全部搬到 Cloudflare。');
+  } catch (e) { msg(msgOf(e)); }
+  finally { S.migrating = false; btn.disabled = false; }
 }
 
 /* ---------- CSV ---------- */

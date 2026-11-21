@@ -10,5 +10,7 @@ window.CELLAR_CONFIG = {
   pollSecondsViewer: 60,
   pollSecondsEditor: 15,
   apiBase: 'https://api.github.com',
-  rawBase: 'https://raw.githubusercontent.com'
+  rawBase: 'https://raw.githubusercontent.com',
+  // 照片放在 Cloudflare R2（經由照片小程式 cloudflare/photos-worker.js）；留空就照舊放 GitHub
+  photoBase: 'https://wine-cellar-photos.comfort527.workers.dev'
 };

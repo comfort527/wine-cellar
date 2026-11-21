@@ -3,7 +3,8 @@
 公開的酒庫管理網頁：任何人都能瀏覽酒款與庫存；用「裝置密碼」登入後才能新增、編輯、出庫、上傳照片。
 
 - **網頁**：`main` 分支，以 GitHub Pages 發布。
-- **資料**：`data` 分支的 `data/wines.json`，照片在 `images/`。每次異動都是一筆 commit，commit 訊息記錄內容、出庫原因與操作的裝置，[data 分支的 commit 歷史](../../commits/data)就是異動紀錄。
+- **資料**：`data` 分支的 `data/wines.json`。
+- **照片**：放在 Cloudflare R2，經由照片小程式（`cloudflare/photos-worker.js`，網址設在 `config.js` 的 `photoBase`）上傳、讀取、刪除；上傳與刪除要帶裝置的 GitHub 權杖，小程式會向 GitHub 確認它能寫入這個 repo。搬家前的舊照片仍在 `data` 分支的 `images/` 當備份，Cloudflare 讀不到時網頁自動改讀 GitHub。工程人員可在「管理 → 儲存空間」按「搬移照片到 Cloudflare」把舊照片複製過去（已搬過的跳過，可重複按）。`photoBase` 留空就照舊把照片放 GitHub。每次異動都是一筆 commit，commit 訊息記錄內容、出庫原因與操作的裝置，[data 分支的 commit 歷史](../../commits/data)就是異動紀錄。
 
 ## 運作方式
 
