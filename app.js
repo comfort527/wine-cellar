@@ -88,7 +88,7 @@ function navOut() {
 let sbSlot = null;
 const searching = () => document.body.classList.contains('searching');
 function enterSearch() {
-  if (!matchMedia(PHONE_MQ).matches) return;
+  if (!matchMedia(PHONE_MQ + ', ' + TABLET_MQ).matches) return;   // 手機直放與 iPad
   // 視窗開著時輸入框拿不到焦點：先立刻關掉所有視窗（不播動畫），再在同一個點擊裡 focus，iPhone 才會跳出鍵盤
   navOut();
   document.querySelectorAll('dialog[open]').forEach(d => { d.classList.remove('closing', 'hero', 'swap', 'has-nav'); dlgClose.call(d); });
@@ -156,7 +156,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261121m';
+const APP_VER = '20261121n';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -974,7 +974,7 @@ function wire() {
   $('search').setAttribute('enterkeyhint', 'search');
   $('search').addEventListener('keydown', e => { if (e.key === 'Enter' && searching()) { e.preventDefault(); $('search').blur(); } });   // 按「搜尋」收起鍵盤看結果
   $('sbExit').addEventListener('click', () => exitSearch(true));
-  matchMedia(PHONE_MQ).addEventListener('change', e => { if (!e.matches) exitSearch(false); });
+  matchMedia(PHONE_MQ + ', ' + TABLET_MQ).addEventListener('change', e => { if (!e.matches) exitSearch(false); });
   $('clearSearch').addEventListener('click', () => { S.search = ''; $('search').value = ''; render(); });
   $('clearFilter').addEventListener('click', () => { S.filter = null; render(); });
   $('factWines').addEventListener('click', openKinds);

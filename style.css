@@ -498,7 +498,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261121m";
+:root{--ver:"20261121n";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
@@ -1098,7 +1098,35 @@ dialog.swap[open]:not(.closing){animation:none!important}
   #bnav #bnSearch::before{content:none}
   .bnav .qa{left:calc(100% + 85px)}
 }
-@media (min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse){ .bnav.has-qa{right:96px} }
+/* iPad：跟手機一樣，左邊分頁一組膠囊；右邊綠色搜尋圓鈕＋酒紅 ＋ 圓鈕一組；點搜尋整條變成搜尋列，頁面上的搜尋框收起來 */
+@media (min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse){
+  .bnav{right:94px;height:66px;padding:5px 8px;align-items:stretch}
+  .bnav.has-qa{right:170px}
+  dialog.has-nav>#bnav{right:78px}
+  dialog.has-nav>#bnav.has-qa{right:154px}
+  .bnav .sch{display:flex}
+  .tools .search{display:none}
+  body.searching #bnav{display:none!important}
+  body.searching #sbar{display:flex}
+  #sbar{position:fixed;left:16px;right:16px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:31;gap:10px;align-items:center}
+  #sbar .sbf,#sbExit{background:var(--lg-strong);background-image:var(--lg-shine);-webkit-backdrop-filter:blur(22px) saturate(185%);backdrop-filter:blur(22px) saturate(185%);border:1px solid var(--lg-edge);box-shadow:inset 0 1px 0 var(--lg-rim),var(--lg-shadow)}
+  #sbar .sbf{flex:1;min-width:0;display:flex;align-items:center;gap:8px;height:62px;padding:0 16px 0 14px;border-radius:31px}
+  #sbar .search{flex:1;min-width:0;border:0;background:transparent;padding:0}
+  #sbar .search svg{stroke:#2f7a4c;stroke-width:2.2}
+  #sbar .search input{font-size:21px;min-height:0;padding:8px 0}
+  #sbar #clearSearch{display:none}
+  #sbar input::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;display:none}
+  #sbar em{font-style:normal;font-size:16px;color:var(--muted);white-space:nowrap}
+  #bnav #bnSearch{position:absolute;top:50%;left:calc(100% + 11px);width:66px;height:66px;padding:0;gap:0;transform:translateY(-50%);display:flex;flex-direction:row;align-items:center;justify-content:center;border-radius:50%;font-size:0;line-height:0;color:#fff;
+    background:radial-gradient(circle at 35% 25%,rgba(255,255,255,.45),transparent 45%),linear-gradient(160deg,#4f9a6a,#1f5a37);border:1px solid rgba(255,255,255,.4);box-shadow:inset 0 1px 1px rgba(255,255,255,.55),inset 0 -2px 4px rgba(0,0,0,.18),0 8px 20px rgba(31,90,55,.32)}
+  #bnav #bnSearch i{width:auto;height:auto;margin:0;background:none;border:0;box-shadow:none;line-height:0}
+  #bnav #bnSearch i .ico{width:34px;height:34px;stroke-width:2.1;transform:translate(-1px,-1px)}  /* 放大；放大鏡圖形本身偏右下，往左上挪 1px 看起來才在正中間 */
+  #bnav #bnSearch::before{content:none}
+  #sbExit{flex:none;width:66px;height:66px;min-height:0;padding:0;border-radius:50%;display:grid;place-items:center;font-size:30px;line-height:1;color:var(--ink)}
+  #sbar .sbf{height:66px;border-radius:33px}
+  .bnav .qa{left:calc(100% + 87px);width:66px;height:66px}
+  .bnav #qaBtn{width:66px;height:66px}
+}
 @media (prefers-reduced-motion:reduce){ .bnav .qa-items button,.bnav #qaBtn .ico{transition:none} }
 
 /* 搜尋時一起列出的已喝完／非酒窖：變淡，左上角有標籤 */
