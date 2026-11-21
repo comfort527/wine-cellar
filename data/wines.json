@@ -1145,20 +1145,14 @@
    "drinkWindow": "",
    "entryDate": "",
    "grapeNotes": "AIT處長先生",
-   "locations": [
-    {
-     "cabinet": "8樓右LB櫃",
-     "shelf": "第7層",
-     "quantity": 1
-    }
-   ],
+   "locations": [],
    "origin": "Turkey",
    "photo": "images/W036-1795228186915.jpg",
    "referencePrice": 900,
-   "revision": 5,
+   "revision": 6,
    "source": "贈",
-   "status": "active",
-   "updatedAt": "2026-11-21T03:52:47.210Z",
+   "status": "archived",
+   "updatedAt": "2026-11-21T03:53:34.650Z",
    "updatedBy": "芝琦",
    "vintage": "2021",
    "volume": "750ml",
@@ -1171,7 +1165,9 @@
      "thumb": "images/W036-1795228186915-t.jpg"
     }
    ],
-   "thumb": "images/W036-1795228186915-t.jpg"
+   "thumb": "images/W036-1795228186915-t.jpg",
+   "archivedAt": "2026-11-21T03:53:34.650Z",
+   "archivedBy": "芝琦"
   },
   "W037": {
    "createdAt": "",
@@ -2090,8 +2086,8 @@
    "revision": 3
   }
  },
- "rev": 168,
- "updatedAt": "2026-11-21T03:52:47.211Z",
+ "rev": 169,
+ "updatedAt": "2026-11-21T03:53:34.650Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
