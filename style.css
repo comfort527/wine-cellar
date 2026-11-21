@@ -498,7 +498,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261121f";
+:root{--ver:"20261121g";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
@@ -1084,7 +1084,20 @@ dialog.swap[open]:not(.closing){animation:none!important}
   .bnav .qa-items i .ico{width:24px;height:24px;stroke-width:2}
   dialog.has-nav>#bnav.has-qa{right:76px}
 }
-@media (max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px){ .bnav.has-qa{right:88px} }
+/* 手機直放：左邊「酒窖、日誌、管理」一組膠囊；右邊綠色搜尋圓鈕＋酒紅 ＋ 圓鈕一組，三者等高對齊 */
+@media (max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px){
+  .bnav{right:86px;height:64px;padding:5px;align-items:stretch}
+  .bnav.has-qa{right:160px}
+  dialog.has-nav>#bnav{right:74px}
+  dialog.has-nav>#bnav.has-qa{right:148px}
+  .bnav button:not(#qaBtn):not(#bnSearch){justify-content:center}
+  #bnav #bnSearch{position:absolute;top:50%;left:calc(100% + 11px);width:64px;height:64px;padding:0;gap:0;transform:translateY(-50%);display:grid;place-items:center;border-radius:50%;font-size:0;color:#fff;
+    background:radial-gradient(circle at 35% 25%,rgba(255,255,255,.45),transparent 45%),linear-gradient(160deg,#4f9a6a,#1f5a37);border:1px solid rgba(255,255,255,.4);box-shadow:inset 0 1px 1px rgba(255,255,255,.55),inset 0 -2px 4px rgba(0,0,0,.18),0 8px 20px rgba(31,90,55,.32)}
+  #bnav #bnSearch i{width:auto;height:auto;margin:0;background:none;border:0;box-shadow:none}
+  #bnav #bnSearch i .ico{width:26px;height:26px;stroke-width:2.2}
+  #bnav #bnSearch::before{content:none}
+  .bnav .qa{left:calc(100% + 85px)}
+}
 @media (min-width:761px) and (max-width:1180px) and (min-height:600px), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse){ .bnav.has-qa{right:96px} }
 @media (prefers-reduced-motion:reduce){ .bnav .qa-items button,.bnav #qaBtn .ico{transition:none} }
 
