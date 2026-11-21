@@ -112,8 +112,11 @@ function sbCount() { if ($('sbCount')) $('sbCount').textContent = searching() &&
 // 鍵盤跳出時，畫面可見的範圍變矮：把搜尋列往上推到鍵盤上方
 function sbPlace() {
   const vv = window.visualViewport; if (!vv) { $('sbar').style.transform = ''; return; }
-  const off = searching() ? Math.max(0, Math.round(innerHeight - vv.height - vv.offsetTop)) : 0;
-  $('sbar').style.transform = off ? `translateY(${-off}px)` : '';
+  const sb = $('sbar'), off = searching() ? Math.max(0, Math.round(innerHeight - vv.height - vv.offsetTop)) : 0;
+  sb.style.transform = ''; if (!off) return;
+  // 鍵盤打開時：搜尋列直接貼在鍵盤（含 iPhone 鍵盤上方的系統工具列）上方 6px，不再多留底部安全區的空隙
+  const gap = innerHeight - sb.getBoundingClientRect().bottom;
+  sb.style.transform = `translateY(${-Math.max(0, off - gap + 6)}px)`;
 }
 window.visualViewport?.addEventListener('resize', sbPlace);
 window.visualViewport?.addEventListener('scroll', sbPlace);
@@ -154,7 +157,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261121j';
+const APP_VER = '20261121k';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -427,7 +430,7 @@ function expandTemplates(root = document) {
   // 搜尋框：放大鏡＋輸入框＋清除鍵
   for (const el of root.querySelectorAll('label.search[data-input]')) {
     const [id, ph, label, clear, clearLabel] = take(el, 'data-input', 'data-ph', 'data-label', 'data-clear', 'data-clear-label');
-    el.innerHTML = `<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="6"/><path d="m14 14 4 4"/></svg><input id="${id}" type="search" placeholder="${ph}" aria-label="${label}"><button type="button" id="${clear}" aria-label="${clearLabel}">×</button>`;
+    el.innerHTML = `<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="6"/><path d="m14 14 4 4"/></svg><input id="${id}" type="search" placeholder="${ph}" aria-label="${label}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" data-1p-ignore data-lpignore="true"><button type="button" id="${clear}" aria-label="${clearLabel}">×</button>`;
   }
   // 圖示：<i data-icon="home"></i>
   for (const el of root.querySelectorAll('i[data-icon]')) { const [name] = take(el, 'data-icon'); el.setAttribute('aria-hidden', 'true'); el.innerHTML = icon(name); }
