@@ -18,6 +18,9 @@ button.primary:hover{background:var(--wine-2);border-color:var(--wine-2)}
 button.ghost{background:transparent}
 button.small{padding:5px 10px;font-size:20px;border-radius:8px}
 button.danger{color:var(--bad);border-color:currentColor;background:transparent}
+button.danger.arm{color:#fff;background:var(--bad);border-color:var(--bad)}
+.dw-del{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.dw-del .hint{margin:0}
 button.link{border:0;background:none;padding:0;color:var(--wine);font-weight:500}
 input,select,textarea{width:100%;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface)}
 textarea{min-height:88px;resize:vertical}
@@ -495,7 +498,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261121b";
+:root{--ver:"20261121c";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
