@@ -498,7 +498,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261121h";
+:root{--ver:"20261121i";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
@@ -1094,7 +1094,7 @@ dialog.swap[open]:not(.closing){animation:none!important}
   #bnav #bnSearch{position:absolute;top:50%;left:calc(100% + 11px);width:64px;height:64px;padding:0;gap:0;transform:translateY(-50%);display:flex;flex-direction:row;align-items:center;justify-content:center;border-radius:50%;font-size:0;line-height:0;color:#fff;
     background:radial-gradient(circle at 35% 25%,rgba(255,255,255,.45),transparent 45%),linear-gradient(160deg,#4f9a6a,#1f5a37);border:1px solid rgba(255,255,255,.4);box-shadow:inset 0 1px 1px rgba(255,255,255,.55),inset 0 -2px 4px rgba(0,0,0,.18),0 8px 20px rgba(31,90,55,.32)}
   #bnav #bnSearch i{width:auto;height:auto;margin:0;background:none;border:0;box-shadow:none;line-height:0}
-  #bnav #bnSearch i .ico{width:26px;height:26px;stroke-width:2.2}
+  #bnav #bnSearch i .ico{width:34px;height:34px;stroke-width:2.1;transform:translate(-1px,-1px)}  /* 放大；放大鏡圖形本身偏右下，往左上挪 1px 看起來才在正中間 */
   #bnav #bnSearch::before{content:none}
   .bnav .qa{left:calc(100% + 85px)}
 }
