@@ -13,10 +13,10 @@
 <meta name="theme-color" content="#eef0ec" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1412" media="(prefers-color-scheme: dark)">
 <title>酒窖</title>
-<link rel="icon" href="icons/favicon.svg?v=20261121e" type="image/svg+xml">
-<link rel="icon" href="icons/favicon-96.png?v=20261121e" sizes="96x96" type="image/png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=20261121e">
-<link rel="manifest" href="manifest.webmanifest?v=20261121e">
+<link rel="icon" href="icons/favicon.svg?v=20261121f" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-96.png?v=20261121f" sizes="96x96" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=20261121f">
+<link rel="manifest" href="manifest.webmanifest?v=20261121f">
 <meta name="apple-mobile-web-app-title" content="酒窖">
 <meta name="application-name" content="酒窖">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -24,13 +24,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261121e" id="mainCss">
+<link rel="stylesheet" href="style.css?v=20261121f" id="mainCss">
 </head>
 <body class="loading">
 <header class="bar">
  <div class="bar-in">
   <a class="mark" href="#" id="homeLink" aria-label="回到全部酒款">
-   <img class="mark-ic" src="icons/logo.svg?v=20261121e" alt="" width="36" height="40">
+   <img class="mark-ic" src="icons/logo.svg?v=20261121f" alt="" width="36" height="40">
    <span class="mark-t">酒窖</span>
   </a>
   <span class="sync" id="sync"><span class="dot"></span><span id="syncText">讀取中</span></span>
@@ -343,7 +343,7 @@
   <p class="hint">層位</p><div class="chips" id="shelfChips"></div>
   <form class="inline" id="locForm" novalidate><div class="field"><label for="l_type">類型</label><select id="l_type"><option value="cabinets">櫃位</option><option value="shelves">層位</option></select></div><div class="field"><label for="l_name">名稱</label><input id="l_name" maxlength="80" placeholder="例如 A櫃、第 2 層"></div><button class="primary" type="submit">新增</button></form>
   <div class="ferr" id="locErr" hidden></div>
-  <div id="locDel" hidden><h3 class="hist-h">刪除櫃位／層位</h3><p class="hint" style="margin-top:0">只有工程人員看得到。按一次 × 或「刪除這一櫃」會先問「確定？」，再按一次才刪除。<b>裡面還有酒的不能刪</b>，請先移到別層或出庫。刪除後出庫、移動的歷史紀錄照樣保留。</p><div id="locDelList"></div></div>
+  <div id="locDel" hidden><h3 class="hist-h">刪除櫃位／層位</h3><p class="hint" style="margin-top:0">工程人員與管理員看得到。按一次 × 或「刪除這一櫃」會先問「確定？」，再按一次才刪除。<b>裡面還有酒的不能刪</b>，請先移到別層或出庫。刪除後出庫、移動的歷史紀錄照樣保留。</p><div id="locDelList"></div></div>
  </section>
  <section id="tab-ai" hidden>
   <p class="hint" style="margin-top:0">填入<b>你自己</b>的 AI 金鑰並驗證成功後，「新增紅酒」的照片欄會多一個「✨ 智慧辨識」按鈕，依照片自動填入酒名、年份、產地等欄位。金鑰只存在這台裝置、只給目前登入的「<b id="aiWho"></b>」使用，不會上傳到 GitHub，其他編輯者看不到；<b>儲存 30 分鐘後自動清除</b>，要用再重新貼上。</p>
@@ -357,7 +357,7 @@
   </form>
  </section>
  <section id="tab-keys" hidden>
-  <p class="hint" style="margin-top:0">每台裝置一組密碼，刪除後該裝置就無法再登入。<b>使用者</b>：對已建好的酒款出庫、移動，拍照放進待入櫃，記錄飲酒日誌。<b>管理員</b>：另外可以新增、編輯酒款、管理照片與待入櫃、設定櫃位、匯出。<b>工程人員</b>：另外可以管理裝置密碼、新增／刪除人員、變更身分與更換權杖。要改某個人的身分，直接在他名字旁的選單換掉即可。</p>
+  <p class="hint" style="margin-top:0">每台裝置一組密碼，刪除後該裝置就無法再登入。<b>使用者</b>：對已建好的酒款出庫、移動，拍照放進待入櫃，記錄飲酒日誌。<b>管理員</b>：另外可以新增、編輯酒款、管理照片與待入櫃、設定與刪除櫃位／層位、刪除已喝完的酒款紀錄、匯出。<b>工程人員</b>：另外可以管理裝置密碼、新增／刪除人員、變更身分與更換權杖。要改某個人的身分，直接在他名字旁的選單換掉即可。</p>
   <div id="slotList"></div>
   <form id="slotForm" novalidate><fieldset><legend>新增裝置</legend>
    <div class="inline" style="margin-top:0"><div class="field"><label for="k_label">裝置名稱</label><input id="k_label" maxlength="40" placeholder="例如 客廳 iPad"></div><div class="field"><label for="k_role">身分</label><select id="k_role"><option value="user">使用者</option><option value="editor">管理員</option><option value="admin">工程人員</option></select></div></div>
@@ -382,7 +382,7 @@
 
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="config.js?v=20261121e"></script>
-<script src="app.js?v=20261121e"></script>
+<script src="config.js?v=20261121f"></script>
+<script src="app.js?v=20261121f"></script>
 </body>
 </html>
