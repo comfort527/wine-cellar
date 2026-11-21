@@ -1849,15 +1849,15 @@
    "origin": "",
    "photo": "images/W060-1795228005879.jpg",
    "referencePrice": 825,
-   "revision": 3,
+   "revision": 4,
    "source": "購",
    "status": "archived",
-   "updatedAt": "2026-11-21T02:26:51.929Z",
+   "updatedAt": "2026-11-21T04:57:58.106Z",
    "updatedBy": "芝琦",
    "vintage": "2020",
    "volume": "750ml",
-   "wineName": "VITICCIO CHIANTI CLASSCIO 55(金鑰匙)",
-   "wineryRegion": "VITICCIO/CHIANTI CLASSCIO",
+   "wineName": "VITICCIO CHIANTI CLASSICO 55(金鑰匙)",
+   "wineryRegion": "VITICCIO/CHIANTI CLASSICO",
    "color": "red",
    "archivedAt": "2026-11-13T02:01:49.261Z",
    "archivedBy": "芝琦",
@@ -2086,8 +2086,8 @@
    "revision": 3
   }
  },
- "rev": 169,
- "updatedAt": "2026-11-21T03:53:34.650Z",
+ "rev": 170,
+ "updatedAt": "2026-11-21T04:57:58.107Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
