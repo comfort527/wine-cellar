@@ -1149,10 +1149,10 @@
    "origin": "Turkey",
    "photo": "images/W036-1795228186915.jpg",
    "referencePrice": 900,
-   "revision": 3,
+   "revision": 4,
    "source": "贈",
    "status": "archived",
-   "updatedAt": "2026-11-21T02:29:51.903Z",
+   "updatedAt": "2026-11-21T03:52:13.634Z",
    "updatedBy": "芝琦",
    "vintage": "2021",
    "volume": "750ml",
@@ -2086,8 +2086,8 @@
    "revision": 3
   }
  },
- "rev": 166,
- "updatedAt": "2026-11-21T02:29:51.903Z",
+ "rev": 167,
+ "updatedAt": "2026-11-21T03:52:13.634Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
