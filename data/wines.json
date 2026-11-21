@@ -2006,7 +2006,7 @@
    "color": "white"
   },
   "W065": {
-   "wineName": "INSIGNIA-Claire借放",
+   "wineName": "INSIGNIA",
    "wineryRegion": "JOSEPH PHELPS/Napa valley",
    "vintage": "2021",
    "entryDate": "",
@@ -2039,9 +2039,9 @@
    "status": "active",
    "createdAt": "2026-11-15T02:34:35.501Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-15T03:15:43.781Z",
+   "updatedAt": "2026-11-21T12:01:48.275Z",
    "updatedBy": "芝琦",
-   "revision": 4
+   "revision": 5
   },
   "W066": {
    "wineName": "Cabernet Sauvignon Ice Wine",
@@ -2086,8 +2086,8 @@
    "revision": 3
   }
  },
- "rev": 174,
- "updatedAt": "2026-11-21T05:19:37.420Z",
+ "rev": 175,
+ "updatedAt": "2026-11-21T12:01:48.275Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
