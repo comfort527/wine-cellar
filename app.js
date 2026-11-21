@@ -20,7 +20,7 @@ const S = {
   data: null, etag: null, keys: null, keysSha: null, session: null,
   filter: null, search: '', view: 'list', 
   editing: null, stock: null, photo: null, localPhotos: new Map(),
-  sort: 'loc', drawer: null, newPhotos: [], pendKeep: [], pendNew: [], jt: 'cal', js: {q: '', type: '', when: 'all', hi: false}, jm: {q: '', sort: 'freq', group: 'all'},
+  sort: 'loc', drawer: null, newPhotos: [], pendKeep: [], pendNew: [], jt: 'cal', js: {q: '', type: '', when: 'all', hi: false}, jm: {q: '', group: 'recent'},
   busy: 0, lastPoll: 0, syncedAt: null, rawFallback: false, auditPage: 1, auditWine: '', audit: []
 };
 S.view = 'grid';
@@ -961,7 +961,6 @@ function wire() {
   const chipGroup = (id, fn) => $(id).addEventListener('click', e => { const b = e.target.closest('button'); if (b) { fn(b); renderJTab(); } });
   chipGroup('js_type', b => { S.js.type = b.dataset.v; });
   chipGroup('js_when', b => { if (b.hasAttribute('data-hi')) S.js.hi = !S.js.hi; else S.js.when = b.dataset.v; });
-  chipGroup('jm_sort', b => { S.jm.sort = b.dataset.v; renderMem(); });
   chipGroup('jm_group', b => { S.jm.group = b.dataset.v; renderMem(); });
   $('js_q').addEventListener('input', e => { S.js.q = e.target.value; renderJSearch(); });
   $('jm_q').addEventListener('input', e => { S.jm.q = e.target.value; renderMem(); });
@@ -2343,32 +2342,33 @@ function memItems() {
   }
   return items;
 }
-function memLine(it) {
+function memLine(it, noAvg) {
   const parts = [];
   if (it.winery) parts.push(esc(it.winery));
   if (it.count) { const kinds = Object.entries(it.byType).filter(([k]) => k !== '送禮').map(([k, n]) => `${k} ${n}`); parts.push(`喝過 ${it.count} 次${kinds.length > 1 ? `（${kinds.join('、')}）` : ''}`); }
   if (it.gifts) parts.push(`送禮 ${it.gifts} 次`);
-  if (it.avg) parts.push(`★${it.avg.toFixed(1)}`);
+  if (it.avg && !noAvg) parts.push(`★${it.avg.toFixed(1)}`);
   if (!it.events.length) parts.push('還沒有飲用紀錄');
   return parts.join('・');
 }
 const stockBadge = it => it.kind === 'ext' ? '<span class="stock none">不在酒窖</span>' : it.stock > 0 ? `<span class="stock">庫存 ${it.stock} 瓶</span>` : '<span class="stock none">已喝完</span>';
 function renderMem() {
   const f = S.jm, q = normKey(f.q);
-  setChips('jm_sort', b => b.dataset.v === f.sort); setChips('jm_group', b => b.dataset.v === f.group);
+  setChips('jm_group', b => b.dataset.v === f.group);
   const ld = it => it.last ? it.last.date + it.last.at : '';
-  let list = memItems().filter(it => (f.group === 'all' || (f.group === 'have' ? it.kind === 'cellar' && it.stock > 0 : !(it.kind === 'cellar' && it.stock > 0)))
+  const list = memItems().filter(it => (f.group !== 'gone' || !(it.kind === 'cellar' && it.stock > 0))
     && (!q || normKey([it.name, it.vintage, it.winery, it.origin].join(' ')).includes(q)));
-  const byName = (a, b) => a.name.localeCompare(b.name, 'en') || String(a.vintage).localeCompare(String(b.vintage));
-  list.sort(f.sort === 'name' ? byName : f.sort === 'recent' ? (a, b) => ld(b).localeCompare(ld(a)) || byName(a, b)
-    : f.sort === 'rating' ? (a, b) => b.avg - a.avg || b.count - a.count || byName(a, b) : (a, b) => b.count - a.count || b.events.length - a.events.length || ld(b).localeCompare(ld(a)) || byName(a, b));
-  $('jm_sum').innerHTML = `所有登錄過的酒（酒窖的、喝完的、別人帶來的）都在這裡，${q || f.group !== 'all' ? '符合' : '共'} <b>${list.length}</b> 款`;
+  // 最近喝的排前面；沒喝過的排最後，依名稱
+  list.sort((a, b) => ld(b).localeCompare(ld(a)) || a.name.localeCompare(b.name, 'en') || String(a.vintage).localeCompare(String(b.vintage)));
+  $('jm_sum').innerHTML = `所有登錄過的酒（酒窖的、喝完的、別人帶來的）都在這裡，${q || f.group !== 'recent' ? '符合' : '共'} <b>${list.length}</b> 款`;
   $('jm_list').innerHTML = list.map(it => {
     const ph = it.photo ? `<img src="${esc(it.photo)}" alt="" loading="lazy">` : `<span class="ph">${esc(it.vintage || 'NV')}</span>`;
     const last = it.last ? `最近 ${mdDate(it.last.date)} ${esc(it.last.kind === 'ext' ? '非酒窖' : it.last.type)}${it.last.note ? ' ' + esc(it.last.note) : ''}` : '';
-    return `<div class="lib" data-mem="${esc(it.key)}" role="button" tabindex="0">${ph}<div><div class="t">${esc(it.name)}${it.vintage ? ` <span class="v">${esc(it.vintage)}</span>` : ''}</div><div class="s">${memLine(it)}${last ? '<br>' + last : ''}　${stockBadge(it)}</div></div></div>`;
+    return `<div class="lib" data-mem="${esc(it.key)}" role="button" tabindex="0"><span class="lph">${ph}${avgStars(it.avg)}</span><div><div class="t">${esc(it.name)}${it.vintage ? ` <span class="v">${esc(it.vintage)}</span>` : ''}</div><div class="s">${memLine(it, true)}${last ? '<br>' + last : ''}　${stockBadge(it)}</div></div></div>`;
   }).join('') || '<p class="hint">沒有符合的酒款。</p>';
 }
+// 照片下方的平均評分：金色星星依分數填滿（可到小數），旁邊標分數
+const avgStars = a => a ? `<span class="lstars" aria-label="平均評分 ${a.toFixed(1)}／5"><span class="lsr" style="--r:${a.toFixed(2)}">★★★★★<b>★★★★★</b></span><em>${a.toFixed(1)}</em></span>` : '';
 function openMem(key) { S.memKey = key; renderMemDetail(); if (!$('memModal').open || isClosing($('memModal'))) showDialog('memModal'); }
 function renderMemDetail() {
   const it = memItems().find(i => i.key === S.memKey); if (!it) { $('memModal').close(); return; }
