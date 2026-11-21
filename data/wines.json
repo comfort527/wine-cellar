@@ -1147,12 +1147,12 @@
    "grapeNotes": "AIT處長先生",
    "locations": [],
    "origin": "Turkey",
-   "photo": "",
+   "photo": "images/W036-1795228186915.jpg",
    "referencePrice": 900,
-   "revision": 2,
+   "revision": 3,
    "source": "贈",
    "status": "archived",
-   "updatedAt": "2026-11-15T02:28:10.179Z",
+   "updatedAt": "2026-11-21T02:29:51.903Z",
    "updatedBy": "芝琦",
    "vintage": "2021",
    "volume": "750ml",
@@ -1160,7 +1160,14 @@
    "wineryRegion": "Likya/Mediterranean",
    "color": "red",
    "archivedAt": "2026-11-15T02:28:10.179Z",
-   "archivedBy": "芝琦"
+   "archivedBy": "芝琦",
+   "photos": [
+    {
+     "photo": "images/W036-1795228186915.jpg",
+     "thumb": "images/W036-1795228186915-t.jpg"
+    }
+   ],
+   "thumb": "images/W036-1795228186915-t.jpg"
   },
   "W037": {
    "createdAt": "",
@@ -2079,8 +2086,8 @@
    "revision": 3
   }
  },
- "rev": 165,
- "updatedAt": "2026-11-21T02:26:51.929Z",
+ "rev": 166,
+ "updatedAt": "2026-11-21T02:29:51.903Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
