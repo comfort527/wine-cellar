@@ -104,19 +104,18 @@ function exitSearch(clear) {
   if (!searching()) return;
   document.body.classList.remove('searching');
   if (sbSlot) sbSlot.after($('search').closest('label'));
-  $('sbar').style.transform = '';
+  $('sbar').style.transform = $('sbar').style.bottom = '';
   $('search').blur();
   if (clear) { S.search = ''; $('search').value = ''; render(); }
 }
 function sbCount() { if ($('sbCount')) $('sbCount').textContent = searching() && S.search.trim() ? `找到 ${S.searchHits || 0} 款` : ''; }
 // 鍵盤跳出時，畫面可見的範圍變矮：把搜尋列往上推到鍵盤上方
 function sbPlace() {
-  const vv = window.visualViewport; if (!vv) { $('sbar').style.transform = ''; return; }
+  const vv = window.visualViewport; if (!vv) { $('sbar').style.transform = $('sbar').style.bottom = ''; return; }
   const sb = $('sbar'), off = searching() ? Math.max(0, Math.round(innerHeight - vv.height - vv.offsetTop)) : 0;
-  sb.style.transform = ''; if (!off) return;
-  // 鍵盤打開時：搜尋列直接貼在鍵盤（含 iPhone 鍵盤上方的系統工具列）上方 6px，不再多留底部安全區的空隙
-  const gap = innerHeight - sb.getBoundingClientRect().bottom;
-  sb.style.transform = `translateY(${-Math.max(0, off - gap + 6)}px)`;
+  // 鍵盤打開時：搜尋列直接貼在鍵盤（含 iPhone 鍵盤上方的系統工具列）上方 6px，不再多留底部安全區的空隙。
+  // 只用鍵盤高度來放，不去量搜尋列的位置（iPhone 回報的位置跟一般瀏覽器不同，量了會算錯）
+  sb.style.transform = ''; sb.style.bottom = off ? `${off + 6}px` : '';
 }
 window.visualViewport?.addEventListener('resize', sbPlace);
 window.visualViewport?.addEventListener('scroll', sbPlace);
@@ -157,7 +156,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261121k';
+const APP_VER = '20261121l';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
