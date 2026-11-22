@@ -2032,7 +2032,13 @@
    "source": "購",
    "color": "red",
    "referencePrice": 9800,
-   "locations": [],
+   "locations": [
+    {
+     "cabinet": "8樓右LB櫃",
+     "shelf": "第8層",
+     "quantity": 1
+    }
+   ],
    "photo": "images/new-1794710064404.jpg",
    "thumb": "images/new-1794710064404-t.jpg",
    "photos": [
@@ -2045,14 +2051,12 @@
      "thumb": "images/new-1794710070261-t.jpg"
     }
    ],
-   "status": "archived",
+   "status": "active",
    "createdAt": "2026-11-15T02:34:35.501Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-22T06:36:48.615Z",
+   "updatedAt": "2026-11-22T06:50:55.374Z",
    "updatedBy": "芝琦",
-   "revision": 8,
-   "archivedAt": "2026-11-22T06:36:48.615Z",
-   "archivedBy": "芝琦"
+   "revision": 9
   },
   "W066": {
    "wineName": "Cabernet Sauvignon Ice Wine",
@@ -2199,8 +2203,8 @@
    "revision": 2
   }
  },
- "rev": 201,
- "updatedAt": "2026-11-22T06:50:28.667Z",
+ "rev": 202,
+ "updatedAt": "2026-11-22T06:50:55.374Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
