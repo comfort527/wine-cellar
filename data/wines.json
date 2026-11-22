@@ -2165,18 +2165,24 @@
    "revision": 3
   },
   "W069": {
-   "wineName": "INISGINA",
+   "wineName": "INSIGNIA",
    "wineryRegion": "",
-   "vintage": "",
+   "vintage": "2021",
    "entryDate": "",
    "drinkWindow": "",
    "grapeNotes": "",
-   "origin": "",
+   "origin": "United States",
    "volume": "750ml",
-   "source": "",
+   "source": "購",
    "color": "red",
    "referencePrice": null,
-   "locations": [],
+   "locations": [
+    {
+     "cabinet": "7樓SUB",
+     "shelf": "第1層",
+     "quantity": 1
+    }
+   ],
    "photo": "images/pending-1795329752313.jpg",
    "thumb": "images/pending-1795329752313-t.jpg",
    "photos": [
@@ -2185,16 +2191,16 @@
      "thumb": "images/pending-1795329752313-t.jpg"
     }
    ],
-   "status": "archived",
+   "status": "active",
    "createdAt": "2026-11-22T06:49:42.864Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-22T06:49:42.864Z",
+   "updatedAt": "2026-11-22T06:50:28.667Z",
    "updatedBy": "芝琦",
-   "revision": 1
+   "revision": 2
   }
  },
- "rev": 200,
- "updatedAt": "2026-11-22T06:49:42.865Z",
+ "rev": 201,
+ "updatedAt": "2026-11-22T06:50:28.667Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
