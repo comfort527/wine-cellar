@@ -2294,19 +2294,24 @@
      "quantity": 1
     }
    ],
-   "photo": "",
-   "thumb": "",
-   "photos": [],
+   "photo": "images/W072-1795331465417.jpg",
+   "thumb": "images/W072-1795331465417-t.jpg",
+   "photos": [
+    {
+     "photo": "images/W072-1795331465417.jpg",
+     "thumb": "images/W072-1795331465417-t.jpg"
+    }
+   ],
    "status": "active",
    "createdAt": "2026-11-22T07:10:57.705Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-22T07:10:57.705Z",
+   "updatedAt": "2026-11-22T07:11:07.307Z",
    "updatedBy": "芝琦",
-   "revision": 1
+   "revision": 2
   }
  },
- "rev": 209,
- "updatedAt": "2026-11-22T07:10:57.705Z",
+ "rev": 210,
+ "updatedAt": "2026-11-22T07:11:07.307Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
