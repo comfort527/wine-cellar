@@ -156,7 +156,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261121n';
+const APP_VER = '20261122a';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -2214,8 +2214,11 @@ const XLSX_STYLES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 </cellXfs>
 <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
 </styleSheet>`;
-const XL_HEAD = ['Region', '酒莊/產區', '酒名', '年份', '容量', '數量', '參考價格', '來源', '位置', '其他備註/葡萄品種', '產地'];
-const XL_HEAD_ST = [XS.head, XS.head, XS.head, XS.head, XS.head, XS.head, XS.head, XS.head, XS.head, XS.head, XS.head];
+const XL_HEAD = ['Region', '酒莊/產區', '酒名', '年份', '容量', '數量', '參考價格', '來源', '位置', '其他備註/葡萄品種', '產地', '照片'];
+const XL_HEAD_ST = XL_HEAD.map(() => XS.head);
+const XL_DATA = 'BCDEFGHIJKL';   // 有框線的欄（A 隱藏）；L＝照片縮圖
+// 縮圖：有照片的那一列加高，圖片置中放在 L 欄
+const XL_PIC = {rowPt: 96, maxH: 86, maxW: 92, colPt: 104};
 const XL_COLS = '<cols><col min="1" max="1" width="33.43" hidden="1" customWidth="1"/><col min="2" max="3" width="90.57" customWidth="1"/><col min="4" max="6" width="18.57" customWidth="1"/><col min="7" max="7" width="24" customWidth="1"/><col min="8" max="9" width="18.57" customWidth="1"/><col min="10" max="10" width="63.57" customWidth="1"/><col min="11" max="11" width="27" customWidth="1"/><col min="12" max="12" width="19" customWidth="1"/><col min="13" max="13" width="20.86" customWidth="1"/></cols>';
 // 一格：數字、文字或公式
 function xlCell(ref, v, st) {
@@ -2230,29 +2233,29 @@ function xlWineRow(r, x) {
   const yr = /^\d{4}$/.test(String(x.w.vintage || '').trim()) ? Number(x.w.vintage) : String(x.w.vintage || '');
   const price = x.w.referencePrice == null || x.w.referencePrice === '' ? '' : Number.isFinite(Number(x.w.referencePrice)) ? Number(x.w.referencePrice) : String(x.w.referencePrice);
   return xlRow(r, [['A', '', 0], ['B', x.w.wineryRegion || '', XS.text], ['C', x.w.wineName || '', XS.text], ['D', yr, XS.mid], ['E', x.w.volume || '', XS.mid], ['F', x.qty, XS.mid],
-    ['G', price, XS.price], ['H', x.w.source || '', XS.cjkMid], ['I', x.code, XS.mid], ['J', x.w.grapeNotes || '', XS.cjkLeft], ['K', x.w.origin || '', XS.cjkLeft]]);
+    ['G', price, XS.price], ['H', x.w.source || '', XS.cjkMid], ['I', x.code, XS.mid], ['J', x.w.grapeNotes || '', XS.cjkLeft], ['K', x.w.origin || '', XS.cjkLeft], ['L', '', XS.mid]], x.pic ? XL_PIC.rowPt : 33);
 }
-const xlBlank = r => xlRow(r, 'BCDEFGHIJK'.split('').map(c => [c, '', 'BC'.includes(c) || 'JK'.includes(c) ? XS.text : XS.mid]), 30);
+const xlBlank = r => xlRow(r, XL_DATA.split('').map(c => [c, '', 'BC'.includes(c) || 'JK'.includes(c) ? XS.text : XS.mid]), 30);
 function xlSheet({title, hint, hintAt, blocks, sums, headRow}) {
-  const rows = [], merges = [];
+  const rows = [], merges = [], pics = [];
   let r = 1;
   if (hint) { rows.push(xlRow(r, [[hintAt[0], hint, XS.hint], [hintAt[1], '', XS.hint]], 48.95)); merges.push(`${hintAt[0]}1:${hintAt[1]}1`); r++; }
-  rows.push(xlRow(r, 'BCDEFGHIJK'.split('').map((c, i) => [c, i ? '' : title, XS.title]))); merges.push(`B${r}:K${r}`); r++;
+  rows.push(xlRow(r, XL_DATA.split('').map((c, i) => [c, i ? '' : title, XS.title]))); merges.push(`B${r}:L${r}`); r++;
   rows.push(xlRow(r, XL_HEAD.map((h, i) => [colName(i), h, XL_HEAD_ST[i]]))); r++;
   const first = r;
   blocks.forEach((list, bi) => {
     if (bi) { rows.push(xlBlank(r)); r++; }
     const start = r;
-    for (const x of list) { rows.push(xlWineRow(r, x)); r++; }
-    if (sums) { rows.push(xlRow(r, 'BCDEFGHIJK'.split('').map(c => [c, c === 'F' ? {f: `SUM(F${start}:F${r - 1})`, v: list.reduce((a, x) => a + (Number(x.qty) || 0), 0)} : '', 'BC'.includes(c) || 'JK'.includes(c) ? XS.text : XS.mid]))); r++; }
+    for (const x of list) { rows.push(xlWineRow(r, x)); if (x.pic) pics.push({row: r, pic: x.pic}); r++; }
+    if (sums) { rows.push(xlRow(r, XL_DATA.split('').map(c => [c, c === 'F' ? {f: `SUM(F${start}:F${r - 1})`, v: list.reduce((a, x) => a + (Number(x.qty) || 0), 0)} : '', 'BC'.includes(c) || 'JK'.includes(c) ? XS.text : XS.mid]))); r++; }
   });
   const last = Math.max(r - 1, first), head = first - 1;
-  return {last, head, xml: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><dimension ref="A1:M${last}"/><sheetViews><sheetView zoomScale="60" zoomScaleNormal="60" workbookViewId="0"><pane ySplit="${head}" topLeftCell="A${head + 1}" activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft" activeCell="B${head + 1}" sqref="B${head + 1}"/></sheetView></sheetViews><sheetFormatPr defaultColWidth="11" defaultRowHeight="30"/>${XL_COLS}<sheetData>${rows.join('')}</sheetData><autoFilter ref="A${head}:M${head}"/><mergeCells count="${merges.length}">${merges.map(m => `<mergeCell ref="${m}"/>`).join('')}</mergeCells><printOptions horizontalCentered="1"/><pageMargins left="0" right="0" top="0" bottom="0" header="0" footer="0"/><pageSetup paperSize="9" fitToHeight="0" orientation="landscape"/><headerFooter><oddFooter>第 &amp;P 頁，共 &amp;N 頁</oddFooter></headerFooter></worksheet>`};
+  return {last, head, pics, xml: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><dimension ref="A1:M${last}"/><sheetViews><sheetView zoomScale="60" zoomScaleNormal="60" workbookViewId="0"><pane ySplit="${head}" topLeftCell="A${head + 1}" activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft" activeCell="B${head + 1}" sqref="B${head + 1}"/></sheetView></sheetViews><sheetFormatPr defaultColWidth="11" defaultRowHeight="30"/>${XL_COLS}<sheetData>${rows.join('')}</sheetData><autoFilter ref="A${head}:M${head}"/><mergeCells count="${merges.length}">${merges.map(m => `<mergeCell ref="${m}"/>`).join('')}</mergeCells><printOptions horizontalCentered="1"/><pageMargins left="0" right="0" top="0" bottom="0" header="0" footer="0"/><pageSetup paperSize="9" fitToHeight="0" orientation="landscape"/><headerFooter><oddFooter>第 &amp;P 頁，共 &amp;N 頁</oddFooter></headerFooter>${pics.length ? '<drawing r:id="rId1"/>' : ''}</worksheet>`};
 }
 const byWinery = (a, b) => (a.w.wineryRegion || '').localeCompare(b.w.wineryRegion || '', 'en', {sensitivity: 'base'}) || (a.w.wineName || '').localeCompare(b.w.wineName || '', 'en', {sensitivity: 'base'}) || String(a.w.vintage || '').localeCompare(String(b.w.vintage || ''));
 const byPlace = (a, b) => a.cab.localeCompare(b.cab) || shelfNo(a.shelf) - shelfNo(b.shelf) || byWinery(a, b);
-function buildWorkbook() {
+async function buildWorkbook() {
   const d = new Date(), stamp = `${d.getFullYear()}.${d.getMonth() + 1}.${d.getDate()}`;
   const sites = new Map(), site = n => { if (!sites.has(n)) sites.set(n, {now: [], gone: []}); return sites.get(n); };
   for (const w of active()) for (const l of w.locations || []) if (l.quantity > 0) site(siteOf(l.cabinet)).now.push({w, cab: l.cabinet, shelf: l.shelf, qty: Number(l.quantity) || 0, code: locCode(l.cabinet, l.shelf)});
@@ -2261,6 +2264,17 @@ function buildWorkbook() {
     const qty = outs.reduce((a, o) => a + (Number(o.qty) || 0), 0);
     site(loc.cabinet ? siteOf(loc.cabinet) : SITES[0][1]).gone.push({w, cab: loc.cabinet || '', shelf: loc.shelf || '', qty: qty || '', code: loc.cabinet ? locCode(loc.cabinet, loc.shelf) : ''});
   }
+  // 縮圖：每款酒的第一張照片縮圖，抓下來放進 Excel（同一張只放一次）
+  const media = new Map(), all = [...sites.values()].flatMap(v => [...v.now, ...v.gone]);
+  const need = [...new Set(all.map(x => photosOf(x.w)[0]).filter(Boolean).map(p => p.thumb || p.photo))];
+  const queue = need.slice();
+  await Promise.all(Array.from({length: 6}, async () => { while (queue.length) { const path = queue.shift(); try {
+    const r = await fetchPhoto(path); if (!r.ok) continue;
+    const blob = await r.blob(), bm = await createImageBitmap(blob), png = /png/.test(blob.type);
+    media.set(path, {n: 0, ext: png ? 'png' : 'jpeg', bytes: new Uint8Array(await blob.arrayBuffer()), w: bm.width, h: bm.height}); bm.close?.();
+  } catch {} } }));
+  let mi = 0; for (const path of need) if (media.has(path)) media.get(path).n = ++mi;
+  for (const x of all) { const p = photosOf(x.w)[0]; x.pic = p ? media.get(p.thumb || p.photo) || null : null; }
   const order = [...sites.keys()].sort((a, b) => (a === SITES[0][1] ? -1 : b === SITES[0][1] ? 1 : a.localeCompare(b)));
   const sheets = [];
   for (const n of order) {
@@ -2275,13 +2289,28 @@ function buildWorkbook() {
   }
   if (!sheets.length) fail('還沒有酒款可以匯出。');
   sheets.forEach(s => { s.name = s.name.replace(/[\\/?*[\]:]/g, '-').slice(0, 31); });
+  // 每張表一個 drawing：圖片固定在 L 欄那一格，置中、不隨欄寬縮放
+  const EMU = 12700, drawings = sheets.map(s => {
+    if (!s.pics.length) return null;
+    const used = [...new Set(s.pics.map(p => p.pic.n))], rid = n => 'rId' + (used.indexOf(n) + 1);
+    const anchors = s.pics.map(({row, pic}, k) => {
+      const sc = Math.min(XL_PIC.maxH / pic.h, XL_PIC.maxW / pic.w), wPt = pic.w * sc, hPt = pic.h * sc;
+      const cx = Math.round(wPt * EMU), cy = Math.round(hPt * EMU), ox = Math.round(Math.max(0, (XL_PIC.colPt - wPt) / 2) * EMU), oy = Math.round(Math.max(0, (XL_PIC.rowPt - hPt) / 2) * EMU);
+      return `<xdr:oneCellAnchor><xdr:from><xdr:col>11</xdr:col><xdr:colOff>${ox}</xdr:colOff><xdr:row>${row - 1}</xdr:row><xdr:rowOff>${oy}</xdr:rowOff></xdr:from><xdr:ext cx="${cx}" cy="${cy}"/><xdr:pic><xdr:nvPicPr><xdr:cNvPr id="${k + 2}" name="照片 ${k + 1}"/><xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="${rid(pic.n)}"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:oneCellAnchor>`;
+    }).join('');
+    const ext = n => [...media.values()].find(m => m.n === n).ext;
+    return {xml: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">${anchors}</xdr:wsDr>`,
+      rels: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${used.map((n, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/image${n}.${ext(n)}"/>`).join('')}</Relationships>`};
+  });
   const files = [
-    ['[Content_Types].xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((s, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}</Types>`],
+    ['[Content_Types].xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="jpeg" ContentType="image/jpeg"/><Default Extension="png" ContentType="image/png"/>${drawings.map((g, i) => g ? `<Override PartName="/xl/drawings/drawing${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>` : '').join('')}<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((s, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}</Types>`],
     ['_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
-    ['xl/workbook.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView/></bookViews><sheets>${sheets.map((s, i) => `<sheet name="${xmlEsc(s.name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('')}</sheets><definedNames>${sheets.map((s, i) => { const q = `'${s.name.replace(/'/g, "''")}'`; return `<definedName name="_xlnm._FilterDatabase" localSheetId="${i}" hidden="1">${xmlEsc(q)}!$A$${s.head}:$M$${s.head}</definedName><definedName name="_xlnm.Print_Area" localSheetId="${i}">${xmlEsc(q)}!$B$1:$K$${s.last}</definedName><definedName name="_xlnm.Print_Titles" localSheetId="${i}">${xmlEsc(q)}!$${s.head - 1}:$${s.head}</definedName>`; }).join('')}</definedNames></workbook>`],
+    ['xl/workbook.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView/></bookViews><sheets>${sheets.map((s, i) => `<sheet name="${xmlEsc(s.name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('')}</sheets><definedNames>${sheets.map((s, i) => { const q = `'${s.name.replace(/'/g, "''")}'`; return `<definedName name="_xlnm._FilterDatabase" localSheetId="${i}" hidden="1">${xmlEsc(q)}!$A$${s.head}:$M$${s.head}</definedName><definedName name="_xlnm.Print_Area" localSheetId="${i}">${xmlEsc(q)}!$B$1:$L$${s.last}</definedName><definedName name="_xlnm.Print_Titles" localSheetId="${i}">${xmlEsc(q)}!$${s.head - 1}:$${s.head}</definedName>`; }).join('')}</definedNames></workbook>`],
     ['xl/_rels/workbook.xml.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((s, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('')}<Relationship Id="rId${sheets.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`],
     ['xl/styles.xml', XLSX_STYLES],
     ...sheets.map((s, i) => [`xl/worksheets/sheet${i + 1}.xml`, s.xml]),
+    ...drawings.flatMap((g, i) => g ? [[`xl/worksheets/_rels/sheet${i + 1}.xml.rels`, `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing${i + 1}.xml"/></Relationships>`], [`xl/drawings/drawing${i + 1}.xml`, g.xml], [`xl/drawings/_rels/drawing${i + 1}.xml.rels`, g.rels]] : []),
+    ...[...media.values()].filter(m => m.n).map(m => [`xl/media/image${m.n}.${m.ext}`, m.bytes]),
   ];
   return {zip: zipStore(files), sheets: sheets.map(s => s.name)};
 }
@@ -2292,7 +2321,7 @@ function zipStore(files) {
   const te = new TextEncoder(), parts = [], dir = []; let off = 0;
   const d = new Date(), dt = ((d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1)) & 0xFFFF, dd = (((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()) & 0xFFFF;
   for (const [name, text] of files) {
-    const nb = te.encode(name), data = te.encode(text), crc = crc32(data);
+    const nb = te.encode(name), data = typeof text === 'string' ? te.encode(text) : text, crc = crc32(data);
     const h = new DataView(new ArrayBuffer(30));
     h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true); h.setUint16(10, dt, true); h.setUint16(12, dd, true);
     h.setUint32(14, crc, true); h.setUint32(18, data.length, true); h.setUint32(22, data.length, true); h.setUint16(26, nb.length, true); h.setUint16(28, 0, true);
@@ -2307,13 +2336,16 @@ function zipStore(files) {
   e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, size, true); e.setUint32(16, off, true);
   return new Blob([...parts, ...dir, new Uint8Array(e.buffer)], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
 }
-function exportXlsx() {
+async function exportXlsx() {
+  const btn = $('exportXlsxBtn'); if (btn.disabled) return;
+  const label = btn.textContent; btn.disabled = true; btn.textContent = '準備照片中…';
   try {
-    const {zip} = buildWorkbook();
+    const {zip} = await buildWorkbook();
     const a = document.createElement('a');
     a.href = URL.createObjectURL(zip); a.download = `wine-cellar-${today()}.xlsx`;   // 檔名用英文：有些瀏覽器遇到中文檔名會變成「download」
     document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
   } catch (e) { toast(msgOf(e)); if (!e.user) console.error(e); }
+  finally { btn.disabled = false; btn.textContent = label; }
 }
 
 /* ---------- 管理 ---------- */
