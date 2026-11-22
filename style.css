@@ -446,6 +446,11 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-ph{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .pend-ph img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block}
 .pend-meta{margin:0;color:var(--muted);font-size:.85em}
+.qstep{display:inline-flex;align-items:center;gap:10px;font-weight:600}
+.qstep button{width:40px;height:40px;min-height:0;padding:0;border-radius:50%;border:1px solid var(--line);background:var(--surface);font-size:22px;line-height:1;color:var(--wine)}
+.qstep button:disabled{opacity:.35}
+.qstep b{min-width:28px;text-align:center;font-size:20px}
+.pend-qty{margin:2px 0}
 .pend-act{display:flex;gap:8px;flex-wrap:wrap}
 .pend-act .primary{flex:1 1 auto}
 .pend-empty{grid-column:1/-1;margin:0}
@@ -498,7 +503,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261122a";
+:root{--ver:"20261122b";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;

@@ -13,10 +13,10 @@
 <meta name="theme-color" content="#eef0ec" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1412" media="(prefers-color-scheme: dark)">
 <title>酒窖</title>
-<link rel="icon" href="icons/favicon.svg?v=20261122a" type="image/svg+xml">
-<link rel="icon" href="icons/favicon-96.png?v=20261122a" sizes="96x96" type="image/png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=20261122a">
-<link rel="manifest" href="manifest.webmanifest?v=20261122a">
+<link rel="icon" href="icons/favicon.svg?v=20261122b" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-96.png?v=20261122b" sizes="96x96" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=20261122b">
+<link rel="manifest" href="manifest.webmanifest?v=20261122b">
 <meta name="apple-mobile-web-app-title" content="酒窖">
 <meta name="application-name" content="酒窖">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -24,13 +24,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261122a" id="mainCss">
+<link rel="stylesheet" href="style.css?v=20261122b" id="mainCss">
 </head>
 <body class="loading">
 <header class="bar">
  <div class="bar-in">
   <a class="mark" href="#" id="homeLink" aria-label="回到全部酒款">
-   <img class="mark-ic" src="icons/logo.svg?v=20261122a" alt="" width="36" height="40">
+   <img class="mark-ic" src="icons/logo.svg?v=20261122b" alt="" width="36" height="40">
    <span class="mark-t">酒窖</span>
   </a>
   <span class="sync" id="sync"><span class="dot"></span><span id="syncText">讀取中</span></span>
@@ -178,7 +178,7 @@
   <div class="field span" id="newPhotoField"><span class="lbl">酒款照片（最多 4 張）</span><div class="photo-in" data-picker="f"></div><div class="pstrip" id="f_strip"></div><div class="ai-row" id="aiRow" hidden><button type="button" class="ai-btn" id="aiBtn">✨ 智慧辨識</button><span class="hint" id="aiMsg"></span></div><span class="hint">照片會自動壓縮到 200 KB 以內，另存一張小縮圖。第一張是封面。</span></div>
  </div>
  <div class="ferr" id="wineErr" hidden></div>
- <div class="dact"><button type="button" data-close>取消</button><button type="submit" class="primary">儲存資料</button></div>
+ <div class="dact"><button type="button" data-close>取消</button><button type="button" id="copyWineBtn" hidden>複製</button><button type="submit" class="primary">儲存資料</button></div>
 </form></dialog>
 
 <dialog class="small" id="stockModal" aria-labelledby="stockTitle" data-title="出庫">
@@ -277,10 +277,11 @@
 
 <dialog id="pendModal" aria-labelledby="pendTitle" data-title="待入櫃">
 <div class="db">
-  <p class="hint" style="margin-top:0">先拍下酒標存起來（每瓶 1–4 張），資料之後再補。取得完整資料後按「編輯並加入酒櫃」，填好酒名與位置就會成為正式酒款。</p>
+  <p class="hint" style="margin-top:0">先拍下酒標存起來（每款 1–4 張）並填數量，資料之後再補。取得完整資料後按「編輯並加入酒櫃」，填好酒名與位置就會成為正式酒款。</p>
   <div class="pend-new">
    <div class="photo-in" id="q_add" data-picker="q"></div>
    <div class="pstrip" id="q_strip"></div>
+   <div class="qstep" id="q_qtyRow" hidden><span>數量</span><button type="button" data-qd="-1" aria-label="少一瓶">−</button><b id="q_qty">1</b><button type="button" data-qd="1" aria-label="多一瓶">＋</button><span>瓶</span></div>
    <div class="ferr" id="pendErr" hidden></div>
    <button type="button" class="primary" id="q_save" hidden>存入待入櫃</button>
   </div>
@@ -383,7 +384,7 @@
 
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="config.js?v=20261122a"></script>
-<script src="app.js?v=20261122a"></script>
+<script src="config.js?v=20261122b"></script>
+<script src="app.js?v=20261122b"></script>
 </body>
 </html>
