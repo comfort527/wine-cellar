@@ -2274,10 +2274,39 @@
    "updatedAt": "2026-11-22T07:08:10.576Z",
    "updatedBy": "芝琦",
    "revision": 1
+  },
+  "W072": {
+   "wineName": "Chenoweth Vineyard Pinot Noir 2023",
+   "wineryRegion": "Joseph Phelps Vineyards",
+   "vintage": "2023",
+   "entryDate": "",
+   "drinkWindow": "",
+   "grapeNotes": "",
+   "origin": "United States",
+   "volume": "750ml",
+   "source": "購",
+   "color": "red",
+   "referencePrice": 3200,
+   "locations": [
+    {
+     "cabinet": "7樓SUB",
+     "shelf": "第2層",
+     "quantity": 1
+    }
+   ],
+   "photo": "",
+   "thumb": "",
+   "photos": [],
+   "status": "active",
+   "createdAt": "2026-11-22T07:10:57.705Z",
+   "createdBy": "芝琦",
+   "updatedAt": "2026-11-22T07:10:57.705Z",
+   "updatedBy": "芝琦",
+   "revision": 1
   }
  },
- "rev": 208,
- "updatedAt": "2026-11-22T07:08:10.576Z",
+ "rev": 209,
+ "updatedAt": "2026-11-22T07:10:57.705Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
