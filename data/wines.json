@@ -2133,20 +2133,20 @@
   "W068": {
    "wineName": "Opus One",
    "wineryRegion": "Opus One Winery",
-   "vintage": "2016",
+   "vintage": "2017",
    "entryDate": "",
    "drinkWindow": "",
-   "grapeNotes": "",
+   "grapeNotes": "彭淮南2023.8",
    "origin": "United States",
    "volume": "750ml",
-   "source": "",
+   "source": "贈",
    "color": "red",
-   "referencePrice": null,
+   "referencePrice": 12616,
    "locations": [
     {
      "cabinet": "7樓SUB",
      "shelf": "第1層",
-     "quantity": 2
+     "quantity": 1
     }
    ],
    "photo": "images/pending-1795329817574.jpg",
@@ -2160,13 +2160,13 @@
    "status": "active",
    "createdAt": "2026-11-22T06:48:01.652Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-22T06:48:01.652Z",
+   "updatedAt": "2026-11-22T06:48:42.480Z",
    "updatedBy": "芝琦",
-   "revision": 1
+   "revision": 2
   }
  },
- "rev": 197,
- "updatedAt": "2026-11-22T06:48:01.652Z",
+ "rev": 198,
+ "updatedAt": "2026-11-22T06:48:42.480Z",
  "pending": [
   {
    "id": "da161333-564d-4bb3-8aab-dd49fd394118",
