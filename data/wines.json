@@ -2179,7 +2179,7 @@
    "volume": "750ml",
    "source": "購",
    "color": "red",
-   "referencePrice": null,
+   "referencePrice": 9800,
    "locations": [
     {
      "cabinet": "7樓SUB",
@@ -2198,13 +2198,13 @@
    "status": "active",
    "createdAt": "2026-11-22T06:49:42.864Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-22T06:50:28.667Z",
+   "updatedAt": "2026-11-22T06:51:22.504Z",
    "updatedBy": "芝琦",
-   "revision": 2
+   "revision": 3
   }
  },
- "rev": 202,
- "updatedAt": "2026-11-22T06:50:55.374Z",
+ "rev": 203,
+ "updatedAt": "2026-11-22T06:51:22.504Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
