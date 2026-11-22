@@ -2095,10 +2095,39 @@
    "updatedAt": "2026-11-15T05:26:43.142Z",
    "updatedBy": "芝琦",
    "revision": 3
+  },
+  "W067": {
+   "wineName": "INSINIA",
+   "wineryRegion": "JOSEPH PHELPS/Napa valley",
+   "vintage": "2019",
+   "entryDate": "",
+   "drinkWindow": "",
+   "grapeNotes": "",
+   "origin": "Italy",
+   "volume": "750ml",
+   "source": "購",
+   "color": "red",
+   "referencePrice": null,
+   "locations": [
+    {
+     "cabinet": "7樓SUB",
+     "shelf": "第1層",
+     "quantity": 2
+    }
+   ],
+   "photo": "",
+   "thumb": "",
+   "photos": [],
+   "status": "active",
+   "createdAt": "2026-11-22T06:38:04.580Z",
+   "createdBy": "芝琦",
+   "updatedAt": "2026-11-22T06:38:04.580Z",
+   "updatedBy": "芝琦",
+   "revision": 1
   }
  },
- "rev": 189,
- "updatedAt": "2026-11-22T06:36:48.615Z",
+ "rev": 190,
+ "updatedAt": "2026-11-22T06:38:04.580Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
