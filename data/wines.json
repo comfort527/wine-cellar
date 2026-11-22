@@ -2237,9 +2237,21 @@
    "revision": 2
   }
  },
- "rev": 206,
- "updatedAt": "2026-11-22T06:53:24.965Z",
- "pending": [],
+ "rev": 207,
+ "updatedAt": "2026-11-22T06:57:41.330Z",
+ "pending": [
+  {
+   "id": "c0ab3f66-d871-43e5-8d69-774d92693f1b",
+   "photos": [
+    {
+     "photo": "images/pending-1795330659280.jpg",
+     "thumb": "images/pending-1795330659280-t.jpg"
+    }
+   ],
+   "by": "芝琦",
+   "at": "2026-11-22T06:57:41.330Z"
+  }
+ ],
  "capacity": {
   "8樓右LB櫃": {
    "第1層": 18,
