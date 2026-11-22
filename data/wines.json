@@ -2139,7 +2139,7 @@
    "wineryRegion": "Opus One Winery",
    "vintage": "2017",
    "entryDate": "",
-   "drinkWindow": "",
+   "drinkWindow": "現在-2040",
    "grapeNotes": "彭淮南2023.8",
    "origin": "United States",
    "volume": "750ml",
@@ -2164,9 +2164,9 @@
    "status": "active",
    "createdAt": "2026-11-22T06:48:01.652Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-22T06:48:55.514Z",
+   "updatedAt": "2026-11-22T07:25:35.898Z",
    "updatedBy": "芝琦",
-   "revision": 3
+   "revision": 4
   },
   "W069": {
    "wineName": "INSIGNIA",
@@ -2310,8 +2310,8 @@
    "revision": 2
   }
  },
- "rev": 210,
- "updatedAt": "2026-11-22T07:11:07.307Z",
+ "rev": 211,
+ "updatedAt": "2026-11-22T07:25:35.898Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
