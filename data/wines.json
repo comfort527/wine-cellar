@@ -2163,23 +2163,39 @@
    "updatedAt": "2026-11-22T06:48:55.514Z",
    "updatedBy": "芝琦",
    "revision": 3
-  }
- },
- "rev": 199,
- "updatedAt": "2026-11-22T06:48:55.514Z",
- "pending": [
-  {
-   "id": "da161333-564d-4bb3-8aab-dd49fd394118",
+  },
+  "W069": {
+   "wineName": "INISGINA",
+   "wineryRegion": "",
+   "vintage": "",
+   "entryDate": "",
+   "drinkWindow": "",
+   "grapeNotes": "",
+   "origin": "",
+   "volume": "750ml",
+   "source": "",
+   "color": "red",
+   "referencePrice": null,
+   "locations": [],
+   "photo": "images/pending-1795329752313.jpg",
+   "thumb": "images/pending-1795329752313-t.jpg",
    "photos": [
     {
      "photo": "images/pending-1795329752313.jpg",
      "thumb": "images/pending-1795329752313-t.jpg"
     }
    ],
-   "by": "芝琦",
-   "at": "2026-11-22T06:42:33.720Z"
+   "status": "archived",
+   "createdAt": "2026-11-22T06:49:42.864Z",
+   "createdBy": "芝琦",
+   "updatedAt": "2026-11-22T06:49:42.864Z",
+   "updatedBy": "芝琦",
+   "revision": 1
   }
- ],
+ },
+ "rev": 200,
+ "updatedAt": "2026-11-22T06:49:42.865Z",
+ "pending": [],
  "capacity": {
   "8樓右LB櫃": {
    "第1層": 18,
