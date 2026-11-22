@@ -2129,10 +2129,44 @@
    "updatedAt": "2026-11-22T06:40:04.713Z",
    "updatedBy": "芝琦",
    "revision": 4
+  },
+  "W068": {
+   "wineName": "Opus One",
+   "wineryRegion": "Opus One Winery",
+   "vintage": "2016",
+   "entryDate": "",
+   "drinkWindow": "",
+   "grapeNotes": "",
+   "origin": "United States",
+   "volume": "750ml",
+   "source": "",
+   "color": "red",
+   "referencePrice": null,
+   "locations": [
+    {
+     "cabinet": "7樓SUB",
+     "shelf": "第1層",
+     "quantity": 2
+    }
+   ],
+   "photo": "images/pending-1795329817574.jpg",
+   "thumb": "images/pending-1795329817574-t.jpg",
+   "photos": [
+    {
+     "photo": "images/pending-1795329817574.jpg",
+     "thumb": "images/pending-1795329817574-t.jpg"
+    }
+   ],
+   "status": "active",
+   "createdAt": "2026-11-22T06:48:01.652Z",
+   "createdBy": "芝琦",
+   "updatedAt": "2026-11-22T06:48:01.652Z",
+   "updatedBy": "芝琦",
+   "revision": 1
   }
  },
- "rev": 196,
- "updatedAt": "2026-11-22T06:43:38.870Z",
+ "rev": 197,
+ "updatedAt": "2026-11-22T06:48:01.652Z",
  "pending": [
   {
    "id": "da161333-564d-4bb3-8aab-dd49fd394118",
@@ -2144,17 +2178,6 @@
    ],
    "by": "芝琦",
    "at": "2026-11-22T06:42:33.720Z"
-  },
-  {
-   "id": "b74ed774-900e-4ebd-8c27-2c6ff447b6ca",
-   "photos": [
-    {
-     "photo": "images/pending-1795329817574.jpg",
-     "thumb": "images/pending-1795329817574-t.jpg"
-    }
-   ],
-   "by": "芝琦",
-   "at": "2026-11-22T06:43:38.870Z"
   }
  ],
  "capacity": {
