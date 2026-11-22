@@ -2277,7 +2277,7 @@
   },
   "W072": {
    "wineName": "Chenoweth Vineyard Pinot Noir 2023",
-   "wineryRegion": "Joseph Phelps Vineyards",
+   "wineryRegion": "Joseph Phelps Vineyards/Sonoma Coast",
    "vintage": "2023",
    "entryDate": "",
    "drinkWindow": "",
@@ -2305,13 +2305,13 @@
    "status": "active",
    "createdAt": "2026-11-22T07:10:57.705Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-22T07:11:07.307Z",
+   "updatedAt": "2026-11-22T07:57:42.531Z",
    "updatedBy": "芝琦",
-   "revision": 2
+   "revision": 3
   }
  },
- "rev": 213,
- "updatedAt": "2026-11-22T07:34:01.207Z",
+ "rev": 214,
+ "updatedAt": "2026-11-22T07:57:42.531Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
