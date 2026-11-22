@@ -2097,7 +2097,7 @@
    "revision": 3
   },
   "W067": {
-   "wineName": "INSINIA",
+   "wineName": "INSIGNIA",
    "wineryRegion": "JOSEPH PHELPS/Napa valley",
    "vintage": "2019",
    "entryDate": "",
@@ -2126,13 +2126,13 @@
    "status": "active",
    "createdAt": "2026-11-22T06:38:04.580Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-22T06:38:47.226Z",
+   "updatedAt": "2026-11-22T06:39:03.264Z",
    "updatedBy": "芝琦",
-   "revision": 2
+   "revision": 3
   }
  },
- "rev": 191,
- "updatedAt": "2026-11-22T06:38:47.226Z",
+ "rev": 192,
+ "updatedAt": "2026-11-22T06:39:03.264Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
