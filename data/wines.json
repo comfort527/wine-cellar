@@ -2145,7 +2145,7 @@
    "locations": [
     {
      "cabinet": "7樓SUB",
-     "shelf": "第1層",
+     "shelf": "第2層",
      "quantity": 1
     }
    ],
@@ -2160,13 +2160,13 @@
    "status": "active",
    "createdAt": "2026-11-22T06:48:01.652Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-22T06:48:42.480Z",
+   "updatedAt": "2026-11-22T06:48:55.514Z",
    "updatedBy": "芝琦",
-   "revision": 2
+   "revision": 3
   }
  },
- "rev": 198,
- "updatedAt": "2026-11-22T06:48:42.480Z",
+ "rev": 199,
+ "updatedAt": "2026-11-22T06:48:55.514Z",
  "pending": [
   {
    "id": "da161333-564d-4bb3-8aab-dd49fd394118",
