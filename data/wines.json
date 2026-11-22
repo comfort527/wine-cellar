@@ -1924,15 +1924,20 @@
      "cabinet": "8樓外冰箱",
      "shelf": "最下層",
      "quantity": 2
+    },
+    {
+     "cabinet": "7樓SUB",
+     "shelf": "第1層",
+     "quantity": 4
     }
    ],
    "origin": "Germany",
    "photo": "images/W062-1794712010167.jpg",
    "referencePrice": 2060,
-   "revision": 3,
+   "revision": 4,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-11-15T03:24:14.871Z",
+   "updatedAt": "2026-11-22T06:29:32.260Z",
    "updatedBy": "芝琦",
    "vintage": "2023",
    "volume": "750ml",
@@ -2096,8 +2101,8 @@
    "revision": 3
   }
  },
- "rev": 186,
- "updatedAt": "2026-11-22T06:17:04.526Z",
+ "rev": 187,
+ "updatedAt": "2026-11-22T06:29:32.261Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
