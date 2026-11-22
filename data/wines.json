@@ -3,7 +3,8 @@
  "catalog": {
   "cabinets": [
    "8樓右LB櫃",
-   "8樓外冰箱"
+   "8樓外冰箱",
+   "7樓CAF"
   ],
   "shelves": [
    "第1層",
@@ -2086,8 +2087,8 @@
    "revision": 3
   }
  },
- "rev": 176,
- "updatedAt": "2026-11-21T12:02:14.915Z",
+ "rev": 177,
+ "updatedAt": "2026-11-22T06:14:33.115Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
