@@ -2241,7 +2241,7 @@
    "wineryRegion": "Opus One Winery",
    "vintage": "2023",
    "entryDate": "",
-   "drinkWindow": "",
+   "drinkWindow": "2031-2055",
    "grapeNotes": "",
    "origin": "United States",
    "volume": "750ml",
@@ -2271,9 +2271,9 @@
    "status": "active",
    "createdAt": "2026-11-22T07:08:10.576Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-22T07:08:10.576Z",
+   "updatedAt": "2026-11-22T07:34:01.207Z",
    "updatedBy": "芝琦",
-   "revision": 1
+   "revision": 2
   },
   "W072": {
    "wineName": "Chenoweth Vineyard Pinot Noir 2023",
@@ -2310,8 +2310,8 @@
    "revision": 2
   }
  },
- "rev": 212,
- "updatedAt": "2026-11-22T07:26:44.037Z",
+ "rev": 213,
+ "updatedAt": "2026-11-22T07:34:01.207Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
