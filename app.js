@@ -1109,6 +1109,7 @@ function wire() {
   $('f_originChoice').addEventListener('change', e => { const o = e.target.value === '__other__'; $('f_originOther').hidden = !o; if (o) $('f_originOther').focus(); });
   $('f_sourceChoice').addEventListener('change', e => { $('f_sourceOther').hidden = e.target.value !== '__other__'; });
   $('addLoc').addEventListener('click', () => addLocRow());
+  $('copyWineBtn').addEventListener('click', copyWine);
   $('locInputs').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) b.closest('.loc-ed').remove(); });
   for (const id of ['f_camera', 'f_gallery']) $(id).addEventListener('change', async e => {
     const files = [...e.target.files].slice(0, MAX_PHOTOS - S.pendKeep.length - S.newPhotos.length); e.target.value = '';
@@ -1128,10 +1129,12 @@ function wire() {
   });
   $('q_strip').addEventListener('click', e => { const b = e.target.closest('[data-qrm]'); if (b) { S.pendNew.splice(Number(b.dataset.qrm), 1); renderPendStrip(); } });
   $('q_save').addEventListener('click', savePending);
+  $('q_qtyRow').addEventListener('click', e => { const b = e.target.closest('[data-qd]'); if (!b) return; S.pendQty = Math.max(1, (S.pendQty || 1) + Number(b.dataset.qd)); renderPendStrip(); });
   $('pendList').addEventListener('click', e => {
     const ed = e.target.closest('[data-pedit]'); if (ed) return editPending(ed.dataset.pedit);
     const d = e.target.closest('[data-pdelq]'); if (d) return deletePending(d);
     const rm = e.target.closest('[data-pprm]'); if (rm) return removePendPhoto(rm.closest('[data-pid]').dataset.pid, rm.dataset.pprm);
+    const qd = e.target.closest('[data-pqd]'); if (qd) return setPendQty(qd.closest('[data-pid]').dataset.pid, Number(qd.dataset.pqd));
   });
   onSubmit('aiForm', 'aiErr', saveAiSettings);
   $('ai_provider').addEventListener('change', () => { $('ai_modelBox').hidden = true; $('ai_key').value = ''; showErr('aiErr', ''); });
@@ -1472,7 +1475,7 @@ function openWineForm(w, pend, rb) {
   const col = w ? kindOf(w) : 'red';
   document.querySelectorAll('input[name=f_color]').forEach(r => r.checked = r.value === col);
   fillOrigin(w?.origin);
-  $('locInputs').replaceChildren(); (w?.locations?.length ? w.locations : [{cabinet: '', shelf: '', quantity: 1}]).forEach(addLocRow);
+  $('locInputs').replaceChildren(); (w?.locations?.length ? w.locations : [{cabinet: '', shelf: '', quantity: S.fromPend ? pendQty(S.fromPend) : 1}]).forEach(addLocRow);
   $('locHint').hidden = !w; $('locLbl').textContent = w ? '存放位置與瓶數' : '存放位置與初始瓶數';
   $('newPhotoField').hidden = !!w; $('f_camera').value = ''; $('f_gallery').value = '';
   document.querySelectorAll('#wineForm .rb-filled, #wineForm .rb-check').forEach(el => el.classList.remove('rb-filled', 'rb-check'));
@@ -1488,7 +1491,7 @@ function openWineForm(w, pend, rb) {
     renderNewStrip();
   }
   renderRebuyNote();
-  $('wineModal').dataset.mode = w ? 'edit' : 'new';
+  $('wineModal').dataset.mode = w ? 'edit' : 'new'; $('copyWineBtn').hidden = !w;
   $('wineModal').dispatchEvent(new Event('keepcheck'));
   showDialog('wineModal');
 }
@@ -1550,6 +1553,22 @@ async function saveWine() {
   }
 }
 
+/* 編輯中按「複製」：用表單上目前的內容開一筆新酒款，除了櫃位與數量以外全部帶過去（照片沿用同一個檔案，不重複上傳） */
+function copyWine() {
+  const src = S.editing; if (!src || !canEdit()) return;
+  const f = $('wineForm'), snap = [...f.querySelectorAll('input:not([type=file]):not([type=radio]), select, textarea')].filter(el => el.id && !el.closest('#locInputs')).map(el => [el.id, el.value]);
+  const col = document.querySelector('input[name=f_color]:checked')?.value || kindOf(src), photos = photosOf(src).slice();
+  dlgClose.call($('wineModal'));
+  openWineForm(null);
+  for (const [id, v] of snap) { const el = $(id); if (el) el.value = v; }
+  for (const [c, o] of [['f_originChoice', 'f_originOther'], ['f_volumeChoice', 'f_volumeOther'], ['f_sourceChoice', 'f_sourceOther']]) $(o).hidden = $(c).value !== '__other__';
+  document.querySelectorAll('input[name=f_color]').forEach(r => r.checked = r.value === col);
+  S.pendKeep = photos; renderNewStrip();
+  $('wineTitle').textContent = '複製酒款';
+  document.querySelectorAll('#locInputs select, #locInputs [data-k=quantity]').forEach(el => el.classList.add('rb-check'));
+  $('wineModal').dispatchEvent(new Event('keepcheck'));
+  toast('已複製，請選擇櫃位與數量後儲存。');
+}
 /* 同一年份再買：把瓶數加到原本那款，並記一筆入庫 */
 async function mergeRebuy(target, r, who) {
   const add = r.locations.filter(l => l.quantity > 0);
@@ -1879,23 +1898,35 @@ function renderPendStrip() {
   $('q_strip').innerHTML = S.pendNew.map((ph, i) => thumbHtml(URL.createObjectURL(ph.thumb), i, `data-qrm="${i}"`)).join('');
   $('q_add').querySelectorAll('label').forEach(l => l.hidden = n >= MAX_PHOTOS);
   $('q_save').hidden = !n; $('q_save').textContent = S.pendSaving ? '上傳中…' : `存入待入櫃（${n} 張）`;
+  $('q_qtyRow').hidden = !n; $('q_qty').textContent = S.pendQty || 1;
 }
 function renderPending() {
-  const list = S.data?.pending || [], n = list.length;
+  const list = S.data?.pending || [], n = list.reduce((a, p) => a + pendQty(p), 0);
   $('factPend').hidden = !S.session;
   $('sumPend').innerHTML = `${n} <small>瓶</small>` + (n ? `<span class="pend-mini">${list.filter(p => p.photos?.length).slice(-3).reverse().map(p => `<img src="${esc(fileUrl(p.photos[0].thumb || p.photos[0].photo))}" alt="">`).join('')}</span>` : '');
   if (!$('pendModal').open) return;
-  const html = n ? list.slice().reverse().map(p => {
+  const html = list.length ? list.slice().reverse().map(p => {
     const busy = S.pendAdding === p.id, room = MAX_PHOTOS - p.photos.length, ed = canEdit(), one = p.photos.length < 2 || !ed;
     return `<article class="pend" data-pid="${esc(p.id)}">
     <div class="pend-ph">${p.photos.map((ph, i) => `<span class="pth"><a href="${esc(fileUrl(ph.photo))}" target="_blank" rel="noopener"><img src="${esc(fileUrl(ph.thumb || ph.photo))}" alt="第 ${i + 1} 張" loading="lazy"></a>${i === 0 ? '<em>封面</em>' : ''}${one || busy ? '' : `<button type="button" data-pprm="${esc(ph.photo)}" aria-label="移除第 ${i + 1} 張">×</button>`}</span>`).join('')}</div>
     <div class="pend-add">${busy ? '<span class="hint">上傳中…</span>' : room > 0 && ed ? `<label>📷 加拍<input type="file" accept="image/*" capture="environment" data-padd></label><label>從相簿加入<input type="file" accept="image/*" multiple data-padd></label>` : ''}<span class="hint">${p.photos.length}／${MAX_PHOTOS} 張</span></div>
+    <div class="qstep pend-qty"><span>數量</span>${ed && !busy ? `<button type="button" data-pqd="-1" ${pendQty(p) <= 1 ? 'disabled' : ''} aria-label="少一瓶">−</button>` : ''}<b>${pendQty(p)}</b>${ed && !busy ? '<button type="button" data-pqd="1" aria-label="多一瓶">＋</button>' : ''}<span>瓶</span></div>
     <p class="pend-meta">${esc(p.by || '')}・${fmtTime(p.at)}</p>
     ${ed ? `<div class="pend-act"><button type="button" class="primary" data-pedit="${esc(p.id)}" ${busy ? 'disabled' : ''}>編輯並加入酒櫃</button><button type="button" class="danger" data-pdelq="${esc(p.id)}" ${busy ? 'disabled' : ''}>刪除</button></div>` : ''}
   </article>`;
   }).join('') : '<p class="hint pend-empty">目前沒有待入櫃的酒。</p>';
   // 內容沒變就不重畫：避免定時同步把正在開啟的相機／相簿選擇器換掉
   if (html !== S.pendHtml || !$('pendList').firstChild) { S.pendHtml = html; $('pendList').innerHTML = html; }
+}
+const pendQty = p => Math.max(1, Math.round(Number(p?.qty) || 1));
+/* 待入櫃：之後再改數量（管理員） */
+async function setPendQty(id, delta) {
+  if (!canEdit()) return;
+  showErr('pendErr', '');
+  try {
+    await mutate(d => { const cur = pendingOf(d, id, '這瓶已被其他人加入酒櫃或刪除。'); cur.qty = Math.max(1, pendQty(cur) + delta); return cur.qty; }, q => `待入櫃：數量改為 ${q} 瓶`);
+  } catch (e) { showErr('pendErr', msgOf(e)); }
+  renderPending();
 }
 /* 待入櫃的酒之後再補拍第 2、3、4 張 */
 async function addPendPhotos(id, fileList) {
@@ -1939,8 +1970,9 @@ async function savePending() {
   try {
     const photos = [];
     for (const ph of S.pendNew) photos.push(await uploadPhoto(ph, 'pending'));
-    await mutate(d => { d.pending = d.pending || []; d.pending.push({id: crypto.randomUUID(), photos, by: who, at: now()}); }, `待入櫃：新增一瓶（${photos.length} 張照片）`);
-    S.pendNew = []; toast('已存入待入櫃，之後再補資料。');
+    const qty = S.pendQty || 1;
+    await mutate(d => { d.pending = d.pending || []; d.pending.push({id: crypto.randomUUID(), photos, qty, by: who, at: now()}); }, `待入櫃：新增 ${qty} 瓶（${photos.length} 張照片）`);
+    S.pendNew = []; S.pendQty = 1; toast('已存入待入櫃，之後再補資料。');
   } catch (e) { showErr('pendErr', msgOf(e)); }
   finally { S.pendSaving = false; $('q_save').disabled = false; renderPendStrip(); renderPending(); checkStorage(); }
 }
@@ -2214,12 +2246,12 @@ const XLSX_STYLES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 </cellXfs>
 <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
 </styleSheet>`;
-const XL_HEAD = ['Region', '酒莊/產區', '酒名', '年份', '容量', '數量', '參考價格', '來源', '位置', '其他備註/葡萄品種', '產地', '照片'];
+const XL_HEAD = ['Region', '酒莊/產區', '酒名', '年份', '容量', '數量', '參考價格', '來源', '位置', '其他備註/葡萄品種', '產地', '照片', '', '', ''];
 const XL_HEAD_ST = XL_HEAD.map(() => XS.head);
-const XL_DATA = 'BCDEFGHIJKL';   // 有框線的欄（A 隱藏）；L＝照片縮圖
-// 縮圖：有照片的那一列加高，圖片置中放在 L 欄
+const XL_DATA = 'BCDEFGHIJKLMNO';   // 有框線的欄（A 隱藏）；L～O＝照片 1～4，一張一格
+// 縮圖：每一列酒都一樣高（有沒有照片都一樣），圖片置中放在各自的格子
 const XL_PIC = {rowPt: 96, maxH: 86, maxW: 92, colPt: 104};
-const XL_COLS = '<cols><col min="1" max="1" width="33.43" hidden="1" customWidth="1"/><col min="2" max="3" width="90.57" customWidth="1"/><col min="4" max="6" width="18.57" customWidth="1"/><col min="7" max="7" width="24" customWidth="1"/><col min="8" max="9" width="18.57" customWidth="1"/><col min="10" max="10" width="63.57" customWidth="1"/><col min="11" max="11" width="27" customWidth="1"/><col min="12" max="12" width="19" customWidth="1"/><col min="13" max="13" width="20.86" customWidth="1"/></cols>';
+const XL_COLS = '<cols><col min="1" max="1" width="33.43" hidden="1" customWidth="1"/><col min="2" max="3" width="90.57" customWidth="1"/><col min="4" max="6" width="18.57" customWidth="1"/><col min="7" max="7" width="24" customWidth="1"/><col min="8" max="9" width="18.57" customWidth="1"/><col min="10" max="10" width="63.57" customWidth="1"/><col min="11" max="11" width="27" customWidth="1"/><col min="12" max="15" width="19" customWidth="1"/></cols>';
 // 一格：數字、文字或公式
 function xlCell(ref, v, st) {
   if (v && typeof v === 'object' && v.f) return `<c r="${ref}" s="${st}"><f>${xmlEsc(v.f)}</f><v>${v.v ?? ''}</v></c>`;
@@ -2233,25 +2265,25 @@ function xlWineRow(r, x) {
   const yr = /^\d{4}$/.test(String(x.w.vintage || '').trim()) ? Number(x.w.vintage) : String(x.w.vintage || '');
   const price = x.w.referencePrice == null || x.w.referencePrice === '' ? '' : Number.isFinite(Number(x.w.referencePrice)) ? Number(x.w.referencePrice) : String(x.w.referencePrice);
   return xlRow(r, [['A', '', 0], ['B', x.w.wineryRegion || '', XS.text], ['C', x.w.wineName || '', XS.text], ['D', yr, XS.mid], ['E', x.w.volume || '', XS.mid], ['F', x.qty, XS.mid],
-    ['G', price, XS.price], ['H', x.w.source || '', XS.cjkMid], ['I', x.code, XS.mid], ['J', x.w.grapeNotes || '', XS.cjkLeft], ['K', x.w.origin || '', XS.cjkLeft], ['L', '', XS.mid]], x.pic ? XL_PIC.rowPt : 33);
+    ['G', price, XS.price], ['H', x.w.source || '', XS.cjkMid], ['I', x.code, XS.mid], ['J', x.w.grapeNotes || '', XS.cjkLeft], ['K', x.w.origin || '', XS.cjkLeft], ['L', '', XS.mid], ['M', '', XS.mid], ['N', '', XS.mid], ['O', '', XS.mid]], XL_PIC.rowPt);
 }
 const xlBlank = r => xlRow(r, XL_DATA.split('').map(c => [c, '', 'BC'.includes(c) || 'JK'.includes(c) ? XS.text : XS.mid]), 30);
 function xlSheet({title, hint, hintAt, blocks, sums, headRow}) {
   const rows = [], merges = [], pics = [];
   let r = 1;
   if (hint) { rows.push(xlRow(r, [[hintAt[0], hint, XS.hint], [hintAt[1], '', XS.hint]], 48.95)); merges.push(`${hintAt[0]}1:${hintAt[1]}1`); r++; }
-  rows.push(xlRow(r, XL_DATA.split('').map((c, i) => [c, i ? '' : title, XS.title]))); merges.push(`B${r}:L${r}`); r++;
-  rows.push(xlRow(r, XL_HEAD.map((h, i) => [colName(i), h, XL_HEAD_ST[i]]))); r++;
+  rows.push(xlRow(r, XL_DATA.split('').map((c, i) => [c, i ? '' : title, XS.title]))); merges.push(`B${r}:O${r}`); r++;
+  rows.push(xlRow(r, XL_HEAD.map((h, i) => [colName(i), h, XL_HEAD_ST[i]]))); merges.push(`L${r}:O${r}`); r++;
   const first = r;
   blocks.forEach((list, bi) => {
     if (bi) { rows.push(xlBlank(r)); r++; }
     const start = r;
-    for (const x of list) { rows.push(xlWineRow(r, x)); if (x.pic) pics.push({row: r, pic: x.pic}); r++; }
+    for (const x of list) { rows.push(xlWineRow(r, x)); x.pics.forEach((pic, k) => pics.push({row: r, col: 11 + k, pic})); r++; }
     if (sums) { rows.push(xlRow(r, XL_DATA.split('').map(c => [c, c === 'F' ? {f: `SUM(F${start}:F${r - 1})`, v: list.reduce((a, x) => a + (Number(x.qty) || 0), 0)} : '', 'BC'.includes(c) || 'JK'.includes(c) ? XS.text : XS.mid]))); r++; }
   });
   const last = Math.max(r - 1, first), head = first - 1;
   return {last, head, pics, xml: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><dimension ref="A1:M${last}"/><sheetViews><sheetView zoomScale="60" zoomScaleNormal="60" workbookViewId="0"><pane ySplit="${head}" topLeftCell="A${head + 1}" activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft" activeCell="B${head + 1}" sqref="B${head + 1}"/></sheetView></sheetViews><sheetFormatPr defaultColWidth="11" defaultRowHeight="30"/>${XL_COLS}<sheetData>${rows.join('')}</sheetData><autoFilter ref="A${head}:M${head}"/><mergeCells count="${merges.length}">${merges.map(m => `<mergeCell ref="${m}"/>`).join('')}</mergeCells><printOptions horizontalCentered="1"/><pageMargins left="0" right="0" top="0" bottom="0" header="0" footer="0"/><pageSetup paperSize="9" fitToHeight="0" orientation="landscape"/><headerFooter><oddFooter>第 &amp;P 頁，共 &amp;N 頁</oddFooter></headerFooter>${pics.length ? '<drawing r:id="rId1"/>' : ''}</worksheet>`};
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><dimension ref="A1:O${last}"/><sheetViews><sheetView zoomScale="60" zoomScaleNormal="60" workbookViewId="0"><pane ySplit="${head}" topLeftCell="A${head + 1}" activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft" activeCell="B${head + 1}" sqref="B${head + 1}"/></sheetView></sheetViews><sheetFormatPr defaultColWidth="11" defaultRowHeight="30"/>${XL_COLS}<sheetData>${rows.join('')}</sheetData><autoFilter ref="A${head}:O${head}"/><mergeCells count="${merges.length}">${merges.map(m => `<mergeCell ref="${m}"/>`).join('')}</mergeCells><printOptions horizontalCentered="1"/><pageMargins left="0" right="0" top="0" bottom="0" header="0" footer="0"/><pageSetup paperSize="9" fitToHeight="0" orientation="landscape"/><headerFooter><oddFooter>第 &amp;P 頁，共 &amp;N 頁</oddFooter></headerFooter>${pics.length ? '<drawing r:id="rId1"/>' : ''}</worksheet>`};
 }
 const byWinery = (a, b) => (a.w.wineryRegion || '').localeCompare(b.w.wineryRegion || '', 'en', {sensitivity: 'base'}) || (a.w.wineName || '').localeCompare(b.w.wineName || '', 'en', {sensitivity: 'base'}) || String(a.w.vintage || '').localeCompare(String(b.w.vintage || ''));
 const byPlace = (a, b) => a.cab.localeCompare(b.cab) || shelfNo(a.shelf) - shelfNo(b.shelf) || byWinery(a, b);
@@ -2264,9 +2296,10 @@ async function buildWorkbook() {
     const qty = outs.reduce((a, o) => a + (Number(o.qty) || 0), 0);
     site(loc.cabinet ? siteOf(loc.cabinet) : SITES[0][1]).gone.push({w, cab: loc.cabinet || '', shelf: loc.shelf || '', qty: qty || '', code: loc.cabinet ? locCode(loc.cabinet, loc.shelf) : ''});
   }
-  // 縮圖：每款酒的第一張照片縮圖，抓下來放進 Excel（同一張只放一次）
+  // 縮圖：每款酒的每一張照片（最多 4 張）都抓下來放進 Excel（同一張檔案只放一次）
   const media = new Map(), all = [...sites.values()].flatMap(v => [...v.now, ...v.gone]);
-  const need = [...new Set(all.map(x => photosOf(x.w)[0]).filter(Boolean).map(p => p.thumb || p.photo))];
+  const picPaths = w => photosOf(w).slice(0, MAX_PHOTOS).map(p => p.thumb || p.photo);
+  const need = [...new Set(all.flatMap(x => picPaths(x.w)))];
   const queue = need.slice();
   await Promise.all(Array.from({length: 6}, async () => { while (queue.length) { const path = queue.shift(); try {
     const r = await fetchPhoto(path); if (!r.ok) continue;
@@ -2274,7 +2307,7 @@ async function buildWorkbook() {
     media.set(path, {n: 0, ext: png ? 'png' : 'jpeg', bytes: new Uint8Array(await blob.arrayBuffer()), w: bm.width, h: bm.height}); bm.close?.();
   } catch {} } }));
   let mi = 0; for (const path of need) if (media.has(path)) media.get(path).n = ++mi;
-  for (const x of all) { const p = photosOf(x.w)[0]; x.pic = p ? media.get(p.thumb || p.photo) || null : null; }
+  for (const x of all) x.pics = picPaths(x.w).map(p => media.get(p)).filter(Boolean);
   const order = [...sites.keys()].sort((a, b) => (a === SITES[0][1] ? -1 : b === SITES[0][1] ? 1 : a.localeCompare(b)));
   const sheets = [];
   for (const n of order) {
@@ -2293,10 +2326,10 @@ async function buildWorkbook() {
   const EMU = 12700, drawings = sheets.map(s => {
     if (!s.pics.length) return null;
     const used = [...new Set(s.pics.map(p => p.pic.n))], rid = n => 'rId' + (used.indexOf(n) + 1);
-    const anchors = s.pics.map(({row, pic}, k) => {
+    const anchors = s.pics.map(({row, col, pic}, k) => {
       const sc = Math.min(XL_PIC.maxH / pic.h, XL_PIC.maxW / pic.w), wPt = pic.w * sc, hPt = pic.h * sc;
       const cx = Math.round(wPt * EMU), cy = Math.round(hPt * EMU), ox = Math.round(Math.max(0, (XL_PIC.colPt - wPt) / 2) * EMU), oy = Math.round(Math.max(0, (XL_PIC.rowPt - hPt) / 2) * EMU);
-      return `<xdr:oneCellAnchor><xdr:from><xdr:col>11</xdr:col><xdr:colOff>${ox}</xdr:colOff><xdr:row>${row - 1}</xdr:row><xdr:rowOff>${oy}</xdr:rowOff></xdr:from><xdr:ext cx="${cx}" cy="${cy}"/><xdr:pic><xdr:nvPicPr><xdr:cNvPr id="${k + 2}" name="照片 ${k + 1}"/><xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="${rid(pic.n)}"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:oneCellAnchor>`;
+      return `<xdr:oneCellAnchor><xdr:from><xdr:col>${col}</xdr:col><xdr:colOff>${ox}</xdr:colOff><xdr:row>${row - 1}</xdr:row><xdr:rowOff>${oy}</xdr:rowOff></xdr:from><xdr:ext cx="${cx}" cy="${cy}"/><xdr:pic><xdr:nvPicPr><xdr:cNvPr id="${k + 2}" name="照片 ${k + 1}"/><xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="${rid(pic.n)}"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:oneCellAnchor>`;
     }).join('');
     const ext = n => [...media.values()].find(m => m.n === n).ext;
     return {xml: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">${anchors}</xdr:wsDr>`,
@@ -2305,7 +2338,7 @@ async function buildWorkbook() {
   const files = [
     ['[Content_Types].xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="jpeg" ContentType="image/jpeg"/><Default Extension="png" ContentType="image/png"/>${drawings.map((g, i) => g ? `<Override PartName="/xl/drawings/drawing${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>` : '').join('')}<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((s, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}</Types>`],
     ['_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
-    ['xl/workbook.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView/></bookViews><sheets>${sheets.map((s, i) => `<sheet name="${xmlEsc(s.name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('')}</sheets><definedNames>${sheets.map((s, i) => { const q = `'${s.name.replace(/'/g, "''")}'`; return `<definedName name="_xlnm._FilterDatabase" localSheetId="${i}" hidden="1">${xmlEsc(q)}!$A$${s.head}:$M$${s.head}</definedName><definedName name="_xlnm.Print_Area" localSheetId="${i}">${xmlEsc(q)}!$B$1:$L$${s.last}</definedName><definedName name="_xlnm.Print_Titles" localSheetId="${i}">${xmlEsc(q)}!$${s.head - 1}:$${s.head}</definedName>`; }).join('')}</definedNames></workbook>`],
+    ['xl/workbook.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView/></bookViews><sheets>${sheets.map((s, i) => `<sheet name="${xmlEsc(s.name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('')}</sheets><definedNames>${sheets.map((s, i) => { const q = `'${s.name.replace(/'/g, "''")}'`; return `<definedName name="_xlnm._FilterDatabase" localSheetId="${i}" hidden="1">${xmlEsc(q)}!$A$${s.head}:$O$${s.head}</definedName><definedName name="_xlnm.Print_Area" localSheetId="${i}">${xmlEsc(q)}!$B$1:$O$${s.last}</definedName><definedName name="_xlnm.Print_Titles" localSheetId="${i}">${xmlEsc(q)}!$${s.head - 1}:$${s.head}</definedName>`; }).join('')}</definedNames></workbook>`],
     ['xl/_rels/workbook.xml.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((s, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('')}<Relationship Id="rId${sheets.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`],
     ['xl/styles.xml', XLSX_STYLES],
     ...sheets.map((s, i) => [`xl/worksheets/sheet${i + 1}.xml`, s.xml]),
