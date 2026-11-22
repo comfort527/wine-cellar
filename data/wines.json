@@ -2037,6 +2037,11 @@
      "cabinet": "8樓右LB櫃",
      "shelf": "第8層",
      "quantity": 1
+    },
+    {
+     "cabinet": "7樓SUB",
+     "shelf": "第1層",
+     "quantity": 2
     }
    ],
    "photo": "images/new-1794710064404.jpg",
@@ -2054,9 +2059,9 @@
    "status": "active",
    "createdAt": "2026-11-15T02:34:35.501Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-21T12:02:14.915Z",
+   "updatedAt": "2026-11-22T06:33:43.812Z",
    "updatedBy": "芝琦",
-   "revision": 6
+   "revision": 7
   },
   "W066": {
    "wineName": "Cabernet Sauvignon Ice Wine",
@@ -2101,8 +2106,8 @@
    "revision": 3
   }
  },
- "rev": 187,
- "updatedAt": "2026-11-22T06:29:32.261Z",
+ "rev": 188,
+ "updatedAt": "2026-11-22T06:33:43.812Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
