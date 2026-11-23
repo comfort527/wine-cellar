@@ -159,7 +159,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261123c';
+const APP_VER = '20261123d';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -490,7 +490,7 @@ async function start() {
 }
 async function poll(force) {
   if (document.hidden || S.busy || !S.data) return;
-  if (S.outbox.length && S.session) { if (!S.flushing) flush(); return; }   // 有離線紀錄：先送出，送完再照常同步
+  if (S.outbox.length && S.session) { flush(); if (!S.obErr) return; }   // 有離線紀錄：先送出，送完再照常同步；卡在權杖或伺服器錯誤時仍照常同步資料
   const every = (S.session ? CFG.pollSecondsEditor : CFG.pollSecondsViewer) * 1000;
   if (!force && Date.now() - S.lastPoll < every) return;
   S.lastPoll = Date.now();
@@ -1617,7 +1617,7 @@ async function mergeRebuy(target, r, who) {
    - 存的是「動作名稱＋參數」，送出時在最新資料上重新執行同一個檢查（例如只剩幾瓶），不會蓋掉別台裝置的修改
    - 每個動作有自己的編號，寫進資料檔的 appliedOps；萬一上次其實已經送出、只是沒收到回應，重送時會跳過，不會重複扣瓶數
    - 照片先存檔案本身，送資料前先上傳照片 */
-const QUEUED = '。目前沒有網路，已先存在這台裝置，連上網路後會自動上傳。';
+const queuedNote = () => S.ob.mem ? '。目前沒有網路，已先記在這個網頁裡；這台裝置無法長期保存，連上網路前請先不要關掉網頁。' : '。目前沒有網路，已先存在這台裝置，連上網路後會自動上傳。';
 const OPS = {
   out: (d, a) => takeOut(d, a.id, {cabinet: a.cabinet, shelf: a.shelf, qty: a.qty, out: a.out}, a.who, a.hint),
   move: (d, a) => moveIn(d, a),
@@ -1640,6 +1640,7 @@ function applyPending() {
 }
 // 離線紀錄的簡短說明（無法套用時提醒用）
 const opLabel = (type, a, d) => { const n = d?.wines?.[a.id]?.wineName || a.id; return type === 'out' ? `出庫「${n}」${a.qty} 瓶` : type === 'move' ? `移動「${n}」${a.qty} 瓶` : `待入櫃 ${a.qty} 瓶`; };
+const obBlob = it => it.blob || new Blob([it.buf], {type: it.type || 'image/jpeg'});
 const obCount = () => S.outbox.filter(x => x.kind === 'op').length;
 function obDb() {
   if (!S.ob.db) S.ob.db = new Promise((res, rej) => { const q = indexedDB.open('cellar-outbox', 1); q.onupgradeneeded = () => q.result.createObjectStore('q', {keyPath: 'seq', autoIncrement: true}); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); });
@@ -1649,7 +1650,7 @@ function obReq(mode, fn) { return obDb().then(db => new Promise((res, rej) => { 
 async function obLoad() {
   try { S.outbox = ((await obReq('readonly', st => st.getAll())) || []).sort((a, b) => a.seq - b.seq); }
   catch { S.ob.mem = true; S.outbox = []; }
-  for (const it of S.outbox) if (it.kind === 'photo' && it.blob && !S.localPhotos.has(it.path)) S.localPhotos.set(it.path, URL.createObjectURL(it.blob));
+  for (const it of S.outbox) if (it.kind === 'photo' && !S.localPhotos.has(it.path)) S.localPhotos.set(it.path, URL.createObjectURL(obBlob(it)));
 }
 async function obPush(item) {
   item = {...item, slot: S.session?.slotId || '', added: now()};
@@ -1665,15 +1666,17 @@ async function obDel(seq) {
 async function runOp(type, args, message) {
   const opId = crypto.randomUUID();
   if (!S.outbox.length) {
-    try { return await mutate(d => applyOp(d, type, args, opId), message, {timeout: 15000, skipGuard: true}); }
-    catch (e) { if (!e.offline) throw e; }
+    try {
+      const r = await mutate(d => applyOp(d, type, args, opId), message, {timeout: 15000, skipGuard: true});
+      return r.dup ? {brief: true, note: '，已記錄。'} : r;   // 前一次其實已經寫入（只是沒收到回應）
+    } catch (e) { if (!e.offline) throw e; }
   }
   const draft = structuredClone(S.data || emptyData());
   const res = applyOp(draft, type, args, opId);   // 檢查不過（例如瓶數不夠）直接顯示給使用者，不存
   const msg = typeof message === 'function' ? message(res, draft) : message;
   await obPush({kind: 'op', opId, type, args, msg, label: opLabel(type, args, S.data)});
   applyPending(); render();
-  return {...res, queued: true};
+  return {...res, queued: true, brief: true, note: queuedNote()};
 }
 // 照片：有網路就直接上傳；沒有就先把檔案存在這台裝置，之後再傳
 async function uploadPhotoQ(ph, id) {
@@ -1683,20 +1686,25 @@ async function uploadPhotoQ(ph, id) {
     S.localPhotos.set(path, URL.createObjectURL(blob));
     let ok = false;
     if (!S.outbox.length) { try { ok = (await r2Send('PUT', path, blob, 20000)).ok; } catch (e) { if (!e.offline) throw e; } }
-    if (!ok) await obPush({kind: 'photo', path, blob});
+    if (!ok) await obPush({kind: 'photo', path, buf: await blob.arrayBuffer(), type: blob.type || 'image/jpeg'});
   }
   return {photo: `${base}.jpg`, thumb: `${base}-t.jpg`};
 }
 // 依序送出。網路不通就停下來等下次；動作本身檢查不過（例如別台裝置已把最後一瓶出庫）就放棄這筆並提醒；
 // 其他錯誤（權杖、伺服器）保留資料、停下來，狀態列顯示原因
-async function flush() {
-  if (S.flushing || !S.outbox.length || !S.session) return;
+function flush() {
+  if (S.flushP) return S.flushP;
+  if (!S.outbox.length || !S.session) return Promise.resolve();
+  S.flushP = flushRun().finally(() => { S.flushP = null; });
+  return S.flushP;
+}
+async function flushRun() {
   S.flushing = true; let sent = 0; const rejected = [];
   try {
     while (S.outbox.length && S.session) {
       const it = S.outbox[0];
       try {
-        if (it.kind === 'photo') { const r = await r2Send('PUT', it.path, it.blob, 20000); if (!r.ok) fail(`照片上傳失敗（${r.status}）`); }
+        if (it.kind === 'photo') { const r = await r2Send('PUT', it.path, obBlob(it), 20000); if (!r.ok) fail(`照片上傳失敗（${r.status}）`); }
         else await mutate(d => applyOp(d, it.type, it.args, it.opId), it.msg, {skipGuard: true, timeout: 15000});
         S.obErr = '';
       } catch (e) {
@@ -1707,7 +1715,7 @@ async function flush() {
     }
   } finally {
     S.flushing = false; applyPending(); render();
-    if (rejected.length) toast(`有 ${rejected.length} 筆離線紀錄在上傳時已經做不到，已略過：${rejected.join('；')}`);
+    if (rejected.length) { const m = `有 ${rejected.length} 筆離線紀錄在上傳時已經做不到，已略過：${rejected.join('；')}`; notice(m, true); toast(m); }
     else if (sent && !S.outbox.length) toast(`離線紀錄已全部上傳（${sent} 筆）。`);
   }
 }
@@ -1738,7 +1746,7 @@ async function saveStock() {
   const res = await runOp('out', {id, cabinet, shelf, qty, out: {date, type, reason}, who, hint: '沒有扣除任何瓶數。'},
     x => takeOutMsg(id, x, {type, cabinet, shelf, qty, date, note: reason}));
   $('stockModal').close();
-  if (res.queued) return toast(`${type}出庫 ${qty} 瓶${QUEUED}`);
+  if (res.brief) return toast(`${type}出庫 ${qty} 瓶${res.note}`);
   toast(res.archived ? `「${res.name}」已全部出庫，移入歷史酒單。` : `${fmtDate(date)} ${type}出庫 ${qty} 瓶，${cabinet} / ${shelf} 剩 ${res.left} 瓶。`);
 }
 
@@ -1780,7 +1788,7 @@ async function saveMove() {
   const res = await runOp('move', {id, from: {cabinet: from.cabinet, shelf: from.shelf}, to, qty, date, note, who},
     x => `移動 ${id} ${x.name}：${from.cabinet}/${from.shelf} → ${to.cabinet}/${to.shelf}（×${qty}）\n\n日期：${date}${note ? '\n備註：' + note : ''}`);
   $('moveModal').close();
-  toast(res.queued ? `已移動 ${qty} 瓶到 ${to.cabinet} / ${to.shelf}${QUEUED}` : `已移動 ${qty} 瓶到 ${to.cabinet} / ${to.shelf}（那裡現有 ${res.now} 瓶）。`);
+  toast(res.brief ? `已移動 ${qty} 瓶到 ${to.cabinet} / ${to.shelf}${res.note}` : `已移動 ${qty} 瓶到 ${to.cabinet} / ${to.shelf}（那裡現有 ${res.now} 瓶）。`);
 }
 function moveIn(d, {id, from, to, qty, date, note, who}) {
     const cur = wineOf(d, id);
@@ -2096,7 +2104,7 @@ async function savePending() {
     for (const ph of S.pendNew) photos.push(await uploadPhotoQ(ph, 'pending'));
     const qty = S.pendQty || 1;
     const res = await runOp('pendNew', {pid: crypto.randomUUID(), photos, qty, who, at: now()}, `待入櫃：新增 ${qty} 瓶（${photos.length} 張照片）`);
-    S.pendNew = []; S.pendQty = 1; toast(res.queued ? `已存入待入櫃${QUEUED}` : '已存入待入櫃，之後再補資料。');
+    S.pendNew = []; S.pendQty = 1; toast(res.brief ? `已存入待入櫃${res.note}` : '已存入待入櫃，之後再補資料。');
   } catch (e) { showErr('pendErr', msgOf(e)); }
   finally { S.pendSaving = false; $('q_save').disabled = false; renderPendStrip(); renderPending(); checkStorage(); }
 }
@@ -2854,7 +2862,7 @@ async function saveJournal() {
     const id = f.wineId, cabinet = f.cab, shelf = f.shelf;
     const res = await runOp('out', {id, cabinet, shelf, qty, out: {date, type, reason: note, ...stamp}, who: me, hint: '請重新點選。'},
       x => takeOutMsg(id, x, {type, cabinet, shelf, qty, date, note}));
-    if (res.queued) toast(`已紀錄${QUEUED}`); else toast(res.archived ? `已紀錄，「${res.name}」已全部喝完。` : `已紀錄，${cabinet} · ${shelf} 還有 ${res.left} 瓶。`);
+    if (res.brief) toast(`已紀錄${res.note}`); else toast(res.archived ? `已紀錄，「${res.name}」已全部喝完。` : `已紀錄，${cabinet} · ${shelf} 還有 ${res.left} 瓶。`);
   } else if (src === 'cellar') {
     const name = $('j_mname').value.trim(), vintage = $('j_mvintage').value.trim();
     const left = Number($('j_left').value || 0), cab = $('j_cab').value.trim(), shelf = $('j_shelf').value.trim();
