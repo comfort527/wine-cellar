@@ -2516,10 +2516,44 @@
    "updatedAt": "2026-11-23T05:53:08.401Z",
    "updatedBy": "芝琦",
    "revision": 4
+  },
+  "W079": {
+   "wineName": "Opus One",
+   "wineryRegion": "Opus One Winery",
+   "vintage": "2015",
+   "entryDate": "",
+   "drinkWindow": "現在-2042",
+   "grapeNotes": "",
+   "origin": "United States",
+   "volume": "750ml",
+   "source": "",
+   "color": "red",
+   "referencePrice": 13743,
+   "locations": [
+    {
+     "cabinet": "7樓SUB",
+     "shelf": "第3層",
+     "quantity": 1
+    }
+   ],
+   "photo": "images/W078-1795413169952.jpg",
+   "thumb": "images/W078-1795413169952-t.jpg",
+   "photos": [
+    {
+     "photo": "images/W078-1795413169952.jpg",
+     "thumb": "images/W078-1795413169952-t.jpg"
+    }
+   ],
+   "status": "active",
+   "createdAt": "2026-11-23T05:56:59.683Z",
+   "createdBy": "芝琦",
+   "updatedAt": "2026-11-23T05:56:59.683Z",
+   "updatedBy": "芝琦",
+   "revision": 1
   }
  },
- "rev": 238,
- "updatedAt": "2026-11-23T05:53:08.401Z",
+ "rev": 239,
+ "updatedAt": "2026-11-23T05:56:59.683Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
