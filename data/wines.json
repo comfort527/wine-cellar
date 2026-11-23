@@ -2424,7 +2424,7 @@
    "grapeNotes": "",
    "origin": "United States",
    "volume": "750ml",
-   "source": "贈",
+   "source": "",
    "color": "red",
    "referencePrice": 14905,
    "locations": [
@@ -2445,9 +2445,9 @@
    "status": "active",
    "createdAt": "2026-11-23T05:46:56.532Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-23T05:47:09.703Z",
+   "updatedAt": "2026-11-23T05:57:54.184Z",
    "updatedBy": "芝琦",
-   "revision": 2
+   "revision": 3
   },
   "W077": {
    "wineName": "Opus One",
@@ -2552,8 +2552,8 @@
    "revision": 3
   }
  },
- "rev": 242,
- "updatedAt": "2026-11-23T05:57:40.193Z",
+ "rev": 243,
+ "updatedAt": "2026-11-23T05:57:54.184Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
