@@ -156,7 +156,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261122b';
+const APP_VER = '20261123a';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -622,12 +622,14 @@ function renderLegend(all) {
 }
 function miniCabHtml(cab, sh) {
   const rows = shelfEntries(sh).map(([name, s]) => ({name, ...s, n: countSum(s), free: freeAt(cab, name, countSum(s))}));
-  const scale = Math.max(1, ...rows.map(r => r.n + (r.free || 0)));
+  const scaleAll = Math.max(1, ...rows.map(r => r.n + (r.free || 0)));
   const sum = rows.reduce((a, r) => a + r.n, 0), frees = rows.filter(r => r.free !== null), freeSum = frees.reduce((a, r) => a + r.free, 0);
   const on = S.filter?.cabinet === cab;
   const bars = rows.map(r => {
     const sel = on && S.filter.shelf === r.name;
-    return `<button type="button" class="sb ${sel ? 'on' : ''}" data-cab="${esc(cab)}" data-shelf="${esc(r.name)}" aria-pressed="${sel}" aria-label="${esc(cab)} ${esc(r.name)}：${r.n} 瓶${r.free !== null ? `，可再放 ${r.free}` : ''}"><span class="sn">${shelfNo(r.name) < 999 ? shelfNo(r.name) : esc(r.name)}</span><span class="bar">${KINDS.map(([k, , c]) => r[k] ? `<i class="${c || 'r'}" style="width:${r[k] / scale * 100}%"></i>` : '').join('')}${r.free ? `<i class="f" style="width:${r.free / scale * 100}%"></i>` : ''}</span><span class="sc">${r.n}${r.free === 0 ? '<em class="full">滿</em>' : ''}</span></button>`;
+    // 有設定容量的層：用這一層自己的容量當整條（滿＝整條，空位是後面的深灰色）；沒設定的層才跟同櫃最大的那層比
+    const scale = r.free !== null ? Math.max(1, r.n + r.free) : scaleAll;
+    return `<button type="button" class="sb ${sel ? 'on' : ''}" data-cab="${esc(cab)}" data-shelf="${esc(r.name)}" aria-pressed="${sel}" aria-label="${esc(cab)} ${esc(r.name)}：${r.n} 瓶${r.free !== null ? `，可再放 ${r.free}` : ''}"><span class="sn">${shelfNo(r.name) < 999 ? shelfNo(r.name) : esc(r.name)}</span><span class="bar">${KINDS.map(([k, , c]) => r[k] ? `<i class="${c || 'r'}" style="width:${r[k] / scale * 100}%"></i>` : '').join('')}</span><span class="sc">${r.n}${r.free === 0 ? '<em class="full">滿</em>' : ''}</span></button>`;
   }).join('');
   return `<div class="mc ${on ? 'on' : ''}"><button type="button" class="mc-h" data-cabopen="${esc(cab)}" aria-label="打開 ${esc(cab)}：${sum} 瓶"><span class="mc-n">${esc(cab)}</span><span class="mc-led">${sum}</span></button>${bars}<button type="button" class="mc-f" data-cabopen="${esc(cab)}"><span>${rows.length} 層・看整櫃 ›</span>${frees.length ? `<em>${freeSum ? `空位 ${freeSum}` : '已滿'}</em>` : ''}</button></div>`;
 }
