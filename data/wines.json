@@ -2465,7 +2465,7 @@
     {
      "cabinet": "7樓SUB",
      "shelf": "第3層",
-     "quantity": 1
+     "quantity": 2
     }
    ],
    "photo": "images/W077-1795413028314.jpg",
@@ -2479,13 +2479,13 @@
    "status": "active",
    "createdAt": "2026-11-23T05:50:11.815Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-23T05:50:33.397Z",
+   "updatedAt": "2026-11-23T05:50:55.002Z",
    "updatedBy": "芝琦",
-   "revision": 3
+   "revision": 4
   }
  },
- "rev": 233,
- "updatedAt": "2026-11-23T05:50:33.397Z",
+ "rev": 234,
+ "updatedAt": "2026-11-23T05:50:55.002Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
