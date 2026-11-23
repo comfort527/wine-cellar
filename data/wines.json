@@ -2414,10 +2414,44 @@
    "updatedAt": "2026-11-23T05:45:53.583Z",
    "updatedBy": "芝琦",
    "revision": 4
+  },
+  "W076": {
+   "wineName": "Opus One",
+   "wineryRegion": "Opus One Winery",
+   "vintage": "2013",
+   "entryDate": "2026-11-23",
+   "drinkWindow": "現在-2045滿分神作，醒2小",
+   "grapeNotes": "",
+   "origin": "United States",
+   "volume": "750ml",
+   "source": "贈",
+   "color": "red",
+   "referencePrice": 14905,
+   "locations": [
+    {
+     "cabinet": "7樓SUB",
+     "shelf": "第3層",
+     "quantity": 1
+    }
+   ],
+   "photo": "images/new-1795412814437.jpg",
+   "thumb": "images/new-1795412814437-t.jpg",
+   "photos": [
+    {
+     "photo": "images/new-1795412814437.jpg",
+     "thumb": "images/new-1795412814437-t.jpg"
+    }
+   ],
+   "status": "active",
+   "createdAt": "2026-11-23T05:46:56.532Z",
+   "createdBy": "芝琦",
+   "updatedAt": "2026-11-23T05:46:56.532Z",
+   "updatedBy": "芝琦",
+   "revision": 1
   }
  },
- "rev": 228,
- "updatedAt": "2026-11-23T05:45:53.583Z",
+ "rev": 229,
+ "updatedAt": "2026-11-23T05:46:56.532Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
