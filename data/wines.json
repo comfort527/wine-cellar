@@ -2496,13 +2496,9 @@
    "color": "red",
    "referencePrice": 14224,
    "locations": [],
-   "photo": "images/new-1795412814437.jpg",
-   "thumb": "images/new-1795412814437-t.jpg",
+   "photo": "images/W078-1795413169952.jpg",
+   "thumb": "images/W078-1795413169952-t.jpg",
    "photos": [
-    {
-     "photo": "images/new-1795412814437.jpg",
-     "thumb": "images/new-1795412814437-t.jpg"
-    },
     {
      "photo": "images/W078-1795413169952.jpg",
      "thumb": "images/W078-1795413169952-t.jpg"
@@ -2511,13 +2507,13 @@
    "status": "archived",
    "createdAt": "2026-11-23T05:52:33.714Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-23T05:52:51.223Z",
+   "updatedAt": "2026-11-23T05:52:55.862Z",
    "updatedBy": "芝琦",
-   "revision": 2
+   "revision": 3
   }
  },
- "rev": 236,
- "updatedAt": "2026-11-23T05:52:51.223Z",
+ "rev": 237,
+ "updatedAt": "2026-11-23T05:52:55.862Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
