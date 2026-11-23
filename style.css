@@ -37,6 +37,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 .sync .dot{width:7px;height:7px;border-radius:50%;background:var(--faint)}
 .sync.live .dot{background:var(--ok);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 22%,transparent)}
 .sync.stale .dot{background:var(--warn)}
+.sync.pending{cursor:pointer;color:#b8620f}
+.sync.pending .dot{background:#e0943a;box-shadow:0 0 0 3px rgba(224,148,58,.25)}
 /* 已同步的綠點：一圈一圈往外擴散 */
 .sync .dot{position:relative;flex:none}
 .sync.live .dot::before,.sync.live .dot::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--ok);opacity:0;pointer-events:none}
@@ -506,7 +508,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261123b";
+:root{--ver:"20261123c";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
@@ -670,6 +672,7 @@ fieldset.colorpick{display:flex;flex-direction:row;flex-wrap:wrap;align-items:ce
   .facts{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 10px;width:100%}
   .fact{padding:8px 10px;border-color:var(--line);background:var(--surface)}
   .sync #syncText{display:none}
+  .sync.pending #syncText{display:inline;font-size:15px}
   .who .pill{display:none}
   .row{grid-template-columns:78px minmax(0,1fr) auto;grid-template-areas:"vin nm qt" "vin lc qt";padding:12px 14px;gap:4px 12px}
   .row .vin{grid-area:vin;font-size:33px;align-self:start;padding-top:2px}.row .nm{grid-area:nm}.row .lc{grid-area:lc}.row .qt{grid-area:qt}

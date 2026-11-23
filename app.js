@@ -20,7 +20,7 @@ const S = {
   data: null, etag: null, keys: null, keysSha: null, session: null,
   filter: null, search: '', view: 'list', 
   editing: null, stock: null, photo: null, localPhotos: new Map(),
-  sort: 'loc', drawer: null, newPhotos: [], pendKeep: [], pendNew: [], jt: 'cal', js: {q: '', type: '', when: 'all', hi: false}, jm: {q: '', group: 'recent'},
+  sort: 'loc', drawer: null, outbox: [], base: null, ob: {db: null, mem: false}, newPhotos: [], pendKeep: [], pendNew: [], jt: 'cal', js: {q: '', type: '', when: 'all', hi: false}, jm: {q: '', group: 'recent'},
   busy: 0, lastPoll: 0, syncedAt: null, rawFallback: false, auditPage: 1, auditWine: '', audit: []
 };
 S.view = 'grid';
@@ -138,6 +138,8 @@ document.addEventListener('cancel', e => {
   [...dlgStack].reverse().find(x => x.open && !isClosing(x))?.close();
 }, true);
 function fail(m) { const e = new Error(m); e.user = true; throw e; }
+// 網路連不上（或逾時）：離線佇列看到這種錯誤會先存在這台裝置，等有網路再送
+function offlineFail(m) { const e = new Error(m); e.user = true; e.offline = true; throw e; }
 function msgOf(e) { return e?.user ? e.message : '操作未完成，請稍後再試。'; }
 /* 身分（存在裝置設定裡的代號不變，只改顯示名稱）：
    admin＝工程人員：全部功能，含管理裝置密碼、新增／刪除人員、更換權杖
@@ -157,7 +159,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261123b';
+const APP_VER = '20261123c';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -186,10 +188,12 @@ async function fetchPhoto(path) {   // 取得照片內容：Cloudflare 優先，
   if (PB) { try { const r = await fetch(`${PB}/${encPath(path)}`); if (r.ok) return r; } catch {} }
   return fetch(`${ghRawBase()}/${encPath(path)}`);
 }
-async function r2Send(method, path, body) {
+async function r2Send(method, path, body, timeout = 30000) {
   let r;
-  try { r = await fetch(`${PB}/${encPath(path)}`, {method, body, headers: {'Authorization': 'Bearer ' + S.session.token, ...(body ? {'Content-Type': 'image/jpeg'} : {})}}); }
-  catch { fail('連不上照片空間（Cloudflare），請檢查網路後再試。'); }
+  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), timeout);
+  try { r = await fetch(`${PB}/${encPath(path)}`, {method, body, signal: ctl.signal, headers: {'Authorization': 'Bearer ' + S.session.token, ...(body ? {'Content-Type': 'image/jpeg'} : {})}}); }
+  catch { offlineFail('連不上照片空間（Cloudflare），請檢查網路後再試。'); }
+  finally { clearTimeout(t); }
   if (r.status === 403) fail('照片空間拒絕這台裝置，請工程人員確認權杖。');
   return r;
 }
@@ -270,14 +274,14 @@ function b64e(bytes) { let s = ''; const b = bytes instanceof Uint8Array ? bytes
 function b64d(s) { return Uint8Array.from(atob(String(s).replace(/\s/g, '')), c => c.charCodeAt(0)); }
 
 /* ---------- GitHub API ---------- */
-async function gh(path, {method = 'GET', body, headers = {}, auth = true, raw = false} = {}) {
+async function gh(path, {method = 'GET', body, headers = {}, auth = true, raw = false, timeout = 25000} = {}) {
   const h = {'Accept': raw ? 'application/vnd.github.raw+json' : 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', ...headers};
   const token = auth === true ? S.session?.token : auth || null;
   if (token) h.Authorization = 'Bearer ' + token;
   if (body !== undefined) h['Content-Type'] = 'application/json';
-  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 25000);
+  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), timeout);
   try { return await fetch(API + path, {method, headers: h, body: body === undefined ? undefined : JSON.stringify(body), cache: 'no-store', signal: ctl.signal}); }
-  catch { fail('連不上 GitHub，請檢查網路後再試。'); }
+  catch { offlineFail('連不上 GitHub，請檢查網路後再試。'); }
   finally { clearTimeout(t); }
 }
 function authProblem(r) {
@@ -286,8 +290,8 @@ function authProblem(r) {
   if (r.status === 403) fail('權杖沒有寫入這個 repo 的權限。請管理員確認權杖的 Contents 權限為 Read and write。');
 }
 /* 讀取 data 分支上的 JSON。回傳 {json, sha, etag}；304 回傳 'same'；檔案不存在回傳 null。 */
-async function readJson(path, {etag = null, auth = true} = {}) {
-  const r = await gh(`${REPO}/contents/${path}?ref=${encodeURIComponent(CFG.dataBranch)}`, {auth, headers: etag ? {'If-None-Match': etag} : {}});
+async function readJson(path, {etag = null, auth = true, timeout} = {}) {
+  const r = await gh(`${REPO}/contents/${path}?ref=${encodeURIComponent(CFG.dataBranch)}`, {auth, headers: etag ? {'If-None-Match': etag} : {}, ...(timeout ? {timeout} : {})});
   if (r.status === 304) return 'same';
   if (r.status === 404) return null;
   if (!r.ok) { if (!auth || !S.session) { const e = new Error('api'); e.status = r.status; throw e; } authProblem(r); fail('讀取資料失敗（' + r.status + '）。'); }
@@ -307,10 +311,10 @@ async function readRaw(path) {
   return {json: await r.json(), sha: null, etag: null};
 }
 /* 寫入檔案到 data 分支，產生一筆 commit。sha 不符時回傳 {conflict:true}。 */
-async function putFile(path, bytes, sha, message, token) {
+async function putFile(path, bytes, sha, message, token, timeout) {
   const body = {message, content: b64e(bytes), branch: CFG.dataBranch};
   if (sha) body.sha = sha;
-  const r = await gh(`${REPO}/contents/${path}`, {method: 'PUT', body, auth: token || true});
+  const r = await gh(`${REPO}/contents/${path}`, {method: 'PUT', body, auth: token || true, ...(timeout ? {timeout} : {})});
   if (r.ok) { const j = await r.json(); return {ok: true, sha: j.content?.sha}; }
   if (r.status === 409) return {conflict: true};
   if (r.status === 422) { const j = await r.json().catch(() => ({})); if (/sha/i.test(j.message || '')) return {conflict: true}; fail('GitHub 拒絕這次寫入：' + (j.message || r.status)); }
@@ -334,7 +338,7 @@ async function loadData(force) {
   if (res === 'same') return false;
   const json = res ? res.json : emptyData();
   if (isOlder(json)) return false; // GitHub 偶爾回舊版本，忽略
-  S.data = json; S.etag = res?.etag || null;
+  S.base = json; S.etag = res?.etag || null; applyPending();
   return true;
 }
 async function loadKeys() {
@@ -346,20 +350,23 @@ async function loadKeys() {
 }
 
 /* 寫入：每次都讀最新版本、套用變更、帶 sha 寫回；有人同時修改就自動重試。 */
-async function mutate(fn, message, {quiet = false} = {}) {
+async function mutate(fn, message, {quiet = false, timeout, skipGuard = false} = {}) {
   if (!S.session) fail('請先登入管理。');
+  // 還有離線紀錄沒送出時，其他修改要等它們先送完（照順序，避免例如「編輯並加入酒櫃」用到還沒上傳的待入櫃）
+  if (!skipGuard && S.outbox.length) { await flush(); if (S.outbox.length) fail(`還有 ${obCount()} 筆離線紀錄等待上傳，請連上網路、等上傳完再做這個動作。`); }
   S.busy++;
   try {
     for (let i = 0; i < 4; i++) {
-      const cur = await readJson(CFG.dataPath);
+      const cur = await readJson(CFG.dataPath, {timeout});
       const base = cur ? cur.json : emptyData();
       if (isOlder(base)) { await sleep(800 * (i + 1)); continue; }
       const draft = structuredClone(base);
       const result = fn(draft);
+      if (result && result.dup) { S.base = base; applyPending(); render(); return result; }   // 這筆離線動作其實已經送出過：不再寫入
       draft.rev = (base.rev || 0) + 1; if (!quiet) draft.updatedAt = now();
       const title = typeof message === 'function' ? message(result, draft) : message;
-      const r = await putFile(CFG.dataPath, jsonBytes(draft), cur?.sha, `${title}\n\n操作者：${S.session.label}`);
-      if (r.ok) { S.data = draft; S.etag = null; S.syncedAt = now(); render(); return result; }
+      const r = await putFile(CFG.dataPath, jsonBytes(draft), cur?.sha, `${title}\n\n操作者：${S.session.label}`, null, timeout);
+      if (r.ok) { S.base = draft; applyPending(); S.etag = null; S.syncedAt = now(); render(); return result; }
       await sleep(500 * (i + 1));
     }
     fail('同時有其他人在修改，請再試一次。');
@@ -412,7 +419,7 @@ function logout(silent) {
   S.session = null;
   try { localStorage.removeItem('cellarSession'); sessionStorage.removeItem('cellarSession'); } catch {}
   document.querySelectorAll('dialog[open]').forEach(d => d.close());
-  if (!silent) toast('已登出，目前為瀏覽模式。');
+  if (!silent) toast(S.outbox.length ? `已登出。還有 ${obCount()} 筆離線紀錄，下次登入後會自動上傳。` : '已登出，目前為瀏覽模式。');
   render();
 }
 
@@ -468,6 +475,7 @@ async function start() {
   if (!CFG.owner || CFG.owner === 'YOUR_GITHUB_ACCOUNT') { notice('尚未設定資料 repo：請在 config.js 填入 GitHub 帳號與 repo 名稱。', true); render(); return; }
   restoreSession();
   wire();
+  await obLoad();
   try {
     await loadKeys();
     syncSlot(true);
@@ -482,6 +490,7 @@ async function start() {
 }
 async function poll(force) {
   if (document.hidden || S.busy || !S.data) return;
+  if (S.outbox.length && S.session) { if (!S.flushing) flush(); return; }   // 有離線紀錄：先送出，送完再照常同步
   const every = (S.session ? CFG.pollSecondsEditor : CFG.pollSecondsViewer) * 1000;
   if (!force && Date.now() - S.lastPoll < every) return;
   S.lastPoll = Date.now();
@@ -520,7 +529,10 @@ const colorName = w => kindName(kindOf(w));
 const emptyCount = () => Object.fromEntries(KIND_IDS.map(k => [k, 0]));
 const countSum = c => KIND_IDS.reduce((a, k) => a + (c[k] || 0), 0);
 function renderSync() {
-  const el = $('sync'), every = (S.session ? CFG.pollSecondsEditor : CFG.pollSecondsViewer) * 1000;
+  const el = $('sync');
+  el.classList.toggle('pending', !!S.outbox.length);
+  if (S.outbox.length) { el.classList.remove('live', 'stale'); const n = obCount(); $('syncText').textContent = n ? `${n} 筆等待上傳` : '照片等待上傳'; el.title = S.obErr ? `上次失敗：${S.obErr}。點一下重試` : '沒有網路時先存在這台裝置，連上網路會自動上傳。點一下立即重試'; return; }
+  const every = (S.session ? CFG.pollSecondsEditor : CFG.pollSecondsViewer) * 1000;
   const age = S.syncedAt ? Date.now() - new Date(S.syncedAt).getTime() : Infinity;
   el.classList.toggle('live', age < every * 2 + 10000);
   el.classList.toggle('stale', age >= every * 2 + 10000 && age !== Infinity);
@@ -1116,6 +1128,7 @@ function wire() {
   $('f_originChoice').addEventListener('change', e => { const o = e.target.value === '__other__'; $('f_originOther').hidden = !o; if (o) $('f_originOther').focus(); });
   $('f_sourceChoice').addEventListener('change', e => { $('f_sourceOther').hidden = e.target.value !== '__other__'; });
   $('addLoc').addEventListener('click', () => addLocRow());
+  $('sync').addEventListener('click', () => { if (!S.outbox.length) return; if (!S.session) return toast('登入後才會上傳離線紀錄。'); toast('正在重試上傳…'); flush(); });
   $('mapView').addEventListener('click', e => { const b = e.target.closest('[data-mv]'); if (!b) return; S.mapView = b.dataset.mv; S.cabOpen = null; try { localStorage.setItem('cellarMapView', S.mapView); } catch {} render(); });
   $('copyWineBtn').addEventListener('click', copyWine);
   $('locInputs').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) b.closest('.loc-ed').remove(); });
@@ -1600,6 +1613,105 @@ async function mergeRebuy(target, r, who) {
   $('wineModal').close(); openDrawer(id); toast(`已加到原本的「${target.wineName}${target.vintage ? ' ' + target.vintage : ''}」，庫存 ${res.before} → ${res.after} 瓶。`);
 }
 
+/* ---------- 離線佇列：沒有網路時，出庫、移動、待入櫃先存在這台裝置（IndexedDB），連上網路後依序送出 ----------
+   - 存的是「動作名稱＋參數」，送出時在最新資料上重新執行同一個檢查（例如只剩幾瓶），不會蓋掉別台裝置的修改
+   - 每個動作有自己的編號，寫進資料檔的 appliedOps；萬一上次其實已經送出、只是沒收到回應，重送時會跳過，不會重複扣瓶數
+   - 照片先存檔案本身，送資料前先上傳照片 */
+const QUEUED = '。目前沒有網路，已先存在這台裝置，連上網路後會自動上傳。';
+const OPS = {
+  out: (d, a) => takeOut(d, a.id, {cabinet: a.cabinet, shelf: a.shelf, qty: a.qty, out: a.out}, a.who, a.hint),
+  move: (d, a) => moveIn(d, a),
+  pendNew: (d, a) => { d.pending = d.pending || []; d.pending.push({id: a.pid, photos: a.photos, qty: a.qty, by: a.who, at: a.at}); return {}; },
+};
+function applyOp(d, type, args, opId) {
+  if ((d.appliedOps || []).includes(opId)) return {dup: true};
+  let res;
+  try { res = OPS[type](d, args); } catch (e) { e.opReject = true; throw e; }
+  d.appliedOps = [...(d.appliedOps || []), opId].slice(-100);
+  return res || {};
+}
+// 畫面用的資料＝伺服器上的最新版本＋還沒送出的離線動作
+function applyPending() {
+  const ops = S.outbox.filter(x => x.kind === 'op');
+  if (!ops.length) { S.data = S.base; return; }
+  const d = structuredClone(S.base || emptyData());
+  for (const o of ops) { try { applyOp(d, o.type, o.args, o.opId); } catch {} }
+  S.data = d;
+}
+// 離線紀錄的簡短說明（無法套用時提醒用）
+const opLabel = (type, a, d) => { const n = d?.wines?.[a.id]?.wineName || a.id; return type === 'out' ? `出庫「${n}」${a.qty} 瓶` : type === 'move' ? `移動「${n}」${a.qty} 瓶` : `待入櫃 ${a.qty} 瓶`; };
+const obCount = () => S.outbox.filter(x => x.kind === 'op').length;
+function obDb() {
+  if (!S.ob.db) S.ob.db = new Promise((res, rej) => { const q = indexedDB.open('cellar-outbox', 1); q.onupgradeneeded = () => q.result.createObjectStore('q', {keyPath: 'seq', autoIncrement: true}); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); });
+  return S.ob.db;
+}
+function obReq(mode, fn) { return obDb().then(db => new Promise((res, rej) => { const t = db.transaction('q', mode), r = fn(t.objectStore('q')); t.oncomplete = () => res(r?.result); t.onerror = t.onabort = () => rej(t.error); })); }
+async function obLoad() {
+  try { S.outbox = ((await obReq('readonly', st => st.getAll())) || []).sort((a, b) => a.seq - b.seq); }
+  catch { S.ob.mem = true; S.outbox = []; }
+  for (const it of S.outbox) if (it.kind === 'photo' && it.blob && !S.localPhotos.has(it.path)) S.localPhotos.set(it.path, URL.createObjectURL(it.blob));
+}
+async function obPush(item) {
+  item = {...item, slot: S.session?.slotId || '', added: now()};
+  if (!S.ob.mem) { try { item.seq = await obReq('readwrite', st => st.add(item)); } catch { S.ob.mem = true; } }
+  if (S.ob.mem) item.seq = Date.now() + Math.random();
+  S.outbox.push(item); renderSync();
+}
+async function obDel(seq) {
+  if (!S.ob.mem) { try { await obReq('readwrite', st => st.delete(seq)); } catch {} }
+  S.outbox = S.outbox.filter(x => x.seq !== seq);
+}
+// 執行一個可以離線的動作：有網路就照常寫入；沒網路（或前面還有沒送出的）就先存起來、畫面先更新
+async function runOp(type, args, message) {
+  const opId = crypto.randomUUID();
+  if (!S.outbox.length) {
+    try { return await mutate(d => applyOp(d, type, args, opId), message, {timeout: 15000, skipGuard: true}); }
+    catch (e) { if (!e.offline) throw e; }
+  }
+  const draft = structuredClone(S.data || emptyData());
+  const res = applyOp(draft, type, args, opId);   // 檢查不過（例如瓶數不夠）直接顯示給使用者，不存
+  const msg = typeof message === 'function' ? message(res, draft) : message;
+  await obPush({kind: 'op', opId, type, args, msg, label: opLabel(type, args, S.data)});
+  applyPending(); render();
+  return {...res, queued: true};
+}
+// 照片：有網路就直接上傳；沒有就先把檔案存在這台裝置，之後再傳
+async function uploadPhotoQ(ph, id) {
+  if (!PB) return uploadPhoto(ph, id);
+  const base = `${CFG.imageDir}/${id}-${Date.now()}`;
+  for (const [path, blob] of [[`${base}.jpg`, ph.full], [`${base}-t.jpg`, ph.thumb]]) {
+    S.localPhotos.set(path, URL.createObjectURL(blob));
+    let ok = false;
+    if (!S.outbox.length) { try { ok = (await r2Send('PUT', path, blob, 20000)).ok; } catch (e) { if (!e.offline) throw e; } }
+    if (!ok) await obPush({kind: 'photo', path, blob});
+  }
+  return {photo: `${base}.jpg`, thumb: `${base}-t.jpg`};
+}
+// 依序送出。網路不通就停下來等下次；動作本身檢查不過（例如別台裝置已把最後一瓶出庫）就放棄這筆並提醒；
+// 其他錯誤（權杖、伺服器）保留資料、停下來，狀態列顯示原因
+async function flush() {
+  if (S.flushing || !S.outbox.length || !S.session) return;
+  S.flushing = true; let sent = 0; const rejected = [];
+  try {
+    while (S.outbox.length && S.session) {
+      const it = S.outbox[0];
+      try {
+        if (it.kind === 'photo') { const r = await r2Send('PUT', it.path, it.blob, 20000); if (!r.ok) fail(`照片上傳失敗（${r.status}）`); }
+        else await mutate(d => applyOp(d, it.type, it.args, it.opId), it.msg, {skipGuard: true, timeout: 15000});
+        S.obErr = '';
+      } catch (e) {
+        if (e.opReject) rejected.push(`${it.label || it.type}（${msgOf(e)}）`);
+        else { S.obErr = e.offline ? '' : msgOf(e); break; }
+      }
+      await obDel(it.seq); if (it.kind === 'op') sent++;
+    }
+  } finally {
+    S.flushing = false; applyPending(); render();
+    if (rejected.length) toast(`有 ${rejected.length} 筆離線紀錄在上傳時已經做不到，已略過：${rejected.join('；')}`);
+    else if (sent && !S.outbox.length) toast(`離線紀錄已全部上傳（${sent} 筆）。`);
+  }
+}
+
 /* ---------- 出庫 ---------- */
 function locPicker(el, name, legend, w, cab, shelf) {
   const locs = (w.locations || []).map((l, i) => ({...l, i})).filter(l => l.quantity > 0);
@@ -1623,9 +1735,10 @@ async function saveStock() {
   if (!type) fail('請選擇出庫類型：自飲、聚餐、送禮或其他。');
   if (type === '其他' && !reason) fail('選「其他」時請填寫說明。');
   checkQty(qty);
-  const res = await mutate(d => takeOut(d, id, {cabinet, shelf, qty, out: {date, type, reason}}, who, '沒有扣除任何瓶數。'),
+  const res = await runOp('out', {id, cabinet, shelf, qty, out: {date, type, reason}, who, hint: '沒有扣除任何瓶數。'},
     x => takeOutMsg(id, x, {type, cabinet, shelf, qty, date, note: reason}));
   $('stockModal').close();
+  if (res.queued) return toast(`${type}出庫 ${qty} 瓶${QUEUED}`);
   toast(res.archived ? `「${res.name}」已全部出庫，移入歷史酒單。` : `${fmtDate(date)} ${type}出庫 ${qty} 瓶，${cabinet} / ${shelf} 剩 ${res.left} 瓶。`);
 }
 
@@ -1664,7 +1777,12 @@ async function saveMove() {
   if (to.cabinet === from.cabinet && to.shelf === from.shelf) fail('新位置和原位置相同。');
   checkQty(qty);
   checkDate(date);
-  const res = await mutate(d => {
+  const res = await runOp('move', {id, from: {cabinet: from.cabinet, shelf: from.shelf}, to, qty, date, note, who},
+    x => `移動 ${id} ${x.name}：${from.cabinet}/${from.shelf} → ${to.cabinet}/${to.shelf}（×${qty}）\n\n日期：${date}${note ? '\n備註：' + note : ''}`);
+  $('moveModal').close();
+  toast(res.queued ? `已移動 ${qty} 瓶到 ${to.cabinet} / ${to.shelf}${QUEUED}` : `已移動 ${qty} 瓶到 ${to.cabinet} / ${to.shelf}（那裡現有 ${res.now} 瓶）。`);
+}
+function moveIn(d, {id, from, to, qty, date, note, who}) {
     const cur = wineOf(d, id);
     const locs = cur.locations || [];
     const src = locs.find(x => x.cabinet === from.cabinet && x.shelf === from.shelf);
@@ -1680,9 +1798,6 @@ async function saveMove() {
     if (!d.catalog.cabinets.includes(to.cabinet)) d.catalog.cabinets.push(to.cabinet);
     if (!d.catalog.shelves.includes(to.shelf)) d.catalog.shelves.push(to.shelf);
     return {name: cur.wineName, now: dst.quantity};
-  }, x => `移動 ${id} ${x.name}：${from.cabinet}/${from.shelf} → ${to.cabinet}/${to.shelf}（×${qty}）\n\n日期：${date}${note ? '\n備註：' + note : ''}`);
-  $('moveModal').close();
-  toast(`已移動 ${qty} 瓶到 ${to.cabinet} / ${to.shelf}（那裡現有 ${res.now} 瓶）。`);
 }
 
 /* ---------- 照片 ---------- */
@@ -1978,10 +2093,10 @@ async function savePending() {
   const who = S.session.label; S.pendSaving = true; $('q_save').disabled = true; renderPendStrip(); showErr('pendErr', '');
   try {
     const photos = [];
-    for (const ph of S.pendNew) photos.push(await uploadPhoto(ph, 'pending'));
+    for (const ph of S.pendNew) photos.push(await uploadPhotoQ(ph, 'pending'));
     const qty = S.pendQty || 1;
-    await mutate(d => { d.pending = d.pending || []; d.pending.push({id: crypto.randomUUID(), photos, qty, by: who, at: now()}); }, `待入櫃：新增 ${qty} 瓶（${photos.length} 張照片）`);
-    S.pendNew = []; S.pendQty = 1; toast('已存入待入櫃，之後再補資料。');
+    const res = await runOp('pendNew', {pid: crypto.randomUUID(), photos, qty, who, at: now()}, `待入櫃：新增 ${qty} 瓶（${photos.length} 張照片）`);
+    S.pendNew = []; S.pendQty = 1; toast(res.queued ? `已存入待入櫃${QUEUED}` : '已存入待入櫃，之後再補資料。');
   } catch (e) { showErr('pendErr', msgOf(e)); }
   finally { S.pendSaving = false; $('q_save').disabled = false; renderPendStrip(); renderPending(); checkStorage(); }
 }
@@ -2737,9 +2852,9 @@ async function saveJournal() {
   const stamp = rating ? {rating} : {};
   if (src === 'cellar' && f.wineId) {
     const id = f.wineId, cabinet = f.cab, shelf = f.shelf;
-    const res = await mutate(d => takeOut(d, id, {cabinet, shelf, qty, out: {date, type, reason: note, ...stamp}}, me, '請重新點選。'),
+    const res = await runOp('out', {id, cabinet, shelf, qty, out: {date, type, reason: note, ...stamp}, who: me, hint: '請重新點選。'},
       x => takeOutMsg(id, x, {type, cabinet, shelf, qty, date, note}));
-    toast(res.archived ? `已紀錄，「${res.name}」已全部喝完。` : `已紀錄，${cabinet} · ${shelf} 還有 ${res.left} 瓶。`);
+    if (res.queued) toast(`已紀錄${QUEUED}`); else toast(res.archived ? `已紀錄，「${res.name}」已全部喝完。` : `已紀錄，${cabinet} · ${shelf} 還有 ${res.left} 瓶。`);
   } else if (src === 'cellar') {
     const name = $('j_mname').value.trim(), vintage = $('j_mvintage').value.trim();
     const left = Number($('j_left').value || 0), cab = $('j_cab').value.trim(), shelf = $('j_shelf').value.trim();
