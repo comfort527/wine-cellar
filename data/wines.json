@@ -2355,7 +2355,13 @@
    "source": "",
    "color": "red",
    "referencePrice": 13583,
-   "locations": [],
+   "locations": [
+    {
+     "cabinet": "7樓SUB",
+     "shelf": "第3層",
+     "quantity": 1
+    }
+   ],
    "photo": "images/W073-1795410650353.jpg",
    "thumb": "images/W073-1795410650353-t.jpg",
    "photos": [
@@ -2364,16 +2370,16 @@
      "thumb": "images/W073-1795410650353-t.jpg"
     }
    ],
-   "status": "archived",
+   "status": "active",
    "createdAt": "2026-11-23T05:34:52.836Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-23T05:34:52.836Z",
+   "updatedAt": "2026-11-23T05:35:35.225Z",
    "updatedBy": "芝琦",
-   "revision": 1
+   "revision": 2
   }
  },
- "rev": 221,
- "updatedAt": "2026-11-23T05:34:52.836Z",
+ "rev": 222,
+ "updatedAt": "2026-11-23T05:35:35.225Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
