@@ -2314,7 +2314,7 @@
    "wineryRegion": "Opus One Winery",
    "vintage": "2019",
    "entryDate": "",
-   "drinkWindow": "現在-2046，醒2小",
+   "drinkWindow": "現在（初期）-2052",
    "grapeNotes": "",
    "origin": "United States",
    "volume": "750ml",
@@ -2339,13 +2339,13 @@
    "status": "active",
    "createdAt": "2026-11-23T05:09:19.083Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-23T05:10:52.285Z",
+   "updatedAt": "2026-11-23T05:33:48.434Z",
    "updatedBy": "芝琦",
-   "revision": 3
+   "revision": 4
   }
  },
- "rev": 219,
- "updatedAt": "2026-11-23T05:10:52.285Z",
+ "rev": 220,
+ "updatedAt": "2026-11-23T05:33:48.434Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
