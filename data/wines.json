@@ -2552,9 +2552,22 @@
    "revision": 3
   }
  },
- "rev": 244,
- "updatedAt": "2026-11-23T05:58:25.433Z",
- "pending": [],
+ "rev": 245,
+ "updatedAt": "2026-11-23T10:42:13.307Z",
+ "pending": [
+  {
+   "id": "d9c4b911-65c7-47e9-a321-56c0adfda486",
+   "photos": [
+    {
+     "photo": "images/pending-1795430528879.jpg",
+     "thumb": "images/pending-1795430528879-t.jpg"
+    }
+   ],
+   "qty": 2,
+   "by": "浚凱",
+   "at": "2026-11-23T10:42:12.832Z"
+  }
+ ],
  "capacity": {
   "8樓右LB櫃": {
    "第1層": 18,
@@ -2574,5 +2587,8 @@
   "8樓外冰箱": {
    "最下層": 15
   }
- }
+ },
+ "appliedOps": [
+  "7f98fb79-6bb5-4c8f-9004-d97609f78cff"
+ ]
 }
