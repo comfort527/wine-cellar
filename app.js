@@ -159,7 +159,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261123d';
+const APP_VER = '20261123e';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -1150,6 +1150,11 @@ function wire() {
   });
   $('q_strip').addEventListener('click', e => { const b = e.target.closest('[data-qrm]'); if (b) { S.pendNew.splice(Number(b.dataset.qrm), 1); renderPendStrip(); } });
   $('q_save').addEventListener('click', savePending);
+  $('q_locAdd').addEventListener('click', addPendLoc);
+  $('q_locs').addEventListener('click', e => {
+    const rm = e.target.closest('[data-lrm]'); if (rm) { rm.closest('.pl-row').remove(); return renderPendStrip(); }
+    const b = e.target.closest('[data-lq]'); if (!b) return; const v = b.parentElement.querySelector('b'); v.textContent = Math.max(1, (Number(v.textContent) || 1) + Number(b.dataset.lq)); renderPendStrip();
+  });
   $('q_qtyRow').addEventListener('click', e => { const b = e.target.closest('[data-qd]'); if (!b) return; S.pendQty = Math.max(1, (S.pendQty || 1) + Number(b.dataset.qd)); renderPendStrip(); });
   $('pendList').addEventListener('click', e => {
     const ed = e.target.closest('[data-pedit]'); if (ed) return editPending(ed.dataset.pedit);
@@ -1496,7 +1501,7 @@ function openWineForm(w, pend, rb) {
   const col = w ? kindOf(w) : 'red';
   document.querySelectorAll('input[name=f_color]').forEach(r => r.checked = r.value === col);
   fillOrigin(w?.origin);
-  $('locInputs').replaceChildren(); (w?.locations?.length ? w.locations : [{cabinet: '', shelf: '', quantity: S.fromPend ? pendQty(S.fromPend) : 1}]).forEach(addLocRow);
+  $('locInputs').replaceChildren(); (w?.locations?.length ? w.locations : S.fromPend?.locations?.length ? S.fromPend.locations : [{cabinet: '', shelf: '', quantity: S.fromPend ? pendQty(S.fromPend) : 1}]).forEach(addLocRow);
   $('locHint').hidden = !w; $('locLbl').textContent = w ? '存放位置與瓶數' : '存放位置與初始瓶數';
   $('newPhotoField').hidden = !!w; $('f_camera').value = ''; $('f_gallery').value = '';
   document.querySelectorAll('#wineForm .rb-filled, #wineForm .rb-check').forEach(el => el.classList.remove('rb-filled', 'rb-check'));
@@ -1621,7 +1626,7 @@ const queuedNote = () => S.ob.mem ? '。目前沒有網路，已先記在這個�
 const OPS = {
   out: (d, a) => takeOut(d, a.id, {cabinet: a.cabinet, shelf: a.shelf, qty: a.qty, out: a.out}, a.who, a.hint),
   move: (d, a) => moveIn(d, a),
-  pendNew: (d, a) => { d.pending = d.pending || []; d.pending.push({id: a.pid, photos: a.photos, qty: a.qty, by: a.who, at: a.at}); return {}; },
+  pendNew: (d, a) => { d.pending = d.pending || []; d.pending.push({id: a.pid, photos: a.photos, qty: a.qty, ...(a.locations?.length ? {locations: a.locations} : {}), by: a.who, at: a.at}); return {}; },
 };
 function applyOp(d, type, args, opId) {
   if ((d.appliedOps || []).includes(opId)) return {dup: true};
@@ -2030,7 +2035,10 @@ function renderPendStrip() {
   $('q_strip').innerHTML = S.pendNew.map((ph, i) => thumbHtml(URL.createObjectURL(ph.thumb), i, `data-qrm="${i}"`)).join('');
   $('q_add').querySelectorAll('label').forEach(l => l.hidden = n >= MAX_PHOTOS);
   $('q_save').hidden = !n; $('q_save').textContent = S.pendSaving ? '上傳中…' : `存入待入櫃（${n} 張）`;
-  $('q_qtyRow').hidden = !n; $('q_qty').textContent = S.pendQty || 1;
+  const rows = $('q_locs').children.length;
+  $('q_locBox').hidden = !n; $('q_qtyRow').hidden = !!rows; $('q_qty').textContent = S.pendQty || 1;
+  $('q_locAdd').textContent = rows ? '＋ 再加一個位置' : '＋ 選擇櫃位與層位';
+  $('q_locSum').hidden = !rows; $('q_locSum').textContent = `共 ${pendLocsRead().reduce((a, l) => a + l.quantity, 0)} 瓶`;
 }
 function renderPending() {
   const list = S.data?.pending || [], n = list.reduce((a, p) => a + pendQty(p), 0);
@@ -2042,7 +2050,7 @@ function renderPending() {
     return `<article class="pend" data-pid="${esc(p.id)}">
     <div class="pend-ph">${p.photos.map((ph, i) => `<span class="pth"><a href="${esc(fileUrl(ph.photo))}" target="_blank" rel="noopener"><img src="${esc(fileUrl(ph.thumb || ph.photo))}" alt="第 ${i + 1} 張" loading="lazy"></a>${i === 0 ? '<em>封面</em>' : ''}${one || busy ? '' : `<button type="button" data-pprm="${esc(ph.photo)}" aria-label="移除第 ${i + 1} 張">×</button>`}</span>`).join('')}</div>
     <div class="pend-add">${busy ? '<span class="hint">上傳中…</span>' : room > 0 && ed ? `<label>📷 加拍<input type="file" accept="image/*" capture="environment" data-padd></label><label>從相簿加入<input type="file" accept="image/*" multiple data-padd></label>` : ''}<span class="hint">${p.photos.length}／${MAX_PHOTOS} 張</span></div>
-    <div class="qstep pend-qty"><span>數量</span>${ed && !busy ? `<button type="button" data-pqd="-1" ${pendQty(p) <= 1 ? 'disabled' : ''} aria-label="少一瓶">−</button>` : ''}<b>${pendQty(p)}</b>${ed && !busy ? '<button type="button" data-pqd="1" aria-label="多一瓶">＋</button>' : ''}<span>瓶</span></div>
+    ${p.locations?.length ? `<div class="pl-where">${p.locations.map(l => `<span>${esc(l.cabinet)}・${esc(l.shelf)}　${l.quantity} 瓶</span>`).join('')}</div><div class="qstep pend-qty"><span>共 ${pendQty(p)} 瓶</span></div>` : `<div class="qstep pend-qty"><span>數量</span>${ed && !busy ? `<button type="button" data-pqd="-1" ${pendQty(p) <= 1 ? 'disabled' : ''} aria-label="少一瓶">−</button>` : ''}<b>${pendQty(p)}</b>${ed && !busy ? '<button type="button" data-pqd="1" aria-label="多一瓶">＋</button>' : ''}<span>瓶</span></div>`}
     <p class="pend-meta">${esc(p.by || '')}・${fmtTime(p.at)}</p>
     ${ed ? `<div class="pend-act"><button type="button" class="primary" data-pedit="${esc(p.id)}" ${busy ? 'disabled' : ''}>編輯並加入酒櫃</button><button type="button" class="danger" data-pdelq="${esc(p.id)}" ${busy ? 'disabled' : ''}>刪除</button></div>` : ''}
   </article>`;
@@ -2050,7 +2058,19 @@ function renderPending() {
   // 內容沒變就不重畫：避免定時同步把正在開啟的相機／相簿選擇器換掉
   if (html !== S.pendHtml || !$('pendList').firstChild) { S.pendHtml = html; $('pendList').innerHTML = html; }
 }
-const pendQty = p => Math.max(1, Math.round(Number(p?.qty) || 1));
+const pendQty = p => p?.locations?.length ? p.locations.reduce((a, l) => a + (Number(l.quantity) || 0), 0) : Math.max(1, Math.round(Number(p?.qty) || 1));
+/* 待入櫃新增區：存放位置（選填），可以分好幾個位置，每個位置自己的瓶數 */
+function addPendLoc() {
+  ensureLists();
+  const row = document.createElement('div'); row.className = 'pl-row';
+  row.innerHTML = '<select class="pl-c" aria-label="櫃位"></select><select class="pl-s" aria-label="層位"></select><div class="pl-q"><span class="qstep"><button type="button" data-lq="-1" aria-label="少一瓶">−</button><b>1</b><button type="button" data-lq="1" aria-label="多一瓶">＋</button><span>瓶</span></span><button type="button" class="pl-x" data-lrm>移除</button></div>';
+  $('q_locs').append(row);
+  fillLocPair(row.querySelector('.pl-c'), row.querySelector('.pl-s'));
+  renderPendStrip();
+}
+function pendLocsRead() {
+  return [...$('q_locs').children].map(r => ({cabinet: r.querySelector('.pl-c').value.trim(), shelf: r.querySelector('.pl-s').value.trim(), quantity: Number(r.querySelector('b').textContent) || 1}));
+}
 /* 待入櫃：之後再改數量（管理員） */
 async function setPendQty(id, delta) {
   if (!canEdit()) return;
@@ -2098,13 +2118,19 @@ async function removePendPhoto(id, path) {
 }
 async function savePending() {
   if (!S.pendNew.length || S.pendSaving) return;
+  // 存放位置（選填）：同一個位置選兩次就合併
+  const pendLocs = [];
+  for (const l of pendLocsRead()) {
+    if (!l.cabinet || !l.shelf) return showErr('pendErr', '請選擇櫃位和層位；不需要的位置請按「移除」。');
+    const ex = pendLocs.find(x => x.cabinet === l.cabinet && x.shelf === l.shelf); if (ex) ex.quantity += l.quantity; else pendLocs.push(l);
+  }
   const who = S.session.label; S.pendSaving = true; $('q_save').disabled = true; renderPendStrip(); showErr('pendErr', '');
   try {
     const photos = [];
     for (const ph of S.pendNew) photos.push(await uploadPhotoQ(ph, 'pending'));
-    const qty = S.pendQty || 1;
-    const res = await runOp('pendNew', {pid: crypto.randomUUID(), photos, qty, who, at: now()}, `待入櫃：新增 ${qty} 瓶（${photos.length} 張照片）`);
-    S.pendNew = []; S.pendQty = 1; toast(res.brief ? `已存入待入櫃${res.note}` : '已存入待入櫃，之後再補資料。');
+    const locations = pendLocs, qty = locations.length ? locations.reduce((a, l) => a + l.quantity, 0) : S.pendQty || 1;
+    const res = await runOp('pendNew', {pid: crypto.randomUUID(), photos, qty, locations, who, at: now()}, `待入櫃：新增 ${qty} 瓶（${photos.length} 張照片）${locations.length ? '\n\n位置：' + locText(locations) : ''}`);
+    S.pendNew = []; S.pendQty = 1; $('q_locs').replaceChildren(); toast(res.brief ? `已存入待入櫃${res.note}` : '已存入待入櫃，之後再補資料。');
   } catch (e) { showErr('pendErr', msgOf(e)); }
   finally { S.pendSaving = false; $('q_save').disabled = false; renderPendStrip(); renderPending(); checkStorage(); }
 }

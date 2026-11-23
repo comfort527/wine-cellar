@@ -456,6 +456,18 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .qstep button:disabled{opacity:.35}
 .qstep b{min-width:28px;text-align:center;font-size:20px}
 .pend-qty{margin:2px 0}
+.pl-box{display:grid;gap:8px;width:100%}
+.pl-h{display:flex;align-items:center;justify-content:space-between;font-weight:600}
+.pl-h small{font-weight:400;color:var(--muted);font-size:14px}
+.pl-sum{font-weight:700;font-size:17px}
+#q_locs{display:grid;gap:8px}#q_locs:empty{display:none}
+.pl-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.pl-row select{width:100%;min-width:0}
+.pl-row .pl-q{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between}
+.pl-row .pl-x{background:none;border:0;color:var(--bad);font-size:15px;padding:6px 4px;min-height:0}
+.pl-add{background:none;border:0;color:var(--wine);font-weight:600;padding:6px 2px;min-height:0;justify-self:start}
+.pend .pl-where{display:flex;flex-direction:column;gap:2px;font-size:15px;margin:2px 0}
+.pend .pl-where span::before{content:"📍 "}
 .pend-act{display:flex;gap:8px;flex-wrap:wrap}
 .pend-act .primary{flex:1 1 auto}
 .pend-empty{grid-column:1/-1;margin:0}
@@ -508,7 +520,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261123d";
+:root{--ver:"20261123e";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
