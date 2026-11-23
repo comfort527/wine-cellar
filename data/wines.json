@@ -2419,7 +2419,7 @@
    "wineName": "Opus One",
    "wineryRegion": "Opus One Winery",
    "vintage": "2013",
-   "entryDate": "2026-11-23",
+   "entryDate": "",
    "drinkWindow": "現在-2045滿分神作，醒2小",
    "grapeNotes": "",
    "origin": "United States",
@@ -2445,13 +2445,13 @@
    "status": "active",
    "createdAt": "2026-11-23T05:46:56.532Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-23T05:46:56.532Z",
+   "updatedAt": "2026-11-23T05:47:09.703Z",
    "updatedBy": "芝琦",
-   "revision": 1
+   "revision": 2
   }
  },
- "rev": 229,
- "updatedAt": "2026-11-23T05:46:56.532Z",
+ "rev": 230,
+ "updatedAt": "2026-11-23T05:47:09.703Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
