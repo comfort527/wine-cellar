@@ -2362,13 +2362,9 @@
      "quantity": 1
     }
    ],
-   "photo": "images/W073-1795410650353.jpg",
-   "thumb": "images/W073-1795410650353-t.jpg",
+   "photo": "images/W074-1795412153885.jpg",
+   "thumb": "images/W074-1795412153885-t.jpg",
    "photos": [
-    {
-     "photo": "images/W073-1795410650353.jpg",
-     "thumb": "images/W073-1795410650353-t.jpg"
-    },
     {
      "photo": "images/W074-1795412153885.jpg",
      "thumb": "images/W074-1795412153885-t.jpg"
@@ -2377,13 +2373,13 @@
    "status": "active",
    "createdAt": "2026-11-23T05:34:52.836Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-23T05:35:55.604Z",
+   "updatedAt": "2026-11-23T05:36:03.430Z",
    "updatedBy": "芝琦",
-   "revision": 3
+   "revision": 4
   }
  },
- "rev": 223,
- "updatedAt": "2026-11-23T05:35:55.604Z",
+ "rev": 224,
+ "updatedAt": "2026-11-23T05:36:03.430Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
