@@ -24,6 +24,7 @@ const S = {
   busy: 0, lastPoll: 0, syncedAt: null, rawFallback: false, auditPage: 1, auditWine: '', audit: []
 };
 S.view = 'grid';
+try { S.mapView = localStorage.getItem('cellarMapView') || ''; } catch {}
 try { S.view = localStorage.getItem('cellarView') === 'list' ? 'list' : 'grid'; S.sort = localStorage.getItem('cellarSort') || 'loc'; } catch {}
 
 /* ---------- 小工具 ---------- */
@@ -587,8 +588,12 @@ function renderMap(list) {
     sh.set(l.shelf, cur);
   }
   const all = [...cabs].filter(([, sh]) => sh.size);
-  // 電腦版櫃子 3 個以上：先顯示全部櫃子的縮圖總覽，點進去才看完整酒櫃
-  const overview = all.length >= 3 && matchMedia(DESK_MQ).matches;
+  // 酒櫃顯示方式：「總覽」先列出全部櫃子的小卡片，點進去才看完整酒櫃；「酒櫃」直接畫完整酒櫃。
+  // 每台裝置自己記住選擇；沒選過時，電腦版櫃子 3 個以上用總覽，其他用完整酒櫃。櫃子 2 個以上才顯示切換鈕
+  const mv = S.mapView || (all.length >= 3 && matchMedia(DESK_MQ).matches ? 'mini' : 'full');
+  $('mapView').hidden = all.length < 2;
+  document.querySelectorAll('#mapView [data-mv]').forEach(b => { const on = b.dataset.mv === mv; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+  const overview = all.length >= 2 && mv === 'mini';
   if (!overview || !all.some(([c]) => c === S.cabOpen)) S.cabOpen = overview ? null : S.cabOpen;
   if (overview && !S.cabOpen) {
     $('map').classList.add('mini-mode');
@@ -1111,6 +1116,7 @@ function wire() {
   $('f_originChoice').addEventListener('change', e => { const o = e.target.value === '__other__'; $('f_originOther').hidden = !o; if (o) $('f_originOther').focus(); });
   $('f_sourceChoice').addEventListener('change', e => { $('f_sourceOther').hidden = e.target.value !== '__other__'; });
   $('addLoc').addEventListener('click', () => addLocRow());
+  $('mapView').addEventListener('click', e => { const b = e.target.closest('[data-mv]'); if (!b) return; S.mapView = b.dataset.mv; S.cabOpen = null; try { localStorage.setItem('cellarMapView', S.mapView); } catch {} render(); });
   $('copyWineBtn').addEventListener('click', copyWine);
   $('locInputs').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) b.closest('.loc-ed').remove(); });
   for (const id of ['f_camera', 'f_gallery']) $(id).addEventListener('change', async e => {

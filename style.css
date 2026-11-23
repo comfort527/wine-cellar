@@ -54,6 +54,9 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 .notice{padding:12px 14px;border-radius:var(--r-sm);background:var(--warn-soft);color:var(--warn);font-size:21px}
 .notice.bad{background:var(--bad-soft);color:var(--bad)}
 .sec-h{display:flex;align-items:baseline;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.sec-h .mapview{margin-left:auto;align-self:center}
+.sec-h .mapview button{padding:6px 14px;font-size:15px}
+@media (max-width:760px){.sec-h:has(.mapview:not([hidden])) .hint{order:3;flex-basis:100%;margin-top:-6px}}
 .sec-h h2{font:700 22px/1.2 var(--body);letter-spacing:.14em}
 .hint{font-size:20px;color:var(--muted)}
 
@@ -773,7 +776,7 @@ fieldset.colorpick{display:flex;flex-direction:row;flex-wrap:wrap;align-items:ce
 }
 
 /* 電腦版：櫃子 3 個以上時的縮圖總覽 */
-.map.mini-mode{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+.map.mini-mode{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:12px;align-items:start}
 .mc{background:#0b0b0b;border-radius:12px;padding:10px 10px 6px;color:#e9e6e1;box-shadow:0 8px 18px -10px rgba(0,0,0,.5)}
 .mc.on{box-shadow:0 0 0 3px #ffcf8a,0 8px 18px -10px rgba(0,0,0,.5)}
 .mc button:focus-visible{outline:2px solid #ffcf8a;outline-offset:1px;border-radius:6px}
