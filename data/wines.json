@@ -2737,7 +2737,7 @@
    }
   }
  },
- "rev": 295,
+ "rev": 296,
  "updatedAt": "2026-11-24T12:02:04.940Z",
  "pending": [],
  "capacity": {
@@ -2769,6 +2769,7 @@
   "61a779ac-11f6-4528-87f4-e8a13e4d93ce"
  ],
  "auditHidden": [
-  "51d87ec0bde7de23989673806c3ed9a26164ec0b"
+  "51d87ec0bde7de23989673806c3ed9a26164ec0b",
+  "ff14acc8f83685e6d78ef819a8a323581a7b3e68"
  ]
 }
