@@ -473,6 +473,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .as-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;padding-top:8px;border-top:1px dashed #d8c9b0;font-size:13px;color:var(--muted)}
 .as-foot .acts{display:flex;gap:14px}.as-foot .acts button{background:none;border:0;padding:0;min-height:0;color:var(--wine);font-weight:600;font-size:14px}
 .as-full{font-size:15px;line-height:1.7;overflow-wrap:anywhere}
+.as-full .as-lead{font-size:18px;font-weight:600;line-height:1.6;margin:0 0 6px}
 .as-full h5{margin:14px 0 4px;font-size:16px;color:var(--wine)}
 .as-full p{margin:4px 0}
 .as-full a.src{display:inline-block;margin:0 4px 4px 0;padding:1px 8px;border-radius:999px;background:rgba(122,31,48,.08);color:var(--wine);font-size:12px;text-decoration:none}
@@ -552,7 +553,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261124d";
+:root{--ver:"20261124e";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;

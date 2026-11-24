@@ -159,7 +159,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261124d';
+const APP_VER = '20261124e';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -1644,19 +1644,47 @@ function assessFormat(text) {
     if (/^[-•*]\s+/.test(t)) { ul.push(`<li>${inline(t.replace(/^[-•*]\s+/, ''))}</li>`); return; }
     const k = t.match(/^([^：:，。\s]{1,8})[：:](.+)$/);
     if (k && i > 0) { ul.push(`<li><b>${esc(k[1])}</b>：${inline(k[2].trim())}</li>`); return; }
-    const next = (lines[i + 1] || '').trim();
-    if (i > 0 && t.length <= 12 && !/[。，、；！？.!?：:]/.test(t) && !/^\[/.test(t) && (next === '' || !next.includes('\t'))) { flush(); out.push(`<h5>${inline(t)}</h5>`); return; }
+    if (i > 0 && t.length <= 12 && !/[。，、；！？.!?：:]/.test(t) && !/^\[/.test(t)) { flush(); out.push(`<h5>${inline(t)}</h5>`); return; }
     flush(); out.push(`<p>${inline(t)}</p>`);
   });
   flush(); return out.join('');
 }
+// 依固定順序重排評估內容（顯示時套用，所以已經存好的評估也會照新順序顯示）：
+// 結論 → 年份背景 → 適飲階段表格 → 酒莊定位 → 開瓶建議 → 開瓶前先檢查 → 其他（例如資料來源）
+const AS_ORDER = [['year', /年份/], ['estate', /酒莊/], ['serve', /開瓶建議|建議|侍酒/], ['check', /檢查/]];
+const asIsTable = t => t.includes('\t') || /^\|.*\|$/.test(t) || /^\|?\s*:?-{2,}/.test(t);
+const asIsHead = t => /^#{1,6}\s/.test(t) || (t.length <= 12 && !/[。，、；！？.!?：:]/.test(t) && !/^\[/.test(t) && !asIsTable(t));
+function assessSections(text) {
+  const lines = String(text || '').replace(/\r/g, '').split('\n'), blocks = [{head: '', lines: []}];
+  lines.forEach((raw, i) => { const t = raw.trim(), next = (lines[i + 1] || '').trim(); if (t && i > 0 && asIsHead(t, next)) blocks.push({head: t.replace(/^#+\s*/, ''), lines: []}); else blocks[blocks.length - 1].lines.push(raw); });
+  const lead = blocks.shift(), table = [], keyed = {}, other = [];
+  // 表格不管原本在哪一段，都拿出來自成一段
+  for (const b of [lead, ...blocks]) { const keep = []; for (const l of b.lines) (asIsTable(l.trim()) ? table : keep).push(l); b.lines = keep; }
+  for (const b of blocks) {
+    const body = b.lines.join('\n').trim();
+    if (/判斷依據|階段/.test(b.head) && !body) continue;   // 只是大標題、或表格的標題（表格已經另外拿出來）
+    const k = AS_ORDER.find(([, re]) => re.test(b.head));
+    if (k && !keyed[k[0]]) keyed[k[0]] = b; else other.push(b);
+  }
+  return {lead: lead.lines.join('\n').trim(), table, keyed, other};
+}
+function assessReorder(text) {
+  const {lead, table, keyed, other} = assessSections(text), part = b => b ? `${b.head}\n${b.lines.join('\n').trim()}` : '';
+  const tableHead = table.length ? `適飲階段\n${table.join('\n')}` : '';
+  return [lead, part(keyed.year), tableHead, part(keyed.estate), part(keyed.serve), part(keyed.check), ...other.map(part)].filter(x => x.trim()).join('\n\n');
+}
+// 顯示：結論（字大一點）＋其餘內容
+function assessBody(text) {
+  const t = assessReorder(text), cut = t.indexOf('\n\n'), lead = (cut < 0 ? t : t.slice(0, cut)).trim(), rest = cut < 0 ? '' : t.slice(cut + 2);
+  return `<p class="as-lead">${esc(lead.replace(/\*\*/g, ''))}</p>${assessFormat('\n' + rest)}`;
+}
 const assessSummary = text => { const t = String(text || '').trim().split(/\n\s*\n/)[0].replace(/^結論[：:]\s*/, '').replace(/\*\*/g, ''); return t.length > 160 ? t.slice(0, 160) + '…' : t; };
 function assessCard(a, {preview = false} = {}) {
   const v = AS_VERDICT[a.verdict] ? a.verdict : '', badge = v ? `<span class="as-v ${v}">${AS_VERDICT[v]}</span>` : '';
-  if (preview) return `<section class="as-card open"><div class="as-h"><b>📝 適飲評估</b>${badge}</div><div class="as-full">${assessFormat(a.text)}</div></section>`;
+  if (preview) return `<section class="as-card open"><div class="as-h"><b>📝 適飲評估</b>${badge}</div><div class="as-full">${assessBody(a.text)}</div></section>`;
   // 預設收合，只顯示「適飲評估」標題列；點一下展開全文
   return `<section class="as-card"><button type="button" class="as-h as-toggle" data-asmore aria-expanded="false"><b>📝 適飲評估</b><span class="as-hr">${badge}<span class="as-chev" aria-hidden="true">›</span></span></button>
-    <div class="as-body" hidden><div class="as-full">${assessFormat(a.text)}</div>
+    <div class="as-body" hidden><div class="as-full">${assessBody(a.text)}</div>
     <div class="as-foot"><span>${a.source ? `來源：${esc(a.source)}・` : ''}${a.at ? fmtDate(String(a.at).slice(0, 10)) : ''}${a.by ? `・${esc(nameOf(a.by))}` : ''}・AI 推估，非專業品飲紀錄</span>${isEng() ? '<span class="acts"><button type="button" data-asedit>編輯</button><button type="button" data-asdel>刪除</button></span>' : ''}</div></div></section>`;
 }
 const assessHtml = w => w.assess ? assessCard(w.assess) : isEng() ? '<button type="button" class="as-add" data-asedit>＋ 適飲評估</button>' : '';
@@ -1674,7 +1702,7 @@ function openAssess(id) {
   const w = byId(id); if (!w || !isEng()) return;
   S.assessId = id; const a = w.assess || {};
   $('asWine').textContent = [w.wineName, w.vintage, w.wineryRegion].filter(Boolean).join('・');
-  $('asText').value = a.text || ''; $('asSource').value = a.source || ''; S.asVerdict = a.verdict || ''; $('asGuess').hidden = true;
+  $('asText').value = a.text ? assessReorder(a.text) : ''; $('asSource').value = a.source || ''; S.asVerdict = a.verdict || ''; $('asGuess').hidden = true;
   $('asGenMsg').textContent = ''; showErr('asErr', '');
   renderAssessForm(); showDialog('assessModal');
 }
@@ -1706,10 +1734,11 @@ ${imgs.length ? `附上 ${imgs.length} 張酒標照片，請先從照片確認�
 請用台灣慣用的繁體中文、一般人看得懂的說法，依照下面的格式寫（純文字，不要用 # 或 ** 等 Markdown 符號）：
 第一行：「結論：」開頭，一兩句話說現在該喝、可以再放，還是已過高峰。
 接著依序寫這些段落，每個段落標題獨立一行：
-判斷依據（分「酒莊定位」「年份背景」兩小段）
-一個「階段」與「估計時間」的表格，每列用 Tab 分隔兩欄，第一列是「階段<Tab>估計時間」
-開瓶前先檢查（每項一行，格式「項目：說明」）
+年份背景（這個年份在這個產區的狀況）
+適飲階段：一個「階段」與「估計時間」的表格，每列用 Tab 分隔兩欄，第一列是「階段<Tab>估計時間」
+酒莊定位（酒莊的等級、風格、是否適合長期陳年）
 開瓶建議（每項一行，格式「項目：說明」，例如醒酒、溫度、搭配）
+開瓶前先檢查（每項一行，格式「項目：說明」，例如液面、軟木塞、酒色）
 需要時可以上網查資料；引用的來源請在該段落後另起一行寫成 [網站名稱](網址)。查不到這支酒的專業品飲紀錄時要說明是推估，不要編造分數或評語。
 最後另外加兩行給程式讀：
 VERDICT: hold 或 now 或 past（hold＝可以再放，now＝現在就該喝，past＝已過高峰）
