@@ -159,7 +159,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261124e';
+const APP_VER = '20261124f';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -1676,7 +1676,7 @@ function assessReorder(text) {
 // 顯示：結論（字大一點）＋其餘內容
 function assessBody(text) {
   const t = assessReorder(text), cut = t.indexOf('\n\n'), lead = (cut < 0 ? t : t.slice(0, cut)).trim(), rest = cut < 0 ? '' : t.slice(cut + 2);
-  return `<p class="as-lead">${esc(lead.replace(/\*\*/g, ''))}</p>${assessFormat('\n' + rest)}`;
+  return `<p class="as-lead">${esc(lead.replace(/\*\*/g, '').replace(/^結論\s*[：:]\s*/, ''))}</p>${assessFormat('\n' + rest)}`;   // 開頭的「結論：」不顯示
 }
 const assessSummary = text => { const t = String(text || '').trim().split(/\n\s*\n/)[0].replace(/^結論[：:]\s*/, '').replace(/\*\*/g, ''); return t.length > 160 ? t.slice(0, 160) + '…' : t; };
 function assessCard(a, {preview = false} = {}) {
