@@ -159,7 +159,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261124c';
+const APP_VER = '20261124d';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -1695,7 +1695,8 @@ async function generateAssess() {
   S.asBusy = true; showErr('asErr', ''); $('asGenMsg').dataset.keep = '1'; $('asGenMsg').textContent = '讀照片、查資料中，約需 1 分鐘…'; $('asGen').textContent = '產生中…'; renderAssessForm();
   try {
     const imgs = [];
-    for (const p of photosOf(w).slice(0, MAX_PHOTOS)) { try { const r = await fetchPhoto(p.photo); if (r.ok) { const b = await r.blob(); imgs.push({type: /^image\//.test(b.type) ? b.type : 'image/jpeg', b64: await blobToB64(b)}); } } catch {} }
+    const all = photosOf(w);   // 這款酒有幾張照片就讀幾張
+    for (const p of all) { try { const r = await fetchPhoto(p.photo); if (r.ok) { const b = await r.blob(); imgs.push({type: /^image\//.test(b.type) ? b.type : 'image/jpeg', b64: await blobToB64(b)}); } } catch {} }
     const facts = [['酒名', w.wineName], ['酒莊／產區', w.wineryRegion], ['年份', w.vintage], ['產地', w.origin], ['容量', w.volume], ['酒種', colorName(w)], ['葡萄品種／備註', w.grapeNotes], ['目前填的適飲期', w.drinkWindow]].filter(([, v]) => v).map(([k, v]) => `${k}：${v}`).join('\n');
     const prompt = `請評估這支酒的適飲期。今天是 ${today()}。
 酒款資料（由使用者登錄，可能有誤，請以酒標照片為準）：
@@ -1733,7 +1734,7 @@ PEAK: 高峰期的起訖年份，例如 2005–2015；無法判斷就寫 PEAK: -
     $('asText').value = assessClean(text) + (srcs.size ? '\n\n資料來源\n' + [...srcs].map(([u, t]) => `[${t}](${u})`).join('\n') : '');
     if (g.verdict) { S.asVerdict = g.verdict; $('asGuess').hidden = false; }
     $('asSource').value = 'Claude Opus';
-    $('asGenMsg').textContent = '已產生，請看過內容、確認結論再儲存。';
+    $('asGenMsg').textContent = `已讀 ${imgs.length} 張照片${imgs.length < all.length ? `（另有 ${all.length - imgs.length} 張讀取失敗）` : ''}產生評估，請看過內容、確認結論再儲存。`;
   } catch (e) { $('asGenMsg').textContent = ''; showErr('asErr', aiError(e)); }
   finally { S.asBusy = false; $('asGen').textContent = '用 Claude Opus 讀照片產生'; renderAssessForm(); delete $('asGenMsg').dataset.keep; }
 }
