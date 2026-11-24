@@ -542,23 +542,35 @@
    "locations": [
     {
      "cabinet": "8樓右LB櫃",
-     "quantity": 2,
+     "quantity": 1,
      "shelf": "第1層"
     }
    ],
    "origin": "France",
    "photo": "images/W016-1794053494809.jpg",
    "referencePrice": 1200,
-   "revision": 2,
+   "revision": 3,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-11-08T04:42:41.079Z",
-   "updatedBy": "浩銓",
+   "updatedAt": "2026-11-24T11:28:14.464Z",
+   "updatedBy": "芝琦",
    "vintage": "2019",
    "volume": "750ml",
    "wineName": "Major",
    "wineryRegion": "Château l'Escadre",
-   "thumb": "images/W016-1794053494809-q60-t.jpg"
+   "thumb": "images/W016-1794053494809-q60-t.jpg",
+   "outs": [
+    {
+     "date": "2026-11-24",
+     "type": "其他",
+     "reason": "移至7樓",
+     "qty": 1,
+     "cabinet": "8樓右LB櫃",
+     "shelf": "第1層",
+     "by": "芝琦",
+     "at": "2026-11-24T11:28:14.464Z"
+    }
+   ]
   },
   "W017": {
    "createdAt": "",
@@ -2742,8 +2754,8 @@
    }
   }
  },
- "rev": 287,
- "updatedAt": "2026-11-24T11:26:38.539Z",
+ "rev": 288,
+ "updatedAt": "2026-11-24T11:28:14.464Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
@@ -2770,6 +2782,7 @@
   "975d64c2-192b-41b5-8524-baf2185e0468",
   "eeba679f-0317-473a-9a87-fac1ad6b14ac",
   "5cdf0df5-0a5d-4701-923f-a04fab9f698a",
-  "ec57c674-8c02-4455-923f-015d6721a34b"
+  "ec57c674-8c02-4455-923f-015d6721a34b",
+  "61a779ac-11f6-4528-87f4-e8a13e4d93ce"
  ]
 }
