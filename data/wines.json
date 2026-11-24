@@ -1845,16 +1845,16 @@
     {
      "cabinet": "8樓右LB櫃",
      "shelf": "第1層",
-     "quantity": 4
+     "quantity": 3
     }
    ],
    "origin": "France",
    "photo": "images/W059-1794233497836.jpg",
    "referencePrice": 7350,
-   "revision": 18,
+   "revision": 19,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-11-15T03:17:17.066Z",
+   "updatedAt": "2026-11-24T11:23:43.245Z",
    "updatedBy": "芝琦",
    "vintage": "2001",
    "volume": "375ml",
@@ -1875,7 +1875,19 @@
      "thumb": "images/W059-1794233521392-t.jpg"
     }
    ],
-   "color": "red"
+   "color": "red",
+   "outs": [
+    {
+     "date": "2026-11-24",
+     "type": "其他",
+     "reason": "移至7樓",
+     "qty": 1,
+     "cabinet": "8樓右LB櫃",
+     "shelf": "第1層",
+     "by": "芝琦",
+     "at": "2026-11-24T11:23:43.245Z"
+    }
+   ]
   },
   "W060": {
    "createdAt": "",
@@ -2678,8 +2690,8 @@
    }
   }
  },
- "rev": 283,
- "updatedAt": "2026-11-24T11:22:31.393Z",
+ "rev": 284,
+ "updatedAt": "2026-11-24T11:23:43.245Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
@@ -2703,6 +2715,7 @@
  },
  "appliedOps": [
   "7f98fb79-6bb5-4c8f-9004-d97609f78cff",
-  "975d64c2-192b-41b5-8524-baf2185e0468"
+  "975d64c2-192b-41b5-8524-baf2185e0468",
+  "eeba679f-0317-473a-9a87-fac1ad6b14ac"
  ]
 }
