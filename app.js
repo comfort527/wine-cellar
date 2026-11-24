@@ -159,7 +159,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261123e';
+const APP_VER = '20261124a';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -847,7 +847,7 @@ function renderDrawer() {
   const w = byId(S.drawer); if (!w) { closeDrawer(); return; }
   const ed = canEdit(), use = canUse(), t = total(w), archived = w.status === 'archived';
   const facts = `<div><dt>酒種</dt><dd>${colorName(w)}</dd></div>` + [['wineryRegion', '酒莊／產區'], ['origin', '產地'], ['volume', '容量'], ['source', '來源'], ['referencePrice', '參考價格'], ['entryDate', '入庫日期'], ['drinkWindow', '適飲期']]
-    .map(([k, l]) => `<div><dt>${l}</dt><dd>${k === 'referencePrice' ? fmtPrice(w[k]) : esc(w[k] || '—')}</dd></div>`).join('');
+    .map(([k, l]) => `<div><dt>${l}</dt><dd>${k === 'referencePrice' ? fmtPrice(w[k]) : esc(w[k] || '—')}${k === 'drinkWindow' && w.assess ? '<span class="as-ic" data-asgo role="button" title="看適飲評估">📝</span>' : ''}</dd></div>`).join('');
   const locs = (w.locations || []).map(l => `<div class="dw-loc ${S.filter?.cabinet === l.cabinet && (!S.filter.shelf || S.filter.shelf === l.shelf) ? 'here' : ''}"><span class="where">${esc(l.cabinet)} <small>· ${esc(l.shelf)}</small></span><span class="n">${l.quantity}</span></div>`).join('');
   const prevSl = $('drawerBody').querySelector('.slides'), keep = S.drawerShown === S.drawer && prevSl ? prevSl.scrollLeft : 0;
   S.drawerShown = S.drawer;
@@ -862,6 +862,7 @@ function renderDrawer() {
     ${archived && canDel() ? `<div class="dw-del"><button type="button" class="danger" data-delwine="${esc(w.wineId)}">刪除這筆紀錄</button></div>` : ''}
     ${ed ? (archived ? '<p class="hint" style="margin:0">這款酒已全部出庫。要補回庫存，請按「編輯」填入瓶數，它會回到目前酒款。</p>' : '') : use ? (archived ? '<p class="hint" style="margin:0">這款酒已全部出庫。</p>' : '') : '<p class="hint" style="margin:0">登入後可以出庫與移動這款酒。</p>'}
     <dl class="dw-facts">${facts}${w.grapeNotes ? `<div class="wide"><dt>葡萄品種／備註</dt><dd class="note">${notesHtml(w.grapeNotes)}</dd></div>` : ''}</dl>
+    ${assessHtml(w)}
     ${use ? outsHtml(w) : ''}
     <div class="dw-meta">${w.createdAt ? `建立 ${fmtTime(w.createdAt)}（${esc(nameOf(w.createdBy))}）<br>` : ''}最後修改 ${fmtTime(w.updatedAt)}（${esc(nameOf(w.updatedBy))}）${archived ? `<br>出清 ${fmtTime(w.archivedAt)}（${esc(nameOf(w.archivedBy))}）` : ''}</div>
    </div>`;
@@ -1122,12 +1123,20 @@ function wire() {
     if (galleryNav(e)) return;
     const ph = e.target.closest('[data-photo]'); if (ph) return openPhoto(byId(ph.dataset.photo));
     const dl = e.target.closest('[data-delwine]'); if (dl) { if (!confirmTap(dl, '再按一次確定刪除')) deleteWine(dl.dataset.delwine); return; }
+    if (e.target.closest('[data-asgo]')) { const c = $('drawerBody').querySelector('.as-card'); if (c && !c.classList.contains('open')) c.querySelector('[data-asmore]').click(); return c?.scrollIntoView({behavior: 'smooth', block: 'start'}); }
+    const am = e.target.closest('[data-asmore]'); if (am) { const c = am.closest('.as-card'), open = c.classList.toggle('open'); c.querySelector('.as-body').hidden = !open; am.setAttribute('aria-expanded', open); return; }
+    if (e.target.closest('[data-asedit]')) return openAssess(S.drawer);
+    const ad = e.target.closest('[data-asdel]'); if (ad) { if (!confirmTap(ad, '再按一次刪除')) deleteAssess(S.drawer); return; }
     const lg = e.target.closest('[data-log]'); if (lg) { showDialog('adminModal'); switchTab('audit', true); loadAudit(lg.dataset.log, 1); checkStorage(); }
   });
   $('f_volumeChoice').addEventListener('change', e => { $('f_volumeOther').hidden = e.target.value !== '__other__'; });
   $('f_originChoice').addEventListener('change', e => { const o = e.target.value === '__other__'; $('f_originOther').hidden = !o; if (o) $('f_originOther').focus(); });
   $('f_sourceChoice').addEventListener('change', e => { $('f_sourceOther').hidden = e.target.value !== '__other__'; });
   $('addLoc').addEventListener('click', () => addLocRow());
+  $('asGen').addEventListener('click', generateAssess);
+  $('asSave').addEventListener('click', saveAssess);
+  $('asText').addEventListener('input', () => { const g = assessGuess($('asText').value); if (!S.asVerdict && g.verdict) { S.asVerdict = g.verdict; $('asGuess').hidden = false; } renderAssessForm(); });
+  $('asVerdict').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (!b) return; S.asVerdict = b.dataset.v; $('asGuess').hidden = true; renderAssessForm(); });
   $('sync').addEventListener('click', () => { if (!S.outbox.length) return; if (!S.session) return toast('登入後才會上傳離線紀錄。'); toast('正在重試上傳…'); flush(); });
   $('mapView').addEventListener('click', e => { const b = e.target.closest('[data-mv]'); if (!b) return; S.mapView = b.dataset.mv; S.cabOpen = null; try { localStorage.setItem('cellarMapView', S.mapView); } catch {} render(); });
   $('copyWineBtn').addEventListener('click', copyWine);
@@ -1618,6 +1627,132 @@ async function mergeRebuy(target, r, who) {
   $('wineModal').close(); openDrawer(id); toast(`已加到原本的「${target.wineName}${target.vintage ? ' ' + target.vintage : ''}」，庫存 ${res.before} → ${res.after} 瓶。`);
 }
 
+/* ---------- 適飲評估：工程人員用 Claude（Sonnet，讀酒標照片、可上網查資料）產生或貼上一篇評估；其他人只能看 ----------
+   存在 w.assess = {text, verdict: hold|now|past, source, by, at}；「適飲期」短欄位照舊由管理員在編輯表單填 */
+const AS_VERDICT = {hold: '可以再放', now: '現在就該喝', past: '已過高峰'};
+const AS_MODEL = 'claude-sonnet-5-5';
+// 把評估全文排版：段落標題、條列（「醒酒：…」或「- …」）、表格（Tab 或 | 分隔）、資料來源連結
+function assessFormat(text) {
+  const inline = t => esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, (m, n, u) => `<a class="src" href="${u}" target="_blank" rel="noopener">🔗 ${n}</a>`);
+  const lines = String(text || '').replace(/\r/g, '').split('\n'), out = []; let tbl = [], ul = [];
+  const flush = () => { if (tbl.length) { out.push('<table>' + tbl.map(r => '<tr>' + r.map(c => `<td>${inline(c)}</td>`).join('') + '</tr>').join('') + '</table>'); tbl = []; } if (ul.length) { out.push('<ul>' + ul.join('') + '</ul>'); ul = []; } };
+  lines.forEach((raw, i) => {
+    const t = raw.trim(); if (!t) return flush();
+    if (/^\|?\s*:?-{2,}/.test(t)) return;   // markdown 表格分隔線
+    if (t.includes('\t') || /^\|.*\|$/.test(t)) { if (ul.length) flush(); tbl.push(t.replace(/^\||\|$/g, '').split(/\t|\|/).map(c => c.trim())); return; }
+    if (/^#{1,6}\s/.test(t)) { flush(); out.push(`<h5>${inline(t.replace(/^#+\s*/, ''))}</h5>`); return; }
+    if (/^[-•*]\s+/.test(t)) { ul.push(`<li>${inline(t.replace(/^[-•*]\s+/, ''))}</li>`); return; }
+    const k = t.match(/^([^：:，。\s]{1,8})[：:](.+)$/);
+    if (k && i > 0) { ul.push(`<li><b>${esc(k[1])}</b>：${inline(k[2].trim())}</li>`); return; }
+    const next = (lines[i + 1] || '').trim();
+    if (i > 0 && t.length <= 12 && !/[。，、；！？.!?：:]/.test(t) && !/^\[/.test(t) && (next === '' || !next.includes('\t'))) { flush(); out.push(`<h5>${inline(t)}</h5>`); return; }
+    flush(); out.push(`<p>${inline(t)}</p>`);
+  });
+  flush(); return out.join('');
+}
+const assessSummary = text => { const t = String(text || '').trim().split(/\n\s*\n/)[0].replace(/^結論[：:]\s*/, '').replace(/\*\*/g, ''); return t.length > 160 ? t.slice(0, 160) + '…' : t; };
+function assessCard(a, {preview = false} = {}) {
+  const v = AS_VERDICT[a.verdict] ? a.verdict : '', badge = v ? `<span class="as-v ${v}">${AS_VERDICT[v]}</span>` : '';
+  if (preview) return `<section class="as-card open"><div class="as-h"><b>📝 適飲評估</b>${badge}</div><div class="as-full">${assessFormat(a.text)}</div></section>`;
+  // 預設收合，只顯示「適飲評估」標題列；點一下展開全文
+  return `<section class="as-card"><button type="button" class="as-h as-toggle" data-asmore aria-expanded="false"><b>📝 適飲評估</b><span class="as-hr">${badge}<span class="as-chev" aria-hidden="true">›</span></span></button>
+    <div class="as-body" hidden><div class="as-full">${assessFormat(a.text)}</div>
+    <div class="as-foot"><span>${a.source ? `來源：${esc(a.source)}・` : ''}${a.at ? fmtDate(String(a.at).slice(0, 10)) : ''}${a.by ? `・${esc(nameOf(a.by))}` : ''}・AI 推估，非專業品飲紀錄</span>${isEng() ? '<span class="acts"><button type="button" data-asedit>編輯</button><button type="button" data-asdel>刪除</button></span>' : ''}</div></div></section>`;
+}
+const assessHtml = w => w.assess ? assessCard(w.assess) : isEng() ? '<button type="button" class="as-add" data-asedit>＋ 適飲評估</button>' : '';
+// 從內容猜結論與高峰期
+function assessGuess(text) {
+  const t = String(text || ''), m = t.match(/VERDICT[:：]\s*(hold|now|past)/i);
+  let verdict = m ? m[1].toLowerCase() : '';
+  if (!verdict) { const head = (t.match(/結論[：:][^\n]*/) || [t.slice(0, 120)])[0]; verdict = /已過|過了高峰|衰退|盡快/.test(head) ? (/現在|就該喝/.test(head) && !/已過高峰/.test(head) ? 'now' : 'past') : /現在|就該喝|適飲|可以喝/.test(head) ? 'now' : /再放|陳年|還早|保存/.test(head) ? 'hold' : ''; }
+  const p = t.match(/PEAK[:：]\s*(\d{4})\s*[–-]\s*(\d{4})/i) || t.match(/高峰[期]?[^\d\n]{0,8}(\d{4})\s*[–-]\s*(\d{4})/) || t.match(/最佳適飲期[^\d\n]{0,8}(\d{4})\s*[–-]\s*(\d{4})/);
+  return {verdict, peak: p ? `${p[1]}–${p[2]}` : ''};
+}
+// 把 Claude 回傳的機器用標記拿掉，只留給人看的內容
+const assessClean = t => String(t || '').replace(/^\s*(VERDICT|PEAK)[:：].*$/gim, '').replace(/\n{3,}/g, '\n\n').trim();
+function openAssess(id) {
+  const w = byId(id); if (!w || !isEng()) return;
+  S.assessId = id; const a = w.assess || {};
+  $('asWine').textContent = [w.wineName, w.vintage, w.wineryRegion].filter(Boolean).join('・');
+  $('asText').value = a.text || ''; $('asSource').value = a.source || ''; S.asVerdict = a.verdict || ''; $('asGuess').hidden = true;
+  $('asGenMsg').textContent = ''; showErr('asErr', '');
+  renderAssessForm(); showDialog('assessModal');
+}
+function renderAssessForm() {
+  const w = byId(S.assessId), text = $('asText').value, g = assessGuess(text), c = getAI();
+  document.querySelectorAll('#asVerdict [data-v]').forEach(b => { const on = b.dataset.v === S.asVerdict; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+  const fill = g.peak && w && g.peak !== (w.drinkWindow || '').replace(/\s/g, '').replace('-', '–');
+  $('asFillBox').hidden = !fill; if (fill) $('asFillTxt').textContent = `同時把「適飲期」填成 ${g.peak}${w.drinkWindow ? `（目前是 ${w.drinkWindow}）` : ''}`;
+  $('asPreview').innerHTML = text.trim() ? assessCard({text, verdict: S.asVerdict}, {preview: true}) : '<p class="hint" style="margin:0">產生或貼上內容後，這裡會顯示排好版的樣子。</p>';
+  $('asGen').disabled = !!S.asBusy;
+  if (!S.asBusy && !$('asGenMsg').dataset.keep) $('asGenMsg').textContent = c?.ok && c.provider === 'claude' ? `會讀這款酒的 ${photosOf(w).length} 張照片，必要時上網查資料，約需 1 分鐘。費用算在你的 Claude 金鑰。` : '要先到「管理 → 智慧辨識」貼上 Claude 的金鑰（30 分鐘內有效）。也可以直接把別處做好的評估貼在下面。';
+}
+async function generateAssess() {
+  const w = byId(S.assessId), c = getAI();
+  if (!w || S.asBusy) return;
+  if (!c?.ok || c.provider !== 'claude') return showErr('asErr', '請先到「管理 → 智慧辨識」選 Claude 並貼上金鑰。');
+  if ($('asText').value.trim() && !confirmTap($('asGen'), '會取代目前的內容，再按一次')) return;
+  S.asBusy = true; showErr('asErr', ''); $('asGenMsg').dataset.keep = '1'; $('asGenMsg').textContent = '讀照片、查資料中，約需 1 分鐘…'; $('asGen').textContent = '產生中…'; renderAssessForm();
+  try {
+    const imgs = [];
+    for (const p of photosOf(w).slice(0, MAX_PHOTOS)) { try { const r = await fetchPhoto(p.photo); if (r.ok) { const b = await r.blob(); imgs.push({type: /^image\//.test(b.type) ? b.type : 'image/jpeg', b64: await blobToB64(b)}); } } catch {} }
+    const facts = [['酒名', w.wineName], ['酒莊／產區', w.wineryRegion], ['年份', w.vintage], ['產地', w.origin], ['容量', w.volume], ['酒種', colorName(w)], ['葡萄品種／備註', w.grapeNotes], ['目前填的適飲期', w.drinkWindow]].filter(([, v]) => v).map(([k, v]) => `${k}：${v}`).join('\n');
+    const prompt = `請評估這支酒的適飲期。今天是 ${today()}。
+酒款資料（由使用者登錄，可能有誤，請以酒標照片為準）：
+${facts}
+${imgs.length ? `附上 ${imgs.length} 張酒標照片，請先從照片確認酒莊、酒名與年份。` : '沒有照片。'}
+
+請用台灣慣用的繁體中文、一般人看得懂的說法，依照下面的格式寫（純文字，不要用 # 或 ** 等 Markdown 符號）：
+第一行：「結論：」開頭，一兩句話說現在該喝、可以再放，還是已過高峰。
+接著依序寫這些段落，每個段落標題獨立一行：
+判斷依據（分「酒莊定位」「年份背景」兩小段）
+一個「階段」與「估計時間」的表格，每列用 Tab 分隔兩欄，第一列是「階段<Tab>估計時間」
+開瓶前先檢查（每項一行，格式「項目：說明」）
+開瓶建議（每項一行，格式「項目：說明」，例如醒酒、溫度、搭配）
+需要時可以上網查資料；引用的來源請在該段落後另起一行寫成 [網站名稱](網址)。查不到這支酒的專業品飲紀錄時要說明是推估，不要編造分數或評語。
+最後另外加兩行給程式讀：
+VERDICT: hold 或 now 或 past（hold＝可以再放，now＝現在就該喝，past＝已過高峰）
+PEAK: 高峰期的起訖年份，例如 2005–2015；無法判斷就寫 PEAK: -`;
+    const client = await claudeClient(c.key);
+    const messages = [{role: 'user', content: [...imgs.map(i => ({type: 'image', source: {type: 'base64', media_type: i.type, data: i.b64}})), {type: 'text', text: prompt}]}];
+    let res;
+    for (let turn = 0; turn < 4; turn++) {   // 用了上網搜尋時，回覆可能分段（pause_turn），把內容接回去繼續
+      res = await client.beta.messages.create({model: AS_MODEL, max_tokens: 16000, output_config: {effort: 'medium'},
+        tools: [{type: 'web_search_20260209', name: 'web_search', max_uses: 5}],
+        betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default', messages});
+      if (res.stop_reason !== 'pause_turn') break;
+      messages.push({role: 'assistant', content: res.content});
+    }
+    if (res.stop_reason === 'refusal') fail('Claude 婉拒評估這支酒，請改用貼上的方式。');
+    if (res.stop_reason === 'max_tokens') fail('Claude 回覆不完整，請再試一次。');
+    const text = res.content.filter(b => b.type === 'text').map(b => b.text).join('');
+    if (!text.trim()) fail('Claude 沒有回傳內容，請再試一次。');
+    // 引用的網頁：內文沒寫到的，補在最後
+    const srcs = new Map(); for (const b of res.content) for (const ci of b.citations || []) if (ci.url && !text.includes(ci.url)) srcs.set(ci.url, ci.title || new URL(ci.url).hostname);
+    const g = assessGuess(text);
+    $('asText').value = assessClean(text) + (srcs.size ? '\n\n資料來源\n' + [...srcs].map(([u, t]) => `[${t}](${u})`).join('\n') : '');
+    if (g.verdict) { S.asVerdict = g.verdict; $('asGuess').hidden = false; }
+    $('asSource').value = 'Claude Sonnet';
+    $('asGenMsg').textContent = '已產生，請看過內容、確認結論再儲存。';
+  } catch (e) { $('asGenMsg').textContent = ''; showErr('asErr', aiError(e)); }
+  finally { S.asBusy = false; $('asGen').textContent = '用 Claude Sonnet 讀照片產生'; renderAssessForm(); delete $('asGenMsg').dataset.keep; }
+}
+async function saveAssess() {
+  const id = S.assessId, text = assessClean($('asText').value), source = $('asSource').value.trim(), verdict = S.asVerdict, g = assessGuess($('asText').value);
+  const fill = !$('asFillBox').hidden && $('asFill').checked ? g.peak : '';
+  if (!text) return showErr('asErr', '請先產生或貼上評估內容。');
+  if (!AS_VERDICT[verdict]) return showErr('asErr', '請選擇結論：可以再放、現在就該喝或已過高峰。');
+  try {
+    await mutate(d => { const cur = wineOf(d, id); cur.assess = {text, verdict, source, by: S.session.label, at: now()}; if (fill) cur.drinkWindow = fill; touch(cur, S.session.label); },
+      `適飲評估 ${id} ${byId(id)?.wineName || ''}：${AS_VERDICT[verdict]}${fill ? `\n\n適飲期改為 ${fill}` : ''}`);
+    $('assessModal').close(); toast(fill ? `已儲存適飲評估，適飲期填成 ${fill}。` : '已儲存適飲評估。');
+  } catch (e) { showErr('asErr', msgOf(e)); }
+}
+async function deleteAssess(id) {
+  if (!isEng()) return;
+  try { await mutate(d => { const cur = wineOf(d, id); delete cur.assess; touch(cur, S.session.label); }, `刪除適飲評估 ${id} ${byId(id)?.wineName || ''}`); toast('已刪除適飲評估。'); }
+  catch (e) { toast(msgOf(e)); }
+}
 /* ---------- 離線佇列：沒有網路時，出庫、移動、待入櫃先存在這台裝置（IndexedDB），連上網路後依序送出 ----------
    - 存的是「動作名稱＋參數」，送出時在最新資料上重新執行同一個檢查（例如只剩幾瓶），不會蓋掉別台裝置的修改
    - 每個動作有自己的編號，寫進資料檔的 appliedOps；萬一上次其實已經送出、只是沒收到回應，重送時會跳過，不會重複扣瓶數

@@ -456,6 +456,38 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .qstep button:disabled{opacity:.35}
 .qstep b{min-width:28px;text-align:center;font-size:20px}
 .pend-qty{margin:2px 0}
+/* 適飲評估：跟一般欄位區隔，像夾在酒款資料裡的一張品酒筆記 */
+.as-card{margin:4px 0;padding:14px 16px 12px;border-radius:16px;background:#f7f0e3;border-left:5px solid var(--wine);color:var(--ink)}
+:root[data-theme="dark"] .as-card{background:#2a241c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .as-card{background:#2a241c}}
+.as-h{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%}
+.as-card.open .as-h{margin-bottom:8px}
+.as-toggle{background:none;border:0;padding:0;min-height:0;color:inherit;text-align:left;cursor:pointer}
+.as-hr{display:flex;align-items:center;gap:10px}.as-chev{font-size:22px;line-height:1;color:var(--wine);transition:transform .2s}.as-card.open .as-chev{transform:rotate(90deg)}
+.as-card:not(.open){padding:12px 16px}
+.as-h b{font-size:18px;letter-spacing:.06em}
+.as-v{padding:4px 12px;border-radius:999px;font-size:14px;font-weight:700;color:#fff;white-space:nowrap}
+.as-v.hold{background:#2f7a45}.as-v.now{background:#d9822b}.as-v.past{background:#b3263c}
+.as-sum{font-size:16px;line-height:1.65;margin:0}
+.as-more{background:none;border:0;padding:6px 0 0;min-height:0;color:var(--wine);font-weight:700;font-size:16px}
+.as-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;padding-top:8px;border-top:1px dashed #d8c9b0;font-size:13px;color:var(--muted)}
+.as-foot .acts{display:flex;gap:14px}.as-foot .acts button{background:none;border:0;padding:0;min-height:0;color:var(--wine);font-weight:600;font-size:14px}
+.as-full{font-size:15px;line-height:1.7;overflow-wrap:anywhere}
+.as-full h5{margin:14px 0 4px;font-size:16px;color:var(--wine)}
+.as-full p{margin:4px 0}
+.as-full a.src{display:inline-block;margin:0 4px 4px 0;padding:1px 8px;border-radius:999px;background:rgba(122,31,48,.08);color:var(--wine);font-size:12px;text-decoration:none}
+.as-full table{width:100%;border-collapse:collapse;margin:8px 0;font-size:14px}
+.as-full td{border:1px solid #d8c9b0;padding:6px 8px;vertical-align:top}.as-full tr:first-child td{background:rgba(122,31,48,.06);font-weight:700}
+.as-full ul{margin:4px 0;padding-left:18px}.as-full li{margin:3px 0}
+.as-add{background:none;border:0;padding:6px 0;min-height:0;color:var(--wine);font-weight:700;font-size:16px;opacity:.85}
+.as-ic{margin-left:6px;font-size:15px;cursor:pointer}
+.as-chips{display:flex;gap:8px;flex-wrap:wrap}.as-chips button{border-radius:999px;padding:8px 14px}
+.as-chips button.on[data-v=hold]{background:#2f7a45;border-color:#2f7a45;color:#fff}.as-chips button.on[data-v=now]{background:#d9822b;border-color:#d9822b;color:#fff}.as-chips button.on[data-v=past]{background:#b3263c;border-color:#b3263c;color:#fff}
+.as-guess{font-size:12px;color:#2f7a45;margin-left:6px;font-weight:400}
+#asText{width:100%;min-height:180px;font-size:14px;line-height:1.55}
+.as-fill{display:flex;align-items:center;gap:8px;margin:4px 0 10px;font-size:15px}
+.as-gen{margin-bottom:12px}
+#asPreview .as-card{margin:0}
 .pl-box{display:grid;gap:8px;width:100%}
 .pl-h{display:flex;align-items:center;justify-content:space-between;font-weight:600}
 .pl-h small{font-weight:400;color:var(--muted);font-size:14px}
@@ -520,7 +552,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261123e";
+:root{--ver:"20261124a";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;

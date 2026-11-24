@@ -13,10 +13,10 @@
 <meta name="theme-color" content="#eef0ec" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1412" media="(prefers-color-scheme: dark)">
 <title>酒窖</title>
-<link rel="icon" href="icons/favicon.svg?v=20261123e" type="image/svg+xml">
-<link rel="icon" href="icons/favicon-96.png?v=20261123e" sizes="96x96" type="image/png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=20261123e">
-<link rel="manifest" href="manifest.webmanifest?v=20261123e">
+<link rel="icon" href="icons/favicon.svg?v=20261124a" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-96.png?v=20261124a" sizes="96x96" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=20261124a">
+<link rel="manifest" href="manifest.webmanifest?v=20261124a">
 <meta name="apple-mobile-web-app-title" content="酒窖">
 <meta name="application-name" content="酒窖">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -24,13 +24,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261123e" id="mainCss">
+<link rel="stylesheet" href="style.css?v=20261124a" id="mainCss">
 </head>
 <body class="loading">
 <header class="bar">
  <div class="bar-in">
   <a class="mark" href="#" id="homeLink" aria-label="回到全部酒款">
-   <img class="mark-ic" src="icons/logo.svg?v=20261123e" alt="" width="36" height="40">
+   <img class="mark-ic" src="icons/logo.svg?v=20261124a" alt="" width="36" height="40">
    <span class="mark-t">酒窖</span>
   </a>
   <span class="sync" id="sync"><span class="dot"></span><span id="syncText">讀取中</span></span>
@@ -262,6 +262,19 @@
 <dialog id="viewerModal" class="viewer" aria-labelledby="viewerTitle" data-title="照片">
 <div class="db" id="viewerBody"></div></dialog>
 
+<dialog class="small" id="assessModal" aria-labelledby="assessTitle" data-title="適飲評估">
+<div class="db">
+ <p id="asWine" class="strong" style="margin-top:0"></p>
+ <div class="as-gen" id="asGenBox"><button type="button" class="primary" id="asGen">用 Claude Sonnet 讀照片產生</button><p class="hint" id="asGenMsg" style="margin:6px 0 0"></p></div>
+ <div class="field"><label for="asText">評估全文（可以直接修改，或整篇貼上）</label><textarea id="asText" rows="10" placeholder="按上面的按鈕自動產生，或把別處做好的評估整篇貼上"></textarea></div>
+ <div class="field"><span class="lbl">結論 <span class="as-guess" id="asGuess" hidden>✓ 已從內容判斷，請確認</span></span><div class="as-chips" id="asVerdict" role="radiogroup" aria-label="結論"><button type="button" data-v="hold" role="radio">可以再放</button><button type="button" data-v="now" role="radio">現在就該喝</button><button type="button" data-v="past" role="radio">已過高峰</button></div></div>
+ <div class="field"><label for="asSource">來源（選填）</label><input id="asSource" maxlength="40" placeholder="例如 Claude Sonnet、Wine Spectator"></div>
+ <label class="as-fill" id="asFillBox" hidden><input type="checkbox" id="asFill"> <span id="asFillTxt"></span></label>
+ <div class="field"><span class="lbl">預覽</span><div id="asPreview"></div></div>
+ <div class="ferr" id="asErr" hidden></div>
+ <div class="dact"><button type="button" data-close>取消</button><button type="button" class="primary" id="asSave">儲存</button></div>
+</div></dialog>
+
 <dialog class="small" id="photoModal" aria-labelledby="photoTitle" data-title="照片">
 <div class="db">
  <p id="photoWine" class="strong"></p>
@@ -384,7 +397,7 @@
 
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="config.js?v=20261123e"></script>
-<script src="app.js?v=20261123e"></script>
+<script src="config.js?v=20261124a"></script>
+<script src="app.js?v=20261124a"></script>
 </body>
 </html>
