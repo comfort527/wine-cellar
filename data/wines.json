@@ -1019,17 +1019,17 @@
     {
      "cabinet": "8樓右LB櫃",
      "shelf": "第2層",
-     "quantity": 3
+     "quantity": 1
     }
    ],
    "origin": "Italy",
    "photo": "images/W029-1794287528467.jpg",
    "referencePrice": 1750,
-   "revision": 4,
+   "revision": 5,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-11-24T12:23:15.855Z",
-   "updatedBy": "廖炎鴻",
+   "updatedAt": "2026-11-24T12:41:59.668Z",
+   "updatedBy": "芝琦",
    "vintage": "NV",
    "volume": "750ml",
    "wineName": "Edizione CINQUE AUTOCTONI(混血王子)",
@@ -1048,7 +1048,19 @@
     "source": "Claude Opus",
     "by": "廖炎鴻",
     "at": "2026-11-24T12:23:15.855Z"
-   }
+   },
+   "outs": [
+    {
+     "date": "2026-11-24",
+     "type": "其他",
+     "reason": "移至7樓",
+     "qty": 2,
+     "cabinet": "8樓右LB櫃",
+     "shelf": "第2層",
+     "by": "芝琦",
+     "at": "2026-11-24T12:41:59.668Z"
+    }
+   ]
   },
   "W030": {
    "createdAt": "",
@@ -2835,8 +2847,8 @@
    }
   }
  },
- "rev": 315,
- "updatedAt": "2026-11-24T12:40:52.741Z",
+ "rev": 316,
+ "updatedAt": "2026-11-24T12:41:59.668Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
@@ -2864,7 +2876,8 @@
   "eeba679f-0317-473a-9a87-fac1ad6b14ac",
   "5cdf0df5-0a5d-4701-923f-a04fab9f698a",
   "ec57c674-8c02-4455-923f-015d6721a34b",
-  "61a779ac-11f6-4528-87f4-e8a13e4d93ce"
+  "61a779ac-11f6-4528-87f4-e8a13e4d93ce",
+  "143ee3b0-4e9f-4c15-bda4-251e23e685f4"
  ],
  "auditHidden": [
   "51d87ec0bde7de23989673806c3ed9a26164ec0b",
