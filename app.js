@@ -159,7 +159,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261124f';
+const APP_VER = '20261124g';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -1651,7 +1651,7 @@ function assessFormat(text) {
 }
 // 依固定順序重排評估內容（顯示時套用，所以已經存好的評估也會照新順序顯示）：
 // 結論 → 年份背景 → 適飲階段表格 → 酒莊定位 → 開瓶建議 → 開瓶前先檢查 → 其他（例如資料來源）
-const AS_ORDER = [['year', /年份/], ['estate', /酒莊/], ['serve', /開瓶建議|建議|侍酒/], ['check', /檢查/]];
+const AS_ORDER = [['year', /年份/], ['stage', /階段/], ['estate', /酒莊/], ['serve', /開瓶建議|建議|侍酒/], ['check', /檢查/]];
 const asIsTable = t => t.includes('\t') || /^\|.*\|$/.test(t) || /^\|?\s*:?-{2,}/.test(t);
 const asIsHead = t => /^#{1,6}\s/.test(t) || (t.length <= 12 && !/[。，、；！？.!?：:]/.test(t) && !/^\[/.test(t) && !asIsTable(t));
 function assessSections(text) {
@@ -1662,7 +1662,7 @@ function assessSections(text) {
   for (const b of [lead, ...blocks]) { const keep = []; for (const l of b.lines) (asIsTable(l.trim()) ? table : keep).push(l); b.lines = keep; }
   for (const b of blocks) {
     const body = b.lines.join('\n').trim();
-    if (/判斷依據|階段/.test(b.head) && !body) continue;   // 只是大標題、或表格的標題（表格已經另外拿出來）
+    if (/判斷依據/.test(b.head) && !body) continue;   // 只是大標題、底下沒內容
     const k = AS_ORDER.find(([, re]) => re.test(b.head));
     if (k && !keyed[k[0]]) keyed[k[0]] = b; else other.push(b);
   }
@@ -1670,7 +1670,9 @@ function assessSections(text) {
 }
 function assessReorder(text) {
   const {lead, table, keyed, other} = assessSections(text), part = b => b ? `${b.head}\n${b.lines.join('\n').trim()}` : '';
-  const tableHead = table.length ? `適飲階段\n${table.join('\n')}` : '';
+  // 適飲階段：先放表格，這一段原本的說明文字放在表格下面
+  const stageNote = keyed.stage ? keyed.stage.lines.join('\n').trim() : '';
+  const tableHead = table.length || stageNote ? ['適飲階段', table.join('\n'), stageNote].filter(Boolean).join('\n') : '';
   return [lead, part(keyed.year), tableHead, part(keyed.estate), part(keyed.serve), part(keyed.check), ...other.map(part)].filter(x => x.trim()).join('\n\n');
 }
 // 顯示：結論（字大一點）＋其餘內容
@@ -1735,7 +1737,7 @@ ${imgs.length ? `附上 ${imgs.length} 張酒標照片，請先從照片確認�
 第一行：「結論：」開頭，一兩句話說現在該喝、可以再放，還是已過高峰。
 接著依序寫這些段落，每個段落標題獨立一行：
 年份背景（這個年份在這個產區的狀況）
-適飲階段：一個「階段」與「估計時間」的表格，每列用 Tab 分隔兩欄，第一列是「階段<Tab>估計時間」
+適飲階段：一個「階段」與「估計時間」的表格，每列用 Tab 分隔兩欄，第一列是「階段<Tab>估計時間」；這個時間表怎麼推估出來的說明，寫在表格下面
 酒莊定位（酒莊的等級、風格、是否適合長期陳年）
 開瓶建議（每項一行，格式「項目：說明」，例如醒酒、溫度、搭配）
 開瓶前先檢查（每項一行，格式「項目：說明」，例如液面、軟木塞、酒色）
