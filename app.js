@@ -159,7 +159,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261124b';
+const APP_VER = '20261124c';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -1627,10 +1627,10 @@ async function mergeRebuy(target, r, who) {
   $('wineModal').close(); openDrawer(id); toast(`已加到原本的「${target.wineName}${target.vintage ? ' ' + target.vintage : ''}」，庫存 ${res.before} → ${res.after} 瓶。`);
 }
 
-/* ---------- 適飲評估：工程人員用 Claude（Sonnet，讀酒標照片、可上網查資料）產生或貼上一篇評估；其他人只能看 ----------
+/* ---------- 適飲評估：工程人員用 Claude（Opus，讀酒標照片、可上網查資料）產生或貼上一篇評估；其他人只能看 ----------
    存在 w.assess = {text, verdict: hold|now|past, source, by, at}；「適飲期」短欄位照舊由管理員在編輯表單填 */
 const AS_VERDICT = {hold: '可以再放', now: '現在就該喝', past: '已過高峰'};
-const AS_MODEL = 'claude-sonnet-5-5';
+const AS_MODEL = 'claude-opus-5-5';
 // 把評估全文排版：段落標題、條列（「醒酒：…」或「- …」）、表格（Tab 或 | 分隔）、資料來源連結
 function assessFormat(text) {
   const inline = t => esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, (m, n, u) => `<a class="src" href="${u}" target="_blank" rel="noopener">🔗 ${n}</a>`);
@@ -1732,10 +1732,10 @@ PEAK: 高峰期的起訖年份，例如 2005–2015；無法判斷就寫 PEAK: -
     const g = assessGuess(text);
     $('asText').value = assessClean(text) + (srcs.size ? '\n\n資料來源\n' + [...srcs].map(([u, t]) => `[${t}](${u})`).join('\n') : '');
     if (g.verdict) { S.asVerdict = g.verdict; $('asGuess').hidden = false; }
-    $('asSource').value = 'Claude Sonnet';
+    $('asSource').value = 'Claude Opus';
     $('asGenMsg').textContent = '已產生，請看過內容、確認結論再儲存。';
   } catch (e) { $('asGenMsg').textContent = ''; showErr('asErr', aiError(e)); }
-  finally { S.asBusy = false; $('asGen').textContent = '用 Claude Sonnet 讀照片產生'; renderAssessForm(); delete $('asGenMsg').dataset.keep; }
+  finally { S.asBusy = false; $('asGen').textContent = '用 Claude Opus 讀照片產生'; renderAssessForm(); delete $('asGenMsg').dataset.keep; }
 }
 async function saveAssess() {
   const id = S.assessId, text = assessClean($('asText').value), source = $('asSource').value.trim(), verdict = S.asVerdict, g = assessGuess($('asText').value);
