@@ -2192,9 +2192,16 @@
    "status": "active",
    "createdAt": "2026-11-22T06:48:01.652Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-22T07:25:35.898Z",
-   "updatedBy": "芝琦",
-   "revision": 4
+   "updatedAt": "2026-11-24T10:23:40.135Z",
+   "updatedBy": "廖炎鴻",
+   "revision": 5,
+   "assess": {
+    "text": "結論：照片確認是 Opus One 2017。這支酒已經進入適飲期，現在開就好喝；保存得好的話，還可以再放 10 年以上，不用急著喝。\n\n判斷依據\n酒莊定位：從酒標看得出酒名 Opus One、年份 2017、產地加州 Napa Valley 的 Oakville，酒精濃度 14.0%，也有 Robert Mondavi 和 Baron Philippe de Rothschild 兩位創辦人的簽名，跟您登錄的資料一致。這款酒以波爾多式混調為主，是 Napa 很有代表性的頂級紅酒，本來就是做給人陳放的。這個年份的混調裡有5% Merlot 和 1% Malbec，其餘以卡本內蘇維濃為主。另外，備註欄的「彭淮南2023.8」不是葡萄品種，看起來像是取得來源或日期的紀錄，不影響這次判斷。\n年份背景：2017 年的 Napa 碰上 10 月的大火。不過這款酒在大火前就已經採收得差不多，還留在藤上的果實不到一成。專家的評價也不錯：Wine Advocate 的 Lisa Perrotti-Brown 形容它果味豐滿、口感柔順如絲，並給出2021–2036 年的適飲期。Vinous 的 Antonio Galloni 建議2023–2042 年；Jane Anson 建議2030–2042 年；James Suckling 給 95 分，認為現在可以喝，也可以再放。CellarTracker 上也有酒友在 2025 年 12 月品飲後表示，這支酒開始進入不錯的適飲期，還會繼續發展好幾年。綜合來看，您目前填的「現在–2040」很合理。\n[K&L Wines](https://www.klwines.com/products/details/1502831?i=1502831)\n[CellarTracker](https://www.cellartracker.com/wine.asp?iWine=3332588)\n[Justerini & Brooks](https://www.justerinis.com/fine-wines/usa/california/opus-one/opus-one-napa-valley/2017)\n[Angry Wine Merchant](https://angrywinemerchant.com/products/opus-one-2017)\n\n階段\t估計時間\n年輕、果味為主\t2019–2023\n開始適飲\t2023–2027\n高峰期\t2027–2038\n慢慢成熟、走下坡\t2038–2045\n建議最晚喝完\t約 2045\n\n開瓶前先檢查\n保存環境：最好一直放在 12–16°C、溫度穩定、避光的地方，而且瓶子要躺著放。這支酒的照片是在展示架上拍的，如果長時間直立放在室溫或燈光下，酒會老得比較快，建議早點喝。\n液面高度：酒液應該要到瓶頸。如果明顯低於瓶肩，可能已經氧化。\n軟木塞與封蓋：看看封蓋周圍有沒有滲酒、黏黏的痕跡，或軟木塞有沒有往外凸。有的話，代表這支酒可能受過熱。\n來源與真偽：Opus One 是常被仿冒的酒款，建議確認進口商標示、酒標印刷品質，以及瓶身上的防偽資訊。\n\n開瓶建議\n醒酒：建議用醒酒器醒 1–2 小時。現在酒還算年輕，醒過之後果香和單寧會比較柔順。\n沉澱物：9 年的酒通常沉澱不多。開瓶前讓酒直立 1 天，倒酒時慢慢倒就可以了。\n溫度：16–18°C 最合適。台灣室溫偏高，可以先放冰箱冷藏 20–30 分鐘再開。\n酒杯：用波爾多杯這種杯肚大的酒杯，香氣比較容易散發出來。\n搭配：適合牛排、烤羊排、紅燒或滷的牛肋、炭烤和牛，也可以配熟成的硬質乳酪。比較不建議搭配太辣或太甜的菜色。\n陳放：如果您還有好幾瓶，可以現在先開一瓶，其他的留到 2028–2035 年之間再喝，比較看看它的變化。",
+    "verdict": "hold",
+    "source": "Claude Opus",
+    "by": "廖炎鴻",
+    "at": "2026-11-24T10:23:40.135Z"
+   }
   },
   "W069": {
    "wineName": "INSIGNIA",
@@ -2629,8 +2636,8 @@
    }
   }
  },
- "rev": 265,
- "updatedAt": "2026-11-24T10:13:06.614Z",
+ "rev": 266,
+ "updatedAt": "2026-11-24T10:23:40.135Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
