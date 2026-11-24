@@ -2340,9 +2340,16 @@
    "status": "active",
    "createdAt": "2026-11-22T07:10:57.705Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-22T08:02:21.422Z",
-   "updatedBy": "芝琦",
-   "revision": 4
+   "updatedAt": "2026-11-24T09:54:04.847Z",
+   "updatedBy": "廖炎鴻",
+   "revision": 5,
+   "assess": {
+    "text": "結論：這支 2023 年的酒現在才三年左右，已經可以喝，但還沒到最好喝的時候。如果不急，建議再放 1 到 2 年，大約 2027 年起到 2033 年前後最好喝。\n\n判斷依據\n酒莊定位\n從酒標可以確認，這是 Joseph Phelps 的 Chenoweth Vineyard 黑皮諾（Pinot Noir），年份 2023，產區是 West Sonoma Coast，跟你登錄的資料一致。Joseph Phelps 以納帕的 Insignia 出名。1999 年，Phelps 家族在 Sonoma Coast 的 Freestone 鎮附近增購了 100 英畝葡萄園，在那裡種植黑皮諾和夏多內。Chenoweth 是酒莊在這個產區推出的單一葡萄園酒款之一，等級比一般的 Sonoma Coast 混調款高，結構和陳年潛力通常也比較好。參考同一系列：2023 年的 Pastorale Vineyard 黑皮諾在 52% 新的法國橡木桶裡培養了 13 個月，風格偏濃郁、層次多。過去他們家較基本的 Freestone 黑皮諾，專業評論給的適飲期大約是裝瓶後 3 到 9 年。例如 2011 年份的建議適飲期是 2014–2020 年。單一園酒款應該可以撐得更久一些。我查不到這支 Chenoweth 2023 的專業品飲紀錄或分數，下面的時間是根據酒莊風格、同系列酒款和年份推估的。\n\n[SaratogaWine](https://www.saratogawine.com/product/joseph-phelps-pinot-noir-pastorale-vineyard-2023-750ml/)\n[Wine.com](https://www.wine.com/list/wine/joseph-phelps/7155-8881)\n[Decanter](https://www.decanter.com/wine-reviews/usa/sonoma-coast/joseph-phelps-freestone-vineyards-sonoma-coast-2011-499/)\n\n年份背景\n酒莊形容 2023 年份生長季涼爽又漫長，葡萄能慢慢熟到理想程度，同時保有清新感和優雅。涼爽年份的黑皮諾酸度通常比較好，果香也比較集中，所以年輕時會比較緊、比較收斂，多放幾年會比較好喝，耐放度大致落在中上。\n\n[Joseph Phelps Vineyards](https://www.josephphelps.com/)\n\n階段\t估計時間\n年輕期（果香直接、橡木味和單寧還沒完全融合）\t2025–2026\n開始進入適飲\t2027\n最佳高峰\t2027–2033\n慢慢走下坡（果香變淡，轉向乾燥花、菇類風味）\t2034–2037\n建議喝完\t2037 年前\n\n開瓶前先檢查\n軟木塞：看瓶口有沒有凸起，或周圍有沒有酒液滲出的痕跡。有的話代表曾經受熱或泡過，酒可能提早老化。\n液面高度：這麼年輕的酒，液面應該在瓶頸。如果明顯偏低，就要注意保存狀況。\n保存環境：照片看起來是放在恆溫酒櫃裡、瓶身平放，這樣很理想，維持 12–15°C 繼續放就可以。\n氣味：開瓶後如果聞到濕紙板或發霉的味道，可能是軟木塞污染（俗稱「酒有木塞味」）。如果聞起來像煮過的果醬、有焦糖味，可能曾經受熱。\n\n開瓶建議\n醒酒：現在喝的話，建議先倒進醒酒瓶醒 30 到 60 分鐘，讓橡木味和單寧柔和一點。2028 年以後喝，開瓶後直接倒杯、邊喝邊等它變化就可以。\n溫度：大約 15–17°C。台灣室溫偏高，可以先放冰箱冷藏 15 到 20 分鐘再開。\n酒杯：用勃根地杯（杯肚寬的大杯），比較能聞到香氣。\n搭配：烤鴨、鴨胸、櫻桃鴨、香煎鮭魚、蘑菇燉飯、紅燒或滷的豬肉（不要太甜）、乾式熟成的牛排都很搭。避免太辣或太甜的菜。\n保存剩酒：塞回瓶塞放冰箱，2 到 3 天內喝完。",
+    "verdict": "hold",
+    "source": "Claude Opus",
+    "by": "廖炎鴻",
+    "at": "2026-11-24T09:54:04.847Z"
+   }
   },
   "W073": {
    "wineName": "Opus One",
@@ -2594,8 +2601,8 @@
    "revision": 3
   }
  },
- "rev": 257,
- "updatedAt": "2026-11-24T08:52:26.099Z",
+ "rev": 258,
+ "updatedAt": "2026-11-24T09:54:04.847Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
