@@ -1948,11 +1948,11 @@
    "origin": "Germany",
    "photo": "images/W062-1794712010167.jpg",
    "referencePrice": 2060,
-   "revision": 4,
+   "revision": 5,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-11-22T06:29:32.260Z",
-   "updatedBy": "芝琦",
+   "updatedAt": "2026-11-24T08:48:36.999Z",
+   "updatedBy": "廖炎鴻",
    "vintage": "2023",
    "volume": "750ml",
    "wineName": "Kiedrich Klosterberg Riesling Trocken",
@@ -1964,7 +1964,14 @@
     }
    ],
    "thumb": "images/W062-1794712010167-t.jpg",
-   "color": "white"
+   "color": "white",
+   "assess": {
+    "text": "結論：這支酒標示為 2023 Kiedrich Gräfenberg Riesling Trocken GG，不是你登錄的 Klosterberg。以目前（2026 年底）的狀態來看，它還太年輕，建議再放 3–5 年，約 2029–2030 年後開始更適飲，高峰可延續到 2040 年左右。以下是依據酒莊定位與年份特性做的推估，我沒有查到這支酒的專業品飲紀錄，所以不提供分數或評語。\n\n判斷依據\n酒莊定位：\n酒標上清楚寫的是 Weingut Robert Weil、Kiedrich Gräfenberg、Riesling Trocken GG。GG（Grosses Gewächs）是德國 VDP 最高等級的特級園乾型酒。Gräfenberg 是 Robert Weil 的招牌園，也是萊茵高（Rheingau）的名園。這類酒酸度高、礦物感強、結構緊，本來就是設計來陳年的。你登錄的「Klosterberg」與酒標不符，請以酒標的 Gräfenberg 為準。\n\n年份背景：\n2023 是萊茵高相對溫暖、成熟度不錯的年份，一般認為果香飽滿、酸度仍然足夠。我沒有逐一查證這個年份的評論，所以這部分是依一般認知推估。乾型 GG 通常在上市後 3 到 5 年才逐漸開展，之後可以放 10 到 15 年以上。\n\n階段與估計時間\n階段\t估計時間\n封閉／偏年輕期\t2026–2028\n開始適飲期\t2029–2031\n高峰期\t2031–2040\n緩降期\t2041 年以後\n\n開瓶前先檢查\n酒標與酒款資料：登錄的「Klosterberg」與酒標的「Gräfenberg」不一致，建議更正資料。\n保存狀況：確認一直放在 12–15°C 左右、避光、恆溫的環境。\n瓶身與瓶塞：確認沒有漏酒、瓶塞沒有被頂出，也沒有膠膜下的異常痕跡。\n酒色：白酒呈淡金黃色屬正常。如果顏色偏深褐，就代表保存不良。\n\n開瓶建議\n醒酒：如果現在就想喝，建議提早 1 到 2 小時開瓶，或用醒酒瓶醒 30 到 60 分鐘，讓緊閉的香氣打開。\n溫度：8–11°C 為宜，太冰會壓住香氣。\n酒杯：用大一點的白酒杯或 Riesling 專用杯。\n搭配：清蒸或白灼海鮮、干貝、鮮魚、帶皮雞肉、清爽的粵式料理，以及較鮮的日式料理。",
+    "verdict": "hold",
+    "source": "Claude Sonnet",
+    "by": "廖炎鴻",
+    "at": "2026-11-24T08:48:36.999Z"
+   }
   },
   "W063": {
    "createdAt": "",
@@ -2566,8 +2573,8 @@
    "revision": 3
   }
  },
- "rev": 251,
- "updatedAt": "2026-11-24T08:44:32.509Z",
+ "rev": 252,
+ "updatedAt": "2026-11-24T08:48:36.999Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
