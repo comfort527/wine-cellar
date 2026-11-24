@@ -2610,13 +2610,20 @@
    "status": "active",
    "createdAt": "2026-11-23T05:56:59.683Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-23T05:57:20.510Z",
-   "updatedBy": "芝琦",
-   "revision": 3
+   "updatedAt": "2026-11-24T10:08:59.677Z",
+   "updatedBy": "廖炎鴻",
+   "revision": 4,
+   "assess": {
+    "text": "結論：這支 2015 Opus One 已經進入適飲期，現在開來喝很好喝。如果保存條件良好，也可以再放 10 年以上，不急著喝。你目前填的「現在-2042」大致合理，比較保守的話可以改成「現在-2040」。\n\n判斷依據\n從酒標照片可以確認酒莊是 Opus One Winery（加州 Oakville），酒名 Opus One，年份 2015，容量 750ml，酒精濃度 15%，跟你登錄的資料一致。\n\n酒莊定位\nOpus One 是 Robert Mondavi 和 Baron Philippe de Rothschild 合作成立的酒莊，酒是用卡本內蘇維濃為主的波爾多式混釀，屬於納帕最頂級、很適合長期陳放的酒款。這個年份的專業評價很高：James Suckling 給了 98 分，Wine Advocate 給了 97 分，K&L 網頁上註明這是 Jane Anson 的適飲期 2026–2044。Antonio Galloni 在 2019 年 9 月品飲，建議的適飲期是 2023–2040。\n[K&L Wine Merchants](https://www.klwines.com/products/details/1505358)\n[Angry Wine Merchant](https://angrywinemerchant.com/products/2015-opus-one)\n[K&L Wine Merchants](https://www.klwines.com/p/i?i=1359101)\n\n年份背景\n2015 年納帕遇到乾旱，產量非常少，也有部分葡萄成熟不均，糖分累積比風味發展快。好處是乾旱讓果粒比較小，顏色和風味都很濃縮。這一年是納帕連續第三個優秀年份，果味強勁，但產量比平常低。CellarTracker 有飲家提到這支酒單寧仍然強勁，酸度偏低，符合炎熱年份的特性。因為酸度偏低、酒精又有 15%，我推估它的巔峰不會像涼爽年份那麼長，但撐到 2040 年左右應該沒問題。\n[Wine Spectator](https://www.winespectator.com/articles/wine-harvest-2015-napa-valley-reports-an-outstanding-but-small-grape-crop-52371)\n[Napa Valley Register](https://napavalleyregister.com/star/wine/harvest-report-low-yields-high-quality/article_9cafb996-73ca-5967-b67f-0c50106d2e17.html)\n[CellarTracker](https://www.cellartracker.com/wine.asp?iWine=2636422)\n\n階段\t估計時間\n年輕、單寧較緊\t2018–2023\n開始適飲\t2023–2025\n高峰期\t2025–2038\n緩慢下滑、陳年風味為主\t2038–2042\n可能過了最佳狀態\t2043 以後\n\n（高峰期是我綜合上面幾位評論家的適飲期和年份特性推估出來的。）\n\n開瓶前先檢查\n酒位：瓶中的酒液應該在瓶頸位置。如果明顯降到瓶肩，代表可能有氧化風險。\n軟木塞：看看瓶封有沒有滲酒、黏膩，或軟木塞往外凸，這些都可能是受熱過的跡象。\n酒色：拿燈光照瓶身，正常應該是深紅寶石到石榴紅。如果偏磚褐色，要注意可能已經老化。\n保存紀錄：如果曾經放在室溫或溫度變化大的地方，熟成會加快，最好早點喝。\n沉澱：已經放了十年，瓶底可能有一些沉澱，開瓶前最好先把酒瓶直立靜置一兩天。\n\n開瓶建議\n醒酒：建議倒進醒酒器醒 1 到 2 小時，一方面讓單寧變柔順、香氣打開，另一方面也可以把沉澱物留在瓶底。\n溫度：大約 16–18°C，在台灣室溫下可以先冰 20–30 分鐘再開。\n酒杯：用杯肚大的波爾多杯。\n搭配：適合炭烤牛排、紅燒或燉牛肉、烤羊排、紅酒燉牛頰、熟成起司。\n節奏：開瓶後可以慢慢喝幾個小時，觀察香氣的變化。",
+    "verdict": "hold",
+    "source": "Claude Opus",
+    "by": "廖炎鴻",
+    "at": "2026-11-24T10:08:59.677Z"
+   }
   }
  },
- "rev": 263,
- "updatedAt": "2026-11-24T10:07:04.144Z",
+ "rev": 264,
+ "updatedAt": "2026-11-24T10:08:59.677Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
