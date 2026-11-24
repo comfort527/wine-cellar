@@ -159,7 +159,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261124g';
+const APP_VER = '20261124h';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -1644,7 +1644,7 @@ function assessFormat(text) {
     if (/^[-•*]\s+/.test(t)) { ul.push(`<li>${inline(t.replace(/^[-•*]\s+/, ''))}</li>`); return; }
     const k = t.match(/^([^：:，。\s]{1,8})[：:](.+)$/);
     if (k && i > 0) { ul.push(`<li><b>${esc(k[1])}</b>：${inline(k[2].trim())}</li>`); return; }
-    if (i > 0 && t.length <= 12 && !/[。，、；！？.!?：:]/.test(t) && !/^\[/.test(t)) { flush(); out.push(`<h5>${inline(t)}</h5>`); return; }
+    if (i > 0 && asIsHead(t)) { flush(); out.push(`<h5>${inline(t.replace(/[：:]$/, ''))}</h5>`); return; }
     flush(); out.push(`<p>${inline(t)}</p>`);
   });
   flush(); return out.join('');
@@ -1653,10 +1653,10 @@ function assessFormat(text) {
 // 結論 → 年份背景 → 適飲階段表格 → 酒莊定位 → 開瓶建議 → 開瓶前先檢查 → 其他（例如資料來源）
 const AS_ORDER = [['year', /年份/], ['stage', /階段/], ['estate', /酒莊/], ['serve', /開瓶建議|建議|侍酒/], ['check', /檢查/]];
 const asIsTable = t => t.includes('\t') || /^\|.*\|$/.test(t) || /^\|?\s*:?-{2,}/.test(t);
-const asIsHead = t => /^#{1,6}\s/.test(t) || (t.length <= 12 && !/[。，、；！？.!?：:]/.test(t) && !/^\[/.test(t) && !asIsTable(t));
+const asIsHead = t => { t = t.replace(/[：:]$/, ''); return /^#{1,6}\s/.test(t) || (!!t && t.length <= 12 && !/[。，、；！？.!?：:]/.test(t) && !/^\[/.test(t) && !asIsTable(t)); };   // 「酒莊定位：」這種結尾帶冒號的也算標題
 function assessSections(text) {
   const lines = String(text || '').replace(/\r/g, '').split('\n'), blocks = [{head: '', lines: []}];
-  lines.forEach((raw, i) => { const t = raw.trim(), next = (lines[i + 1] || '').trim(); if (t && i > 0 && asIsHead(t, next)) blocks.push({head: t.replace(/^#+\s*/, ''), lines: []}); else blocks[blocks.length - 1].lines.push(raw); });
+  lines.forEach((raw, i) => { const t = raw.trim(), next = (lines[i + 1] || '').trim(); if (t && i > 0 && asIsHead(t, next)) blocks.push({head: t.replace(/^#+\s*/, '').replace(/[：:]$/, ''), lines: []}); else blocks[blocks.length - 1].lines.push(raw); });
   const lead = blocks.shift(), table = [], keyed = {}, other = [];
   // 表格不管原本在哪一段，都拿出來自成一段
   for (const b of [lead, ...blocks]) { const keep = []; for (const l of b.lines) (asIsTable(l.trim()) ? table : keep).push(l); b.lines = keep; }
@@ -1673,7 +1673,9 @@ function assessReorder(text) {
   // 適飲階段：先放表格，這一段原本的說明文字放在表格下面
   const stageNote = keyed.stage ? keyed.stage.lines.join('\n').trim() : '';
   const tableHead = table.length || stageNote ? ['適飲階段', table.join('\n'), stageNote].filter(Boolean).join('\n') : '';
-  return [lead, part(keyed.year), tableHead, part(keyed.estate), part(keyed.serve), part(keyed.check), ...other.map(part)].filter(x => x.trim()).join('\n\n');
+  // 其他段落（例如酒標確認）放在「開瓶前先檢查」前面，讓檢查保持在最後；資料來源則放在最後面
+  const src = other.filter(b => /來源|參考/.test(b.head)), rest = other.filter(b => !src.includes(b));
+  return [lead, part(keyed.year), tableHead, part(keyed.estate), part(keyed.serve), ...rest.map(part), part(keyed.check), ...src.map(part)].filter(x => x.trim()).join('\n\n');
 }
 // 顯示：結論（字大一點）＋其餘內容
 function assessBody(text) {
