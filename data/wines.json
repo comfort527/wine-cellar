@@ -2320,9 +2320,16 @@
    "status": "active",
    "createdAt": "2026-11-22T07:08:10.576Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-22T07:34:01.207Z",
-   "updatedBy": "芝琦",
-   "revision": 2
+   "updatedAt": "2026-11-24T10:40:07.206Z",
+   "updatedBy": "廖炎鴻",
+   "revision": 3,
+   "assess": {
+    "text": "結論：這支 2023 Opus One 現在還很年輕，建議繼續放。2031 年以後再開比較理想，2035 到 2048 年左右會是最好喝的時候。你目前登錄的 2031–2055 很合理，可以不用改。\n\n從照片確認：酒標寫著 OPUS ONE、2023、A Napa Valley Red Wine、Oakville, California、750ML，上面還有 Baron Philippe de Rothschild 和 Robert Mondavi 兩人的簽名圖樣，跟你登錄的資料相符。瓶身包著酒莊原本的半透明包裝紙。酒精度大約是 13.5%，但字隔著紙有點糊，我不是很確定。\n\n年份背景\n2023 年的納帕谷冬天雨下得很多，整年氣溫偏涼，是近年少見的涼爽、生長期很長的年份。葡萄可以在樹上慢慢熟，收成量也比平常多。這種年份釀出的酒通常比較清爽、細緻，酸度好，結構也夠撐，很適合陳年。Decanter 給 2023 年納帕的 Cabernet 打了最高的 5 分（滿分 5 分），James Suckling 也形容這是一個可能成為傳奇的年份。\n[Decanter](https://www.decanter.com/learn/california-vintage-guide/napa-valley-cabernet-sauvignon-2023-a-star-studded-crop-for-the-ages/)\n[James Suckling](https://www.jamessuckling.com/wine-tasting-reports/napas-gorgeous-red-tide-2023-vintage-is-a-legend-in-the-making)\n\n適飲階段\n階段\t估計時間\n年輕封閉期（果味很濃、單寧緊，現在喝有點可惜）\t現在～2030\n開始好喝\t2031～2034\n高峰期\t2035～2048\n維持平穩（慢慢熟成，出現陳年香氣）\t2049～2055\n開始走下坡\t2056 以後\n\n怎麼推估的：我查到一家酒商頁面轉述的兩位酒評家建議。Antonio Galloni 建議的適飲期是 2031–2053，Jeb Dunnuck 是 2025–2065。我沒有看到完整的評語和分數，所以不提分數。我取兩人的交集，再參考 Opus One 過去好年份的陳年表現來估。例如 2015 年份，酒評家建議在出產後大約 8 到 25 年之間喝。另外，2023 是涼爽、酸度好的年份，所以高峰期抓在出產後 12 到 25 年左右。這是推估，實際狀況還是要看保存條件。\n[Angry Wine Merchant（2023 Opus One 頁面）](https://angrywinemerchant.com/collections/napa-valley/products/opus-one-2023)\n\n酒莊定位\nOpus One 是法國波爾多一級酒莊 Mouton Rothschild 的 Baron Philippe de Rothschild，和納帕的 Robert Mondavi 在 1979 年合作創立的，酒莊在納帕的 Oakville。這是美國最有名的頂級酒之一，每年只出一款正牌酒。它用 Cabernet Sauvignon 當主體，混合其他波爾多品種，風格偏優雅、平衡，比較接近波爾多，不走濃厚爆果味的路線。正牌酒本來就是為長期陳年設計的，好年份放 20 到 30 年沒問題。\n\n開瓶建議\n現在開：不建議。真的想試的話，要醒酒 2～3 小時以上。\n醒酒：進入適飲期後，醒酒 1～2 小時。到了高峰期，醒 30～60 分鐘就夠，主要是為了把沉澱物分開。\n溫度：大約 16～18°C。台灣室溫偏高，開之前先放冰箱冷藏 20～30 分鐘。\n酒杯：用波爾多杯這種大杯子。\n搭配：炭烤牛排、燉牛小排、烤羊排、紅燒牛腩、東坡肉，或是熟成的硬質起司。\n保存：要躺著放，溫度維持在 12～15°C 左右，濕度約 60～70%，避光、不要震動。你照片裡的酒櫃環境就很合適。包裝紙可以留著，可以擋光，也能保護酒標。\n\n開瓶前先檢查\n液面：酒應該要到瓶頸，跟軟木塞之間的空間很小。年輕的酒如果液面明顯偏低，可能有漏酒或保存不良的問題。\n軟木塞與封套：封套不應該鼓起來，周圍也不應該有酒漬或黏黏的痕跡。如果有，可能曾經受熱。\n酒色：這麼年輕的酒應該是深紫紅色。如果已經偏磚紅或棕色，表示氧化或保存出了問題。\n氣味：開瓶後如果聞到濕紙箱、霉味（軟木塞污染），或是像煮過的果醬味（曾經受熱），就要注意。\n真偽：Opus One 有不少仿冒品。請確認購買來源可靠，酒標印刷和瓶身細節也要清楚。",
+    "verdict": "hold",
+    "source": "Claude Opus",
+    "by": "廖炎鴻",
+    "at": "2026-11-24T10:40:07.206Z"
+   }
   },
   "W072": {
    "wineName": "Chenoweth Vineyard Pinot Noir",
@@ -2650,8 +2657,8 @@
    }
   }
  },
- "rev": 270,
- "updatedAt": "2026-11-24T10:37:31.291Z",
+ "rev": 271,
+ "updatedAt": "2026-11-24T10:40:07.206Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
