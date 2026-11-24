@@ -2453,9 +2453,16 @@
    "status": "active",
    "createdAt": "2026-11-23T05:45:14.280Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-23T05:45:53.583Z",
-   "updatedBy": "芝琦",
-   "revision": 4
+   "updatedAt": "2026-11-24T10:00:04.146Z",
+   "updatedBy": "廖炎鴻",
+   "revision": 5,
+   "assess": {
+    "text": "結論：這支 2013 Opus One 已經進入適飲期，現在開正好；保存得好的話，也可以再放 10 年以上，不急著喝。\n\n判斷依據\n酒莊定位\n從照片可以確認，這支是 Opus One 酒莊的 2013 年份 Opus One，加州納帕谷奧克維爾（Oakville）產，750ml，酒精度 14.5%，由台灣的拉圖葡萄酒進口。這家酒莊是 Robert Mondavi 和波爾多 Mouton 酒莊的 Baron Philippe de Rothschild 合作創立的，是納帕最具代表性的頂級酒之一。酒是以卡本內蘇維濃為主的波爾多式混釀，單寧和結構都很紮實，本來就是要陳放的酒。另外提醒：瓶身貼紙上的「2022.8 蔡其昌 $30000」看起來是收到或購買的紀錄，不是葡萄品種，建議資料欄改填「卡本內蘇維濃為主的波爾多式混釀」，貼紙資訊放到備註。\n\n年份背景\n2013 年是納帕公認的好年份，天氣穩定、溫暖，酒的風格濃郁、結構強。專業評論方面，Antonio Galloni 年輕時就說過I wouldn't dream of touching a bottle before age ten，他給的適飲期是2023-2043。Wine Advocate 的 Lisa Perrotti-Brown 在 2021 年評這支酒時，給的適飲期是2021-2046。所以你原本填的「現在-2045」跟專業意見差不多，很合理。我建議的高峰期則是自己的推估，比較保守，算在 2026–2040 年。\n[Angry Wine Merchant](https://angrywinemerchant.com/products/opus-one-2013)\n[IntoWine](https://www.intowine.com/reviews/2013-opus-one-usa-california-napa-wine-review)\n\n階段\t估計時間\n年輕緊實期\t2016–2022\n開始適飲\t2023–2025\n高峰期\t2026–2040\n平穩後段\t2041–2046\n可能下滑\t2047 以後\n\n開瓶前先檢查\n酒液高度：酒面應該在瓶頸，如果已經降到瓶肩，代表可能有氧化風險。\n軟木塞與瓶封：瓶封不應鼓起，周圍也不該有漏酒或黏膩的酒漬。\n保存狀況：如果以前曾經放在室溫或很熱的地方，熟成會比較快，建議早點喝。\n沉澱：13 年的酒可能會有沉澱，開瓶前 1–2 天先把酒瓶直立放好，讓沉澱沉到瓶底。\n\n開瓶建議\n醒酒：建議用醒酒瓶醒 1.5–2 小時，同時也能把沉澱分開。喝的時候留意變化，這支酒在杯中會越來越開。\n溫度：16–18°C。從酒櫃拿出來直接喝就差不多，不要放到室溫太高才喝。\n酒杯：用波爾多杯這類大肚的杯子。\n搭配：牛排、烤羊排、紅燒牛肉、滷牛腱、香菇醬燒肉，或熟成起司都很適合。避免太辣、太甜的菜。",
+    "verdict": "hold",
+    "source": "Claude Opus",
+    "by": "廖炎鴻",
+    "at": "2026-11-24T10:00:04.146Z"
+   }
   },
   "W076": {
    "wineName": "Opus One",
@@ -2601,8 +2608,8 @@
    "revision": 3
   }
  },
- "rev": 260,
- "updatedAt": "2026-11-24T09:58:32.923Z",
+ "rev": 261,
+ "updatedAt": "2026-11-24T10:00:04.146Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
