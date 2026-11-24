@@ -159,7 +159,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261124h';
+const APP_VER = '20261124i';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -1738,9 +1738,9 @@ ${imgs.length ? `附上 ${imgs.length} 張酒標照片，請先從照片確認�
 請用台灣慣用的繁體中文、一般人看得懂的說法，依照下面的格式寫（純文字，不要用 # 或 ** 等 Markdown 符號）：
 第一行：「結論：」開頭，一兩句話說現在該喝、可以再放，還是已過高峰。
 接著依序寫這些段落，每個段落標題獨立一行：
-年份背景（這個年份在這個產區的狀況）
+年份背景（這個年份在這個產區的狀況；查得到的話，也寫這個年份這支酒的混調比例、專業酒評分數與評語）
 適飲階段：一個「階段」與「估計時間」的表格，每列用 Tab 分隔兩欄，第一列是「階段<Tab>估計時間」；這個時間表怎麼推估出來的說明，寫在表格下面
-酒莊定位（酒莊的等級、風格、是否適合長期陳年）
+酒莊定位（酒莊的等級、風格、是否適合長期陳年；只寫酒莊本身，這個年份的比例與分數寫在年份背景）
 開瓶建議（每項一行，格式「項目：說明」，例如醒酒、溫度、搭配）
 開瓶前先檢查（每項一行，格式「項目：說明」，例如液面、軟木塞、酒色）
 需要時可以上網查資料；引用的來源請在該段落後另起一行寫成 [網站名稱](網址)。查不到這支酒的專業品飲紀錄時要說明是推估，不要編造分數或評語。
