@@ -159,7 +159,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261124i';
+const APP_VER = '20261124j';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -434,6 +434,7 @@ const ICONS = {
   lib: '<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
   outs: '<path d="M7 3h10v4a5 5 0 0 1-10 0V3z"/><path d="M12 12v8M8 21h8"/>',
   audit: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  assess: '<path d="M6 3h9l4 4v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5M8.5 12h7M8.5 16h5"/>',
   loc: '<rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M5 9h14M5 15h14"/>',
   ai: '<path d="M11 3l1.9 5.1L18 10l-5.1 1.9L11 17l-1.9-5.1L4 10l5.1-1.9z"/><path d="M19 15v5M16.5 17.5h5"/>',
   keys: '<circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l3 3M13.5 9.5l2 2"/>',
@@ -1133,6 +1134,8 @@ function wire() {
   $('f_originChoice').addEventListener('change', e => { const o = e.target.value === '__other__'; $('f_originOther').hidden = !o; if (o) $('f_originOther').focus(); });
   $('f_sourceChoice').addEventListener('change', e => { $('f_sourceOther').hidden = e.target.value !== '__other__'; });
   $('addLoc').addEventListener('click', () => addLocRow());
+  $('asl_group').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) { S.aslGroup = b.dataset.v; renderAssessList(); } });
+  $('asl_list').addEventListener('click', e => { const b = e.target.closest('[data-aslopen]'); if (b) openFromAssessList(b.dataset.aslopen); });
   $('asGen').addEventListener('click', generateAssess);
   $('asSave').addEventListener('click', saveAssess);
   $('asText').addEventListener('input', () => { const g = assessGuess($('asText').value); if (!S.asVerdict && g.verdict) { S.asVerdict = g.verdict; $('asGuess').hidden = false; } renderAssessForm(); });
@@ -1272,15 +1275,16 @@ async function submit(formId, errId, fn) {
   try { await fn(); } catch (e) { showErr(errId, msgOf(e)); if (!e.user) console.error(e); }
   finally { delete form.dataset.busy; btns.forEach(b => b.disabled = false); }
 }
-const ADMIN_TABS = ['lib', 'outs', 'audit', 'loc', 'ai', 'keys', 'export', 'storage'];
+const ADMIN_TABS = ['lib', 'outs', 'audit', 'assess', 'loc', 'ai', 'keys', 'export', 'storage'];
 // 這個身分看得到哪些管理分頁：使用者只有搜尋與自己的紀錄；裝置密碼只有工程人員
-const tabOK = t => !S.session ? false : S.session.role === 'user' ? ['lib', 'outs', 'audit'].includes(t) : t !== 'keys' || isEng();
+const tabOK = t => !S.session ? false : t === 'assess' ? isEng() : S.session.role === 'user' ? ['lib', 'outs', 'audit'].includes(t) : t !== 'keys' || isEng();
 function admMenuShow() {
   document.querySelectorAll('#admMenu [data-tab]').forEach(b => { b.hidden = !tabOK(b.dataset.tab); });
   document.querySelectorAll('#admMenu .adm-grp').forEach(g => { g.hidden = !g.querySelector('.mi:not([hidden])'); });
   const own = S.session?.role === 'user';
   document.querySelector('#admMenu [data-tab=lib] small').textContent = own ? '所有登錄過的酒・飲用紀錄' : '所有登錄過的酒・飲用紀錄・再買一次';
   document.querySelector('#admMenu [data-tab=outs] small').textContent = own ? '你自己記的出庫' : '自飲、聚餐、送禮與已出清的酒';
+  if (isEng() && S.data) { const all = active().filter(w => total(w) > 0); $('assessSub').textContent = `已評估 ${all.filter(w => w.assess).length}／${all.length} 款`; }
   document.querySelector('#admMenu [data-tab=audit] small').textContent = own ? '你自己做過的異動' : '誰在什麼時候改了什麼';
 }
 const admWide = () => matchMedia('(min-width: 761px), ' + PHL_MQ).matches;
@@ -1308,6 +1312,7 @@ function switchTab(name, noLoad) {
   if (name === 'keys') renderSlots();
   if (name === 'ai') renderAiSettings();
   if (name === 'storage') $('migBox').hidden = !(PB && isEng());
+  if (name === 'assess') renderAssessList();
   if (name === 'lib') renderMem();
   if (name === 'audit' && !noLoad) loadAudit('', 1);
 }
@@ -1787,6 +1792,36 @@ async function deleteAssess(id) {
   try { await mutate(d => { const cur = wineOf(d, id); delete cur.assess; touch(cur, S.session.label); }, `刪除適飲評估 ${id} ${byId(id)?.wineName || ''}`); toast('已刪除適飲評估。'); }
   catch (e) { toast(msgOf(e)); }
 }
+/* 管理 → 適飲評估（工程人員）：目前有庫存的酒，哪些有評估、哪些還沒有；點一款打開詳細資料 */
+function renderAssessList() {
+  if (!isEng()) return;
+  const g = S.aslGroup || 'none';
+  setChips('asl_group', b => b.dataset.v === g);
+  const all = active().filter(w => total(w) > 0), done = all.filter(w => w.assess).length;
+  const list = all.filter(w => g === 'all' || (g === 'done' ? w.assess : !w.assess));
+  const firstLoc = w => (w.locations || []).find(l => l.quantity > 0) || {};
+  list.sort((a, b) => (firstLoc(a).cabinet || '').localeCompare(firstLoc(b).cabinet || '') || shelfNo(firstLoc(a).shelf) - shelfNo(firstLoc(b).shelf) || (a.wineName || '').localeCompare(b.wineName || '', 'en'));
+  $('asl_sum').innerHTML = `目前酒窖 ${all.length} 款：已有評估 <b>${done}</b> 款、還沒有 <b>${all.length - done}</b> 款`;
+  let cab = '';
+  $('asl_list').innerHTML = list.map(w => {
+    const l = firstLoc(w), head = l.cabinet !== cab ? `<h4 class="asl-cab">${esc((cab = l.cabinet) || '未放位置')}</h4>` : '';
+    const ph = thumbUrl(w) ? `<img src="${esc(thumbUrl(w))}" alt="" loading="lazy">` : `<span class="ph">${esc(w.vintage || 'NV')}</span>`;
+    const where = (w.locations || []).filter(x => x.quantity > 0).map(x => `${x.shelf} ${x.quantity}瓶`).join('、');
+    const tag = w.assess ? `<span class="as-v ${w.assess.verdict}">${AS_VERDICT[w.assess.verdict] || '已評估'}</span>` : '<span class="asl-none">＋ 評估</span>';
+    return `${head}<button type="button" class="asl-row" data-aslopen="${esc(w.wineId)}">${ph}<span><b>${esc(w.wineName)}</b><small>${esc([w.vintage || 'NV', w.wineryRegion].filter(Boolean).join('・'))}</small><small>${esc(where)}</small></span>${tag}</button>`;
+  }).join('') || `<p class="hint">${g === 'none' ? '目前酒窖裡的酒都有評估了。' : '還沒有評估過的酒。'}</p>`;
+  const sub = $('assessSub'); if (sub) sub.textContent = `已評估 ${done}／${all.length} 款`;
+}
+// 從清單打開一款酒：有評估就展開評估卡片
+function openFromAssessList(id) {
+  $('adminModal').close(); openDrawer(id);
+  setTimeout(() => {
+    const c = $('drawerBody').querySelector('.as-card, .as-add'); if (!c) return;
+    if (c.classList.contains('as-card') && !c.classList.contains('open')) c.querySelector('[data-asmore]')?.click();
+    c.scrollIntoView({behavior: 'smooth', block: 'start'});
+  }, 450);
+}
+
 /* ---------- 離線佇列：沒有網路時，出庫、移動、待入櫃先存在這台裝置（IndexedDB），連上網路後依序送出 ----------
    - 存的是「動作名稱＋參數」，送出時在最新資料上重新執行同一個檢查（例如只剩幾瓶），不會蓋掉別台裝置的修改
    - 每個動作有自己的編號，寫進資料檔的 appliedOps；萬一上次其實已經送出、只是沒收到回應，重送時會跳過，不會重複扣瓶數
@@ -3160,6 +3195,7 @@ async function loadAudit(wineId, page) {
       const list = await r.json();
       for (const c of list) {
         if (/^(飲用優先|評分|調整照片順序|更換封面照片) /.test(c.commit.message) || HIDDEN_AUDIT.has(c.sha)) continue;
+        if (/操作者：Claude（依工程人員要求）/.test(c.commit.message)) continue;   // Claude 代工程人員做的資料整理，不列在異動紀錄
         if (wineId && !new RegExp('\\b' + wineId + '\\b').test(c.commit.message)) continue;
         if (own && !c.commit.message.split('\n').some(l => l.trim() === me)) continue;
         S.audit.push(c);
