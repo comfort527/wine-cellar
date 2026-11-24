@@ -851,12 +851,12 @@
    "origin": "France",
    "photo": "images/W024-1794286899564.jpg",
    "referencePrice": 1485,
-   "revision": 4,
+   "revision": 5,
    "source": "購",
    "status": "active",
-   "updatedAt": "2026-11-24T12:11:37.885Z",
+   "updatedAt": "2026-11-24T12:12:36.762Z",
    "updatedBy": "廖炎鴻",
-   "vintage": "2020",
+   "vintage": "2022",
    "volume": "750ml",
    "wineName": "Le Clos",
    "wineryRegion": "Clos Venturi",
@@ -2744,8 +2744,8 @@
    }
   }
  },
- "rev": 301,
- "updatedAt": "2026-11-24T12:11:37.885Z",
+ "rev": 302,
+ "updatedAt": "2026-11-24T12:12:36.762Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
