@@ -2063,7 +2063,7 @@
    "wineryRegion": "Koenig Vineyards/Idaho,Snake River Valley",
    "vintage": "2018",
    "entryDate": "",
-   "origin": "Unites States",
+   "origin": "United States",
    "drinkWindow": "",
    "grapeNotes": "Cabernet Sauvignon",
    "volume": "750ml",
@@ -2096,9 +2096,9 @@
    "status": "active",
    "createdAt": "2026-11-15T03:21:10.283Z",
    "createdBy": "芝琦",
-   "updatedAt": "2026-11-15T05:26:43.142Z",
-   "updatedBy": "芝琦",
-   "revision": 3
+   "updatedAt": "2026-11-24T00:44:19.689Z",
+   "updatedBy": "廖炎鴻",
+   "revision": 4
   },
   "W067": {
    "wineName": "INSIGNIA",
@@ -2552,8 +2552,8 @@
    "revision": 3
   }
  },
- "rev": 248,
- "updatedAt": "2026-11-23T14:28:43.125Z",
+ "rev": 249,
+ "updatedAt": "2026-11-24T00:44:19.689Z",
  "pending": [],
  "capacity": {
   "8樓右LB櫃": {
