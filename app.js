@@ -159,7 +159,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261124l';
+const APP_VER = '20261124m';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -1992,13 +1992,14 @@ async function saveStock() {
   if (!cabinet) fail('請選擇目前有庫存的位置。');
   checkDate(date, '出庫');
   if (date < '1990-01-01') fail('出庫日期不正確，請重新選擇。');
-  if (!type) fail('請選擇出庫類型：自飲、聚餐、送禮或其他。');
+  if (!type) fail('請選擇出庫類型：自飲、聚餐、送禮、其他或移至7樓。');
   if (type === '其他' && !reason) fail('選「其他」時請填寫說明。');
   checkQty(qty);
   const res = await runOp('out', {id, cabinet, shelf, qty, out: {date, type, reason}, who, hint: '沒有扣除任何瓶數。'},
     x => takeOutMsg(id, x, {type, cabinet, shelf, qty, date, note: reason}));
   $('stockModal').close();
-  if (res.brief) return toast(`${type}出庫 ${qty} 瓶${res.note}`);
+  if (res.brief) return toast(`${type === '移至7樓' ? '移至7樓' : type + '出庫'} ${qty} 瓶${res.note}`);
+  if (type === '移至7樓') return toast(`已記錄移至7樓 ${qty} 瓶，${cabinet} / ${shelf} 剩 ${res.left} 瓶。`);
   toast(res.archived ? `「${res.name}」已全部出庫，移入歷史酒單。` : `${fmtDate(date)} ${type}出庫 ${qty} 瓶，${cabinet} / ${shelf} 剩 ${res.left} 瓶。`);
 }
 
@@ -2826,16 +2827,18 @@ function renderAdmin() {
   renderLocDel();
   renderHistory();
 }
-const OUT_TYPES = ['自飲', '聚餐', '送禮', '其他'];
+const OUT_TYPES = ['自飲', '聚餐', '送禮', '其他', '移至7樓'];
+// 不算喝掉的出庫：不進飲酒日誌、回憶與喝過次數（送禮另外計次）
+const NOT_DRUNK = ['送禮', '移至7樓'];
 
 /* ---------- 飲酒日誌「回憶」（依場合找飲用紀錄）與 管理「搜尋」（所有登錄過的酒、飲用紀錄、再買一次） ---------- */
-const OCC_CLASS = {'自飲': 'self', '聚餐': 'dine', '送禮': 'gift', '其他': 'other'};
+const OCC_CLASS = {'自飲': 'self', '聚餐': 'dine', '送禮': 'gift', '其他': 'other', '移至7樓': 'move'};
 const occBadge = e => e.kind === 'ext' ? '<span class="occ ext">非酒窖</span>' : `<span class="occ ${OCC_CLASS[e.type] || 'other'}">${esc(e.type)}</span>`;
 const roStars = n => n ? `<span class="rostar" aria-label="評分 ${n}／5">${'★'.repeat(n)}${'☆'.repeat(5 - n)}</span>` : '';
 const normKey = v => String(v || '').trim().toLowerCase().replace(/\s+/g, ' ');
 const mdDate = d => d ? d.replace(/^\d{4}-0?(\d+)-0?(\d+)$/, '$1/$2') : '';
-function drinkEvents() {  // 回憶：所有飲用（含送禮）與非酒窖紀錄，由新到舊
-  return drinkRecords().sort(byNewest);
+function drinkEvents() {  // 回憶：所有飲用（含送禮）與非酒窖紀錄，由新到舊；移至7樓不算
+  return drinkRecords().filter(e => e.type !== '移至7樓').sort(byNewest);
 }
 function switchJTab(t) {
   S.jt = t;
@@ -2942,7 +2945,7 @@ function renderRebuyNote() {
 /* ---------- 飲酒日誌：日曆＋當天紀錄（酒窖出庫自飲／聚餐／其他＋外來的酒） ---------- */
 const WEEK = '日一二三四五六';
 function journalEntries() {  // 日曆：送禮不算喝掉
-  return drinkRecords().filter(e => e.type !== '送禮');
+  return drinkRecords().filter(e => !NOT_DRUNK.includes(e.type));
 }
 const sumQty = list => list.reduce((a, e) => a + e.qty, 0);
 // 紀錄卡片左邊的照片；沒有照片就顯示年份

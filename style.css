@@ -563,7 +563,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261124l";
+:root{--ver:"20261124m";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
@@ -654,7 +654,7 @@ fieldset.colorpick{display:flex;flex-direction:row;flex-wrap:wrap;align-items:ce
 .rdate{font:600 15px var(--body);color:var(--muted);margin:14px 0 6px}
 .entry.srch{cursor:pointer}.entry.srch:hover{border-color:var(--faint)}
 .occ{display:inline-block;font:600 13px/1.5 var(--body);padding:0 8px;border-radius:999px;margin-right:6px;background:#efe3c8;color:#7a5410;vertical-align:1px}
-.occ.dine{background:#f3dde3;color:#8c2a3f}.occ.self{background:#e1ece4;color:#2f6a45}.occ.gift{background:#e4e6f3;color:#3b4a8c}
+.occ.move{background:#efe7d8;color:#7a5a20}.occ.dine{background:#f3dde3;color:#8c2a3f}.occ.self{background:#e1ece4;color:#2f6a45}.occ.gift{background:#e4e6f3;color:#3b4a8c}
 .rostar{display:block;color:var(--star);font-size:15px;letter-spacing:1px;margin-top:2px}
 .tl .rostar{display:inline}
 .lib{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;padding:10px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);margin-bottom:8px;align-items:center;cursor:pointer}
