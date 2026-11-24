@@ -1659,39 +1659,6 @@
    "thumb": "images/W052-1794287941741-t.jpg",
    "color": "red"
   },
-  "W053": {
-   "createdAt": "",
-   "createdBy": "comfort527",
-   "drinkWindow": "",
-   "entryDate": "",
-   "grapeNotes": "白酒，黃教漳董事長",
-   "locations": [
-    {
-     "cabinet": "8樓右LB櫃",
-     "quantity": 1,
-     "shelf": "第3層"
-    }
-   ],
-   "origin": "Germany",
-   "photo": "images/W053-1794321377489.jpg",
-   "referencePrice": 2060,
-   "revision": 2,
-   "source": "贈",
-   "status": "active",
-   "updatedAt": "2026-11-10T14:36:25.072Z",
-   "updatedBy": "芝琦",
-   "vintage": "2021",
-   "volume": "750ml",
-   "wineName": "Kiedrich Klosterberg Riesling Trocken",
-   "wineryRegion": "Robert Weil",
-   "photos": [
-    {
-     "photo": "images/W053-1794321377489.jpg",
-     "thumb": "images/W053-1794321377489-t.jpg"
-    }
-   ],
-   "thumb": "images/W053-1794321377489-t.jpg"
-  },
   "W054": {
    "createdAt": "",
    "createdBy": "comfort527",
@@ -1966,16 +1933,21 @@
      "cabinet": "8樓外冰箱",
      "shelf": "最下層",
      "quantity": 3
+    },
+    {
+     "cabinet": "8樓右LB櫃",
+     "quantity": 1,
+     "shelf": "第3層"
     }
    ],
    "origin": "Germany",
    "photo": "images/W061-1794711992898.jpg",
    "referencePrice": 2060,
-   "revision": 5,
+   "revision": 6,
    "source": "贈",
    "status": "active",
-   "updatedAt": "2026-11-24T11:39:12.978Z",
-   "updatedBy": "廖炎鴻",
+   "updatedAt": "2026-11-24T11:53:46.000Z",
+   "updatedBy": "Claude",
    "vintage": "2021",
    "volume": "750ml",
    "wineName": "Kiedrich Klosterberg Riesling Trocken",
@@ -1984,6 +1956,10 @@
     {
      "photo": "images/W061-1794711992898.jpg",
      "thumb": "images/W061-1794711992898-t.jpg"
+    },
+    {
+     "photo": "images/W053-1794321377489.jpg",
+     "thumb": "images/W053-1794321377489-t.jpg"
     }
    ],
    "thumb": "images/W061-1794711992898-t.jpg",
@@ -2754,7 +2730,7 @@
    }
   }
  },
- "rev": 292,
+ "rev": 293,
  "updatedAt": "2026-11-24T11:39:12.978Z",
  "pending": [],
  "capacity": {
