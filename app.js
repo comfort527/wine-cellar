@@ -159,7 +159,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261124k';
+const APP_VER = '20261124l';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -1135,6 +1135,7 @@ function wire() {
   $('f_originChoice').addEventListener('change', e => { const o = e.target.value === '__other__'; $('f_originOther').hidden = !o; if (o) $('f_originOther').focus(); });
   $('f_sourceChoice').addEventListener('change', e => { $('f_sourceOther').hidden = e.target.value !== '__other__'; });
   $('addLoc').addEventListener('click', () => addLocRow());
+  $('auditList').addEventListener('click', e => { const b = e.target.closest('[data-audel]'); if (b) deleteAudit(b); });
   $('asl_group').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) { S.aslGroup = b.dataset.v; renderAssessList(); } });
   $('asl_list').addEventListener('click', e => { const b = e.target.closest('[data-aslopen]'); if (b) openFromAssessList(b.dataset.aslopen); });
   $('asGen').addEventListener('click', generateAssess);
@@ -3236,7 +3237,7 @@ async function loadAudit(wineId, page) {
       if (!r.ok) { authProblem(r); fail('讀取異動紀錄失敗。'); }
       const list = await r.json();
       for (const c of list) {
-        if (/^(飲用優先|評分|調整照片順序|更換封面照片) /.test(c.commit.message) || HIDDEN_AUDIT.has(c.sha)) continue;
+        if (/^(飲用優先|評分|調整照片順序|更換封面照片|刪除異動紀錄) /.test(c.commit.message) || HIDDEN_AUDIT.has(c.sha) || (S.data?.auditHidden || []).includes(c.sha)) continue;
         if (/操作者：Claude（依工程人員要求）/.test(c.commit.message)) continue;   // Claude 代工程人員做的資料整理，不列在異動紀錄
         if (wineId && !new RegExp('\\b' + wineId + '\\b').test(c.commit.message)) continue;
         if (own && !c.commit.message.split('\n').some(l => l.trim() === me)) continue;
@@ -3250,9 +3251,22 @@ async function loadAudit(wineId, page) {
       const lines = c.commit.message.split('\n').map(s => s.replace(/\b[WH]\d{3,}\b\s*/g, '').trim()).filter(Boolean);
       const op = lines.find(l => l.startsWith('操作者：'));
       const body = lines.slice(1).filter(l => l !== op);
-      return `<div><span class="t">${fmtTime(c.commit.author?.date)}</span> · ${esc(op ? op.slice(4) : (c.author?.login || c.commit.author?.name || ''))}<br><b>${esc(lines[0] || '')}</b>${body.length ? '<br>' + body.map(esc).join('<br>') : ''}</div>`;
+      return `<div data-sha="${esc(c.sha)}">${isEng() ? '<button type="button" class="au-del" data-audel>刪除</button>' : ''}<span class="t">${fmtTime(c.commit.author?.date)}</span> · ${esc(op ? op.slice(4) : (c.author?.login || c.commit.author?.name || ''))}<br><b>${esc(lines[0] || '')}</b>${body.length ? '<br>' + body.map(esc).join('<br>') : ''}</div>`;
     }).join('') || '<p class="hint">尚無紀錄。</p>';
   } catch (e) { $('auditList').innerHTML = `<p class="hint">${esc(msgOf(e))}</p>`; }
+}
+/* 工程人員：刪除單筆異動紀錄。異動紀錄就是 GitHub 上的修改歷史，無法真的抹掉，
+   所以把那筆的編號記在資料檔的 auditHidden，所有裝置都不再列出（GitHub 上仍保留） */
+async function deleteAudit(btn) {
+  if (!isEng()) return;
+  const row = btn.closest('[data-sha]'), sha = row?.dataset.sha; if (!sha) return;
+  if (confirmTap(btn, '再按一次刪除')) return;
+  btn.disabled = true;
+  try {
+    const title = (S.audit.find(c => c.sha === sha)?.commit.message || '').split('\n')[0];
+    await mutate(d => { d.auditHidden = [...new Set([...(d.auditHidden || []), sha])]; }, `刪除異動紀錄 ${sha.slice(0, 7)}${title ? '：' + title.replace(/\b[WH]\d{3,}\b\s*/g, '') : ''}`, {quiet: true});
+    S.audit = S.audit.filter(c => c.sha !== sha); row.remove(); toast('已刪除這筆異動紀錄。');
+  } catch (e) { btn.disabled = false; toast(msgOf(e)); }
 }
 async function saveCatalog() {
   const kind = $('l_type').value, name = $('l_name').value.trim(); if (!name) fail('請輸入名稱。');
