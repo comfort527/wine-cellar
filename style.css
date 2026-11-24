@@ -561,7 +561,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261124j";
+:root{--ver:"20261124k";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;
@@ -672,6 +672,8 @@ fieldset.colorpick{display:flex;flex-direction:row;flex-wrap:wrap;align-items:ce
 .tl div{position:relative;padding:6px 0;font-size:15px}
 .tl div::before{content:"";position:absolute;left:-21px;top:13px;width:10px;height:10px;border-radius:50%;background:var(--wine)}
 .buy{display:flex;gap:8px;margin-top:16px}.buy .primary{flex:1}
+.dup-note{background:color-mix(in srgb,#d9822b 12%,var(--surface));border:1px solid #d9822b;border-radius:var(--r-sm);padding:10px 12px;font-size:15px}
+.dup-note .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.dup-note .acts button{padding:6px 12px}
 .rebuy-note{background:color-mix(in srgb,#2f7a45 10%,var(--surface));border:1px solid #2f7a45;border-radius:var(--r-sm);padding:10px 12px;font-size:15px}
 .rb-merge{color:var(--wine);font-weight:600}.rb-new{color:#2f7a45;font-weight:600}
 #wineForm .rb-filled{background:color-mix(in srgb,#2f7a45 8%,var(--surface));border-color:color-mix(in srgb,#2f7a45 50%,var(--line))}

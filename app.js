@@ -159,7 +159,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261124j';
+const APP_VER = '20261124k';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -1019,7 +1019,8 @@ function wire() {
     const rb = e.target.closest('[data-rebuy]'); if (rb) return rebuy(rb.dataset.rebuy);
     const op = e.target.closest('[data-memopen]'); if (op) { $('memModal').close(); openDrawer(op.dataset.memopen); }
   });
-  for (const id of ['f_vintage', 'f_wineName', 'f_wineryRegion']) $(id).addEventListener('input', renderRebuyNote);
+  for (const id of ['f_vintage', 'f_wineName', 'f_wineryRegion']) $(id).addEventListener('input', () => { renderRebuyNote(); renderDupNote(); });
+  $('dupNote').addEventListener('click', e => { const b = e.target.closest('[data-dup]'); if (!b) return; if (b.dataset.dup === 'merge') submit('wineForm', 'wineErr', () => mergeDup(S.dupTarget)); else { S.dupOk = true; renderDupNote(); } });
   $('kindList').addEventListener('click', e => {
     const b = e.target.closest('[data-kind]'); if (!b) return;
     exitSearch(false);
@@ -1530,7 +1531,7 @@ function openWineForm(w, pend, rb) {
     $('f_vintage').classList.add('rb-check'); document.querySelectorAll('#locInputs select, #locInputs [data-k=quantity]').forEach(el => el.classList.add('rb-check'));
     renderNewStrip();
   }
-  renderRebuyNote();
+  renderRebuyNote(); S.dupOk = false; S.dupTarget = null; renderDupNote();
   $('wineModal').dataset.mode = w ? 'edit' : 'new'; $('copyWineBtn').hidden = !w;
   $('wineModal').dispatchEvent(new Event('keepcheck'));
   showDialog('wineModal');
@@ -1578,6 +1579,7 @@ async function saveWine() {
   } else {
     const target = S.rebuy ? rebuyTarget() : null;
     if (target) return mergeRebuy(target, r, who);
+    if (!S.dupOk && findDup()) { renderDupNote(); $('dupNote').scrollIntoView({block: 'center', behavior: 'smooth'}); fail('已經有同一款酒，請在上方選擇「加到原本那筆」或「還是新增一筆」。'); }
     const src = S.fromPend, photos = S.pendKeep.slice();
     for (const ph of S.newPhotos) photos.push(await uploadPhoto(ph, 'new'));
     const photo = photos[0]?.photo || '', thumb = photos[0]?.thumb || '';
@@ -1608,7 +1610,47 @@ function copyWine() {
   $('wineTitle').textContent = '複製酒款';
   document.querySelectorAll('#locInputs select, #locInputs [data-k=quantity]').forEach(el => el.classList.add('rb-check'));
   $('wineModal').dispatchEvent(new Event('keepcheck'));
+  renderDupNote();
   toast('已複製，請選擇櫃位與數量後儲存。');
+}
+/* 新增酒款時的防呆：已經有同名、同年份（酒莊有填就要相同）的酒，提醒加到原本那筆，避免同一款酒登錄成兩筆 */
+function findDup() {
+  if (S.editing || S.rebuy) return null;
+  const n = normKey($('f_wineName').value), v = normKey($('f_vintage').value), r = normKey($('f_wineryRegion').value);
+  if (!n) return null;
+  const same = wines().filter(w => normKey(w.wineName) === n && normKey(w.vintage) === v && (!r || !normKey(w.wineryRegion) || normKey(w.wineryRegion) === r));
+  return same.find(w => w.status !== 'archived') || same[0] || null;
+}
+function renderDupNote() {
+  const el = $('dupNote'), t = findDup(); S.dupTarget = t;
+  if (!t || S.dupOk) { el.hidden = true; return; }
+  const where = (t.locations || []).filter(l => l.quantity > 0).map(l => `${l.cabinet}・${l.shelf} ${l.quantity} 瓶`).join('、');
+  el.hidden = false;
+  el.innerHTML = `⚠️ 已經有這款酒：<b>${esc([t.wineName, t.vintage].filter(Boolean).join(' '))}</b>（${t.status === 'archived' ? '已喝完' : esc(where || '沒有庫存')}${t.assess ? '・有適飲評估' : ''}）。同一款酒建議登錄成一筆，位置和瓶數加在一起，適飲評估、出庫紀錄才會共用。
+    <div class="acts"><button type="button" class="primary" data-dup="merge">加到原本那筆</button><button type="button" data-dup="new">還是新增一筆</button></div>`;
+}
+// 加到原本那筆：位置與瓶數加上去、記一筆入庫、照片補進去（最多 4 張）；從待入櫃來的會一併移除那筆待入櫃
+async function mergeDup(target) {
+  if (!target) return;
+  const r = readWineForm(), who = S.session.label, add = r.locations.filter(l => l.quantity > 0);
+  if (!add.length) fail('請選擇存放位置並填寫瓶數。');
+  const id = target.wineId, n = add.reduce((a, l) => a + l.quantity, 0), date = r.entryDate || today(), src = S.fromPend;
+  const fresh = S.pendKeep.slice();
+  for (const ph of S.newPhotos) fresh.push(await uploadPhoto(ph, id));
+  const res = await mutate(d => {
+    const cur = d.wines[id]; if (!cur) fail('原本的酒款已不存在，請重新整理。');
+    if (src) { const i = (d.pending || []).findIndex(x => x.id === src.id); if (i < 0) fail('這瓶已被其他人加入酒櫃或刪除，請關閉後重新整理。'); d.pending.splice(i, 1); }
+    const before = (cur.locations || []).reduce((a, l) => a + (l.quantity || 0), 0), t = now();
+    cur.locations = cur.locations || [];
+    for (const l of add) { const ex = cur.locations.find(x => x.cabinet === l.cabinet && x.shelf === l.shelf); if (ex) ex.quantity += l.quantity; else cur.locations.push({...l}); }
+    cur.ins = [...(cur.ins || []), ...add.map(l => ({date, qty: l.quantity, cabinet: l.cabinet, shelf: l.shelf, note: src ? '由待入櫃加入' : '入庫', by: who, at: t}))];
+    if (fresh.length) { const list = photosOf(cur).slice(); for (const p of fresh) if (list.length < MAX_PHOTOS && !list.some(x => x.photo === p.photo)) list.push(p); setPhotos(cur, list); }
+    cur.status = 'active'; delete cur.archivedAt; delete cur.archivedBy;
+    touch(cur, who, t);
+    return {before, after: before + n};
+  }, x => `入庫 ${id} ${target.wineName}${target.vintage ? ' ' + target.vintage : ''}：+${n} 瓶（庫存 ${x.before} → ${x.after}）${src ? '（由待入櫃加入）' : ''}\n\n位置：${add.map(l => `${l.cabinet}/${l.shelf}+${l.quantity}`).join('、')}`);
+  S.fromPend = null; S.pendKeep = []; S.rebuy = null;
+  $('wineModal').close(); openDrawer(id); toast(`已加到原本的「${target.wineName}${target.vintage ? ' ' + target.vintage : ''}」，庫存 ${res.before} → ${res.after} 瓶。`);
 }
 /* 同一年份再買：把瓶數加到原本那款，並記一筆入庫 */
 async function mergeRebuy(target, r, who) {
