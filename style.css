@@ -48,6 +48,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
   .sync.live .dot::after{animation:syncRipple 2.4s ease-out 1.2s infinite}
 }
 .who{margin-left:auto;display:flex;align-items:center;gap:8px}
+.who .inst{color:var(--wine);border-color:color-mix(in srgb,var(--wine) 40%,transparent)}
+#installSteps ol{margin:6px 0 0;padding-left:22px;line-height:1.8}#installSteps h4{margin:14px 0 2px}
 .pill{font-size:20px;color:var(--muted);white-space:nowrap}
 .pill b{color:var(--ink);font-weight:700}
 
@@ -563,7 +565,7 @@ div.card:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .pend-add .hint{margin:0}
 
 /* 紅酒紅色框、白酒綠色框 */
-:root{--ver:"20261124o";
+:root{--ver:"20261125a";
   --bg:#eef0ec; --surface:#ffffff; --surface-2:#f6f7f4; --sunk:#e4e8e3;
   --ink:#18201c; --muted:#5f6a64; --faint:#8c968f; --line:#dbe0da;
   --wine:#7a1f33; --wine-2:#5c1626; --on-wine:#ffffff; --wine-soft:#f3e4e7;

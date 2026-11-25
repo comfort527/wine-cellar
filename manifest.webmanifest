@@ -1,4 +1,5 @@
 {
+  "id": "./",
   "name": "酒窖",
   "short_name": "酒窖",
   "description": "紅酒收藏、存放位置與每一次品飲",
@@ -9,9 +10,64 @@
   "background_color": "#eef0ec",
   "theme_color": "#7a1f33",
   "icons": [
-    {"src": "icons/icon-192.png?v=20261124o", "sizes": "192x192", "type": "image/png", "purpose": "any"},
-    {"src": "icons/icon-512.png?v=20261124o", "sizes": "512x512", "type": "image/png", "purpose": "any"},
-    {"src": "icons/icon-maskable-192.png?v=20261124o", "sizes": "192x192", "type": "image/png", "purpose": "maskable"},
-    {"src": "icons/icon-maskable-512.png?v=20261124o", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+    {
+      "src": "icons/icon-192.png?v=20261125a",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png?v=20261125a",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-192.png?v=20261125a",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-maskable-512.png?v=20261125a",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "新增酒款",
+      "short_name": "新增",
+      "url": "./?act=add",
+      "icons": [
+        {
+          "src": "icons/icon-192.png?v=20261125a",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "待入櫃",
+      "short_name": "待入櫃",
+      "url": "./?act=pend",
+      "icons": [
+        {
+          "src": "icons/icon-192.png?v=20261125a",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "飲酒日誌",
+      "short_name": "日誌",
+      "url": "./?act=journal",
+      "icons": [
+        {
+          "src": "icons/icon-192.png?v=20261125a",
+          "sizes": "192x192"
+        }
+      ]
+    }
   ]
 }

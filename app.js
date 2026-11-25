@@ -159,7 +159,7 @@ const PHL_MQ = '(orientation:landscape) and (max-height:500px) and (max-width:10
 const PHONE_MQ = '(max-width:760px) and (orientation:portrait), (max-width:760px) and (min-height:501px)'; // 手機直式
 const SPLIT_MQ = '(min-width:761px) and (max-width:1180px) and (min-height:600px) and (orientation:landscape), (min-width:761px) and (max-width:1400px) and (min-height:600px) and (pointer:coarse) and (orientation:landscape)';
 /* 版本檢查：手機或瀏覽器可能留著舊的 style.css，新程式配舊樣式會讓酒櫃畫不出來。不一致就重新載入樣式。 */
-const APP_VER = '20261124o';
+const APP_VER = '20261125a';
 (function ensureCss() {
   const cur = getComputedStyle(document.documentElement).getPropertyValue('--ver').replace(/["'\s]/g, '');
   if (cur === APP_VER) return;
@@ -485,6 +485,7 @@ async function start() {
   } catch (e) { notice(msgOf(e), true); }
   render();
   readHash();
+  runLaunchAction();
   setInterval(poll, 5000);
   setInterval(renderSync, 30000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(true); });
@@ -546,6 +547,7 @@ function render() {
   $('loginBtn').hidden = !!S.session || !S.data;
   $('loginBtn').textContent = setup ? '初始設定' : '管理登入';
   $('logoutBtn').hidden = !S.session;
+  renderInstall();
   $('adminBtn').hidden = !S.session;
   $('addBtn').hidden = !canEdit();
   $('fab').hidden = !canEdit();
@@ -1135,6 +1137,7 @@ function wire() {
   $('f_originChoice').addEventListener('change', e => { const o = e.target.value === '__other__'; $('f_originOther').hidden = !o; if (o) $('f_originOther').focus(); });
   $('f_sourceChoice').addEventListener('change', e => { $('f_sourceOther').hidden = e.target.value !== '__other__'; });
   $('addLoc').addEventListener('click', () => addLocRow());
+  $('installBtn').addEventListener('click', installApp);
   $('auditList').addEventListener('click', e => { const b = e.target.closest('[data-audel]'); if (b) deleteAudit(b); });
   $('asl_group').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) { S.aslGroup = b.dataset.v; renderAssessList(); } });
   $('asl_list').addEventListener('click', e => { const b = e.target.closest('[data-aslopen]'); if (b) openFromAssessList(b.dataset.aslopen); });
@@ -1863,6 +1866,37 @@ function openFromAssessList(id) {
     if (c.classList.contains('as-card') && !c.classList.contains('open')) c.querySelector('[data-asmore]')?.click();
     c.scrollIntoView({behavior: 'smooth', block: 'start'});
   }, 450);
+}
+
+/* ---------- 安裝到電腦：Chrome、Edge 用瀏覽器內建的安裝；Mac 的 Safari 用「加入 Dock」 ---------- */
+function isStandalone() { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; }
+function isMacSafari() { return /Macintosh/.test(navigator.userAgent) && /Safari\//.test(navigator.userAgent) && !/Chrome|Chromium|CriOS|Edg|Firefox|OPR/.test(navigator.userAgent); }
+function renderInstall() {
+  const show = matchMedia(DESK_MQ).matches && !isStandalone() && !!(S.installEvt || isMacSafari());
+  $('installBtn').hidden = !show;
+}
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); S.installEvt = e; renderInstall(); });
+addEventListener('appinstalled', () => { S.installEvt = null; renderInstall(); toast('已安裝到電腦，之後可以從桌面或開始選單／Dock 打開酒窖。'); });
+async function installApp() {
+  if (S.installEvt) {
+    const e = S.installEvt; S.installEvt = null;
+    try { await e.prompt(); } catch {}
+    renderInstall(); return;
+  }
+  // Safari（Mac）沒有自動安裝，顯示步驟
+  $('installSteps').innerHTML = isMacSafari()
+    ? '<h4>Mac 的 Safari</h4><ol><li>點上方選單列的「檔案」。</li><li>選「加入 Dock」。</li><li>按「加入」，酒窖就會出現在 Dock，也能在「應用程式」資料夾找到。</li></ol><p class="hint">需要 macOS Sonoma（14）以後的版本。</p>'
+    : '<h4>Chrome 或 Edge</h4><ol><li>網址列最右邊會有一個「安裝」小圖示（螢幕加向下箭頭），點它。</li><li>沒看到的話，點右上角「⋮」或「⋯」→「投放、儲存與分享」或「應用程式」→「安裝酒窖」。</li><li>按「安裝」。</li></ol>';
+  showDialog('installModal');
+}
+// 從電腦上的酒窖圖示右鍵選單（或網址加 ?act=）直接打開某個功能
+function runLaunchAction() {
+  const q = new URLSearchParams(location.search), act = q.get('act'); if (!act) return;
+  q.delete('act'); history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q : '') + location.hash);
+  if (act === 'add' && canEdit()) openWineForm(null);
+  else if (act === 'pend' && canUse()) $('factPend').click();
+  else if (act === 'journal' && S.session) $('factJournal').click();
+  else if (act !== 'home' && !S.session) toast('請先登入，才能使用這個功能。');
 }
 
 /* ---------- 離線佇列：沒有網路時，出庫、移動、待入櫃先存在這台裝置（IndexedDB），連上網路後依序送出 ----------
